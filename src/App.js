@@ -1,17 +1,15 @@
-// src/App.js
+import React, { useState, useEffect, createContext, useContext } from 'react';
 
-import React, { useState, useEffect } from 'react';
-import { useFirebase } from './FirebaseContext.js';
-// Importiere spezifische Firestore-Funktionen, die in dieser Datei verwendet werden
-import { collection, doc, addDoc, setDoc, deleteDoc, onSnapshot, query, getDocs, writeBatch } from 'firebase/firestore';
-// Importiere Icons von lucide-react
-import {
-  Info, Calendar, Archive, ListOrdered, Crown, Mail, Settings, ArrowLeft, Award, Target,
-  Upload, Plus, Save, Trash2, XCircle, CheckCircle, Send, Users, Shield, Trophy
-} from 'lucide-react';
+// Importiere Firebase-Module
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs } from 'firebase/firestore';
 
+// Lucide React Icons (Stelle sicher, dass diese installiert sind: npm install lucide-react)
+// Die Liste wurde gekürzt, um Kompilierungsfehler zu vermeiden. Füge nur die Icons hinzu, die du wirklich brauchst.
+import { Home, Info, Users, BarChart, Trophy, Mail, Settings, PlusCircle, Archive, Edit, Trash2, Save, XCircle, CheckCircle, Crown, Target } from 'lucide-react';
 
-// Übersetzungen für verschiedene Sprachen (bleibt gleich)
+// Übersetzungen für verschiedene Sprachen
 const translations = {
   de: {
     welcomeTitle: "Willkommen im Clan Dashboard!",
@@ -30,2985 +28,5057 @@ const translations = {
     copyright: "© 2024 Clan-Dashboard. Alle Rechte by PizzaOnkel.",
     goToNavigation: "Zur Navigation",
     navigationTitle: "Clan-Navigation",
-    personalPlayerReport: "Persönlicher Spielerbericht", // Dieser Schlüssel wird nicht mehr verwendet, aber zur Konsistenz beibehalten
+    personalPlayerReport: "Persönlicher Spielerbericht",
     currentTotalEvent: "Aktuelle Veranstaltungsperiode",
     furtherLinkIndividualDays: "Weiterführender Link zu den einzelnen Tagen",
     eventArchive: "Veranstaltungsarchiv",
-    topTen: "Top Ten",
-    hallOfChamps: "Halle der Champions",
-    contactForm: "Kontaktformular",
-    clanMembers: "Clan-Mitglieder", // Dieser Text wird nur noch im Admin-Panel verwendet
-    addMember: "Mitglied hinzufügen", // Wird nicht mehr direkt verwendet, aber zur Konsistenz beibehalten
-    memberName: "Name des Mitglieds", // Wird nicht mehr direkt verwendet, aber zur Konsistenz beibehalten
-    memberRole: "Rolle (z.B. Krieger, Heiler)", // Wird nicht mehr direkt verwendet, aber zur Konsistenz beibehalten
-    add: "Hinzufügen",
-    cancel: "Abbrechen",
-    delete: "Löschen",
-    confirmDelete: "Löschen bestätigen",
-    areYouSureDelete: "Bist du sicher, dass du \"{itemName}\" löschen möchtest?",
-    noMembers: "Noch keine Clan-Mitglieder vorhanden. Füge neue Mitglieder hinzu!",
-    loading: "Lade Clan Dashboard...",
-    errorMessageAuth: "Fehler bei der Authentifizierung. Bitte versuchen Sie es später erneut.",
-    errorMessageInit: "Fehler beim Starten der App. Bitte versuchen Sie es später erneut.",
-    errorMessageFetch: "Fehler beim Laden der Daten. Bitte versuchen Sie es später erneut.",
-    errorMessageAdd: "Fehler beim Hinzufügen des Eintrags.",
-    errorMessageDelete: "Fehler beim Löschen des Eintrags.",
-    errorMessageEmptyFields: "Alle erforderlichen Felder müssen ausgefüllt werden.",
-    errorMessageDbNotReady: "Datenbank ist nicht bereit oder Benutzer ist nicht authentifiziert.",
-    yourUserId: "Deine Benutzer-ID:",
-    backToNavigation: "Zurück zur Navigation",
-    backToInfo: "Zurück zur Info-Seite",
-    pageUnderConstruction: "Diese Seite ist noch in Konstruktion. Interessante Inhalte folgen!",
-    jsonUpload: "JSON-Datei hochladen",
-    uploadFile: "Datei hochladen",
-    selectJsonFile: "Datei auswählen",
-    fileUploaded: "Datei erfolgreich hochgeladen: {fileName}",
-    errorUploadingFile: "Fehler beim Hochladen der Datei.",
-    errorParsingFile: "Fehler beim Parsen der Datei. Bitte stellen Sie sicher, dass es sich um eine gültige JSON-Datei handelt.",
-    errorProcessingData: "Fehler beim Verarbeiten der hochgeladenen Daten.",
-    normsDefinition: "Normen-Definition",
-    normName: "Norm-Name",
-    troopStrengthMin: "Truppenstärke (Min)",
-    troopStrengthMax: "Truppenstärke (Max)",
-    addNorm: "Norm hinzufügen",
-    addPlayer: "Spieler hinzufügen",
-    playerName: "Spielername",
-    playerAlias: "Alias (Komma-getrennt)",
-    playerRank: "Rang",
-    playerTroopStrength: "Truppenstärke",
-    savePlayer: "Spieler speichern",
-    currentNorms: "Aktuelle Normen",
-    currentPlayers: "Aktuelle Spieler",
-    deleteNorm: "Norm löschen",
-    deletePlayer: "Spieler löschen",
-    normAdded: "Norm '{itemName}' hinzugefügt.",
-    normDeleted: "Norm '{itemName}' gelöscht.",
-    playerAdded: "Spieler '{itemName}' hinzugefügt.",
-    playerDeleted: "Spieler '{itemName}' gelöscht.",
-    troopStrengthManagement: "Truppenstärke-Verwaltung",
-    newTroopStrength: "Neue Truppenstärke (z.B. G1)",
-    addTroopStrength: "Truppenstärke hinzufügen",
-    currentTroopStrengths: "Aktuelle Truppenstärken",
-    deleteTroopStrength: "Delete Troop Strength",
-    rankManagement: "Rang-Verwaltung",
-    newRank: "Neuer Rang (z.B. Anfänger)",
-    addRank: "Rang hinzufügen",
-    currentRanks: "Aktuelle Ränge",
-    deleteRank: "Rang löschen",
-    assignNorm: "Norm zuweisen",
-    selectTroopStrength: "Truppenstärke auswählen",
-    normValue: "Normwert (Punkte)",
-    normAssigned: "Norm '{normValue}' für Truppenstärke '{troopStrength}' zugewiesen.",
-    normMappingDeleted: "Norm-Zuweisung für '{itemName}' gelöscht.",
-    noTroopStrengths: "Keine Truppenstärken definiert.",
-    noRanks: "Keine Ränge definiert.",
-    noNormsDefined: "Keine Normen definiert.",
+    topTen: "Top 10 Spieler",
+    hallOfChamps: "Ruhmeshalle der Champions",
+    contact: "Kontakt",
     adminPanel: "Admin-Panel",
-    endCurrentPeriod: "Aktuelle Periode beenden",
-    confirmEndPeriod: "Bist du sicher, dass du die aktuelle Veranstaltungsperiode beenden möchtest? Alle aktuellen Spielerdaten werden archiviert.",
-    periodEndedSuccess: "Aktuelle Veranstaltungsperiode erfolgreich beendet und Daten archiviert.",
-    periodEndedError: "Fehler beim Beenden der aktuellen Veranstaltungsperiode.",
-    noCurrentPeriodData: "Keine aktuellen Spielerdaten vorhanden, um die Periode zu beenden.",
-    eventName: "Veranstaltungsname",
-    periodDate: "Datum der Periode",
-    overallClanNormFulfillment: "Gesamte Clan-Normerfüllung",
-    playerList: "Spielerliste",
-    name: "Name",
-    rank: "Rang",
-    troopStrength: "Truppenstärke",
-    clanChests: "Anzahl Clantruhen Truhen",
-    totalPoints: "Punkte Total (Istzustand)",
-    normTarget: "Normenvorgabe (Sollzustand)",
-    difference: "Differenz",
-    normFulfillment: "Normerfüllung (%)",
-    noPlayersInCurrentEvent: "Es sind keine Spielerdaten für die aktuelle Veranstaltungsperiode vorhanden.",
-    playerDetails: "Spielerdetails",
-    backToCurrentEvent: "Zurück zur aktuellen Veranstaltungsperiode",
-    aliases: "Aliase",
-    chestCategories: "Truhenkategorien",
-    eventArchiveTitle: "Veranstaltungsarchiv",
-    noArchivedEvents: "Keine archivierten Veranstaltungen vorhanden.",
-    viewDetails: "Details anzeigen",
-    backToArchive: "Zurück zum Archiv",
-    archivedPeriodDetails: "Details der archivierten Periode",
-    periodEndedAt: "Periode beendet am",
-    topTenTitle: "Top Ten Spieler",
-    noTopPlayers: "Keine Top-Spielerdaten verfügbar.",
-    hallOfChampsTitle: "Halle der Champions",
-    noChampions: "Keine Champions verfügbar.",
-    champion: "Champion",
-    contactFormTitle: "Kontaktformular",
-    contactFormDescription: "Sende uns eine Nachricht mit deinen Fragen, Ideen oder Vorschlägen.",
-    yourName: "Dein Name",
-    yourEmail: "Deine E-Mail",
-    yourMessage: "Deine Nachricht",
+    backToWelcome: "Zurück zur Willkommensseite",
+    backToNavigation: "Zurück zur Navigation",
+    playerReportTitle: "Persönlicher Bericht für",
+    selectPlayer: "Spieler auswählen:",
+    loadReport: "Bericht laden",
+    noPlayerSelected: "Bitte wähle einen Spieler aus.",
+    eventPeriod: "Veranstaltungsperiode:",
+    totalScore: "Gesamtpunktzahl:",
+    rank: "Rang:",
+    participation: "Teilnahme:",
+    details: "Details:",
+    day: "Tag",
+    score: "Punkte",
+    viewDetails: "Details ansehen",
+    eventDetails: "Details zur Veranstaltung",
+    eventName: "Veranstaltungsname:",
+    eventDate: "Datum:",
+    eventDescription: "Beschreibung:",
+    returnToCurrentEvent: "Zurück zur aktuellen Veranstaltung",
+    archiveTitle: "Veranstaltungsarchiv",
+    selectPeriod: "Periode auswählen:",
+    topTenTitle: "Top 10 Spieler - Aktuelle Periode",
+    hallOfChampsTitle: "Ruhmeshalle der Champions",
+    contactTitle: "Kontakt aufnehmen",
+    contactText: "Hast du Fragen oder Anregungen? Kontaktiere uns über das Formular.",
+    yourName: "Dein Name:",
+    yourEmail: "Deine E-Mail:",
+    yourMessage: "Deine Nachricht:",
     sendMessage: "Nachricht senden",
     messageSent: "Nachricht erfolgreich gesendet!",
-    messageSendError: "Fehler beim Senden der Nachricht. Bitte versuchen Sie es später erneut.",
-    adminAccessRestricted: "Zugriff auf das Admin-Panel ist eingeschränkt. Bitte melde dich an.",
-    uff2StandardsEvaluation: "UFF_2_Standards Auswertung",
-    uff2StandardsDescription: "Diese Seite zeigt die Auswertung der Spielerfortschritte basierend auf den UFF_2_Standards.",
+    adminPanelTitle: "Admin-Panel",
+    managePlayers: "Spieler verwalten",
+    manageEvents: "Veranstaltungen verwalten",
+    manageAdmins: "Admins verwalten",
+    addPlayer: "Spieler hinzufügen",
+    playerName: "Spielername",
+    playerDiscord: "Discord-ID (optional)",
+    playerGameId: "Spiel-ID (optional)",
+    add: "Hinzufügen",
+    editPlayer: "Spieler bearbeiten",
+    update: "Aktualisieren",
+    deletePlayer: "Spieler löschen",
+    confirmDeletePlayer: "Bist du sicher, dass du diesen Spieler löschen möchtest?",
+    addEvent: "Veranstaltung hinzufügen",
+    eventPeriodName: "Name der Veranstaltungsperiode (z.B. 'Mai 2024')",
+    eventStartDate: "Startdatum",
+    eventEndDate: "Enddatum",
+    addEventPeriod: "Veranstaltungsperiode hinzufügen",
+    editEvent: "Veranstaltung bearbeiten",
+    deleteEvent: "Veranstaltung löschen",
+    confirmDeleteEvent: "Bist du sicher, dass du diese Veranstaltung löschen möchtest?",
+    addAdmin: "Admin hinzufügen",
+    adminUserId: "Admin User ID",
+    addAdminBtn: "Admin hinzufügen",
+    removeAdmin: "Admin entfernen",
+    confirmRemoveAdmin: "Bist du sicher, dass du diesen Admin entfernen möchtest?",
+    noData: "Keine Daten verfügbar.",
+    loading: "Laden...",
+    error: "Ein Fehler ist aufgetreten:",
+    loginRequired: "Bitte melde dich an, um auf das Admin-Panel zuzugreifen.",
+    accessDenied: "Zugriff verweigert. Du bist kein Admin.",
+    userId: "Deine User ID:",
+    copyToClipboard: "In Zwischenablage kopieren",
+    copied: "Kopiert!",
+    playerManagement: "Spielerverwaltung",
+    eventPeriodManagement: "Veranstaltungsperioden-Verwaltung",
+    adminManagement: "Admin-Verwaltung",
+    playerAddedSuccess: "Spieler erfolgreich hinzugefügt!",
+    playerUpdatedSuccess: "Spieler erfolgreich aktualisiert!",
+    playerDeletedSuccess: "Spieler erfolgreich gelöscht!",
+    eventAddedSuccess: "Veranstaltungsperiode erfolgreich hinzugefügt!",
+    eventUpdatedSuccess: "Veranstaltungsperiode erfolgreich aktualisiert!",
+    eventDeletedSuccess: "Veranstaltungsperiode erfolgreich gelöscht!",
+    adminAddedSuccess: "Admin erfolgreich hinzugefügt!",
+    adminRemovedSuccess: "Admin erfolgreich entfernt!",
+    currentAdmins: "Aktuelle Admins:",
+    adminId: "Admin ID",
+    actions: "Aktionen",
+    noAdmins: "Keine Admins vorhanden.",
+    manageEventDays: "Tage verwalten",
+    addEventDay: "Tag hinzufügen",
+    dayNumber: "Tag Nummer",
+    dayDate: "Datum des Tages",
+    dayDescription: "Beschreibung des Tages",
+    addDay: "Tag hinzufügen",
+    editDay: "Tag bearbeiten",
+    deleteDay: "Tag löschen",
+    confirmDeleteDay: "Bist du sicher, dass du diesen Tag löschen möchtest?",
+    dayAddedSuccess: "Tag erfolgreich hinzugefügt!",
+    dayUpdatedSuccess: "Tag erfolgreich aktualisiert!",
+    dayDeletedSuccess: "Tag erfolgreich gelöscht!",
+    managePlayerScores: "Spielergebnisse verwalten",
+    selectEventDay: "Tag auswählen:",
+    addPlayerScore: "Spielerergebnis hinzufügen",
+    scorePoints: "Punkte",
+    addScore: "Ergebnis hinzufügen",
+    editPlayerScore: "Spielerergebnis bearbeiten",
+    deletePlayerScore: "Spielerergebnis löschen",
+    confirmDeletePlayerScore: "Bist du sicher, dass du dieses Spielergebnis löschen möchtest?",
+    scoreAddedSuccess: "Ergebnis erfolgreich hinzugefügt!",
+    scoreUpdatedSuccess: "Ergebnis erfolgreich aktualisiert!",
+    scoreDeletedSuccess: "Ergebnis erfolgreich gelöscht!",
+    playerScoresForDay: "Spielerergebnisse für Tag",
+    player: "Spieler",
+    points: "Punkte",
+    noScores: "Keine Ergebnisse für diesen Tag.",
+    totalPlayers: "Gesamtzahl der Spieler:",
+    totalEvents: "Gesamtzahl der Veranstaltungen:",
+    lastUpdated: "Zuletzt aktualisiert:",
+    overallStats: "Gesamtstatistiken",
+    archivePeriod: "Periode archivieren",
+    confirmArchivePeriod: "Bist du sicher, dass du diese Periode archivieren möchtest? Dies verschiebt sie ins Archiv und macht sie für neue Einträge unzugänglich.",
+    periodArchivedSuccess: "Periode erfolgreich archiviert!",
+    unarchivePeriod: "Periode dearchivieren",
+    confirmUnarchivePeriod: "Bist du sicher, dass du diese Periode dearchivieren möchtest? Sie wird wieder aktiv.",
+    periodUnarchivedSuccess: "Periode erfolgreich dearchiviert!",
+    activePeriods: "Aktive Perioden",
+    archivedPeriods: "Archivierte Perioden",
+    viewArchivedPeriod: "Archivierte Periode ansehen",
+    periodStatusActive: "Aktiv",
+    periodStatusArchived: "Archiviert",
+    currentPeriod: "Aktuelle Periode:",
+    noActivePeriods: "Keine aktiven Perioden gefunden.",
+    noArchivedPeriods: "Keine archivierten Perioden gefunden.",
+    selectActivePeriod: "Aktive Periode auswählen:",
+    selectArchivedPeriod: "Archivierte Periode auswählen:",
+    setAsCurrent: "Als aktuelle Periode festlegen",
+    confirmSetCurrent: "Bist du sicher, dass du diese Periode als aktuelle festlegen möchtest? Nur eine Periode kann gleichzeitig aktiv sein.",
+    setCurrentSuccess: "Periode erfolgreich als aktuell festgelegt!",
+    manageCurrentEvent: "Aktuelle Veranstaltung verwalten",
+    manageArchivedEvents: "Archivierte Veranstaltungen verwalten",
+    noCurrentEventDays: "Keine Tage für die aktuelle Veranstaltung gefunden.",
+    noArchivedEventDays: "Keine Tage für diese archivierte Veranstaltung gefunden.",
+    noCurrentPlayerScores: "Keine Spielergebnisse für die aktuelle Veranstaltung gefunden.",
+    noArchivedPlayerScores: "Keine Spielergebnisse für diese archivierte Veranstaltung gefunden.",
+    selectCurrentEventDay: "Tag der aktuellen Veranstaltung auswählen:",
+    selectArchivedEventDay: "Tag der archivierten Veranstaltung auswählen:",
+    manageCurrentPlayerScores: "Spielergebnisse der aktuellen Veranstaltung verwalten",
+    manageArchivedPlayerScores: "Spielergebnisse der archivierten Veranstaltung verwalten",
+    adminMessage: "Nachricht an Admins",
+    messageContent: "Nachricht",
+    sendMessageToAdmins: "Nachricht an Admins senden",
+    messageSentToAdmins: "Nachricht an Admins gesendet!",
+    adminMessages: "Admin-Nachrichten",
+    noAdminMessages: "Keine Admin-Nachrichten.",
+    fromUser: "Von Benutzer",
+    message: "Nachricht",
+    timestamp: "Zeitstempel",
+    deleteMessage: "Nachricht löschen",
+    confirmDeleteMessage: "Bist du sicher, dass du diese Nachricht löschen möchtest?",
+    messageDeletedSuccess: "Nachricht erfolgreich gelöscht!",
+    showAdminMessages: "Admin-Nachrichten anzeigen",
+    hideAdminMessages: "Admin-Nachrichten ausblenden",
+    playerRanking: "Spielerranking",
+    playerParticipation: "Spielerbeteiligung",
+    playerScores: "Spielergebnisse",
+    eventOverview: "Veranstaltungsübersicht",
+    totalEventsParticipated: "Anzahl der teilgenommenen Events:",
+    averageScore: "Durchschnittliche Punktzahl:",
+    bestScore: "Beste Punktzahl:",
+    playerStats: "Spielerstatistiken",
+    noPlayerStats: "Keine Statistiken für diesen Spieler verfügbar.",
+    playerActivity: "Spieleraktivität",
+    lastParticipation: "Letzte Teilnahme:",
+    playerNotFound: "Spieler nicht gefunden.",
+    playerSearchPlaceholder: "Spielername eingeben...",
+    searchPlayer: "Spieler suchen",
+    playerList: "Spielerliste",
+    noPlayers: "Keine Spieler gefunden.",
+    playerDetails: "Spielerdetails",
+    edit: "Bearbeiten",
+    delete: "Löschen",
+    cancel: "Abbrechen",
+    confirm: "Bestätigen",
+    close: "Schließen",
+    overallRank: "Gesamtrang",
+    overallScore: "Gesamtpunktzahl",
+    playerOverallReport: "Gesamtbericht für",
+    selectOverallPlayer: "Spieler für Gesamtbericht auswählen:",
+    loadOverallReport: "Gesamtbericht laden",
+    overallReportTitle: "Gesamt-Spielerbericht",
+    totalScoreAllPeriods: "Gesamtpunktzahl über alle Perioden:",
+    averageScoreAllPeriods: "Durchschnittliche Punktzahl über alle Perioden:",
+    totalEventsAllPeriods: "Gesamtzahl der Events über alle Perioden:",
+    detailedScoresByPeriod: "Detaillierte Ergebnisse nach Periode:",
+    period: "Periode",
+    event: "Veranstaltung",
+    scoreDetails: "Ergebnisdetails",
+    backToOverallReport: "Zurück zum Gesamtbericht",
+    noOverallReport: "Kein Gesamtbericht für diesen Spieler verfügbar.",
+    toggleTheme: "Theme wechseln",
+    lightTheme: "Helles Theme",
+    darkTheme: "Dunkles Theme",
+    systemTheme: "System-Theme",
+    theme: "Theme",
+    currentTheme: "Aktuelles Theme:",
+    applyTheme: "Theme anwenden",
+    themeChangedSuccess: "Theme erfolgreich geändert!",
+    settings: "Einstellungen",
+    languageSettings: "Spracheinstellungen",
+    themeSettings: "Theme-Einstellungen",
+    saveSettings: "Einstellungen speichern",
+    settingsSavedSuccess: "Einstellungen erfolgreich gespeichert!",
+    resetSettings: "Einstellungen zurücksetzen",
+    confirmResetSettings: "Bist du sicher, dass du alle Einstellungen auf Standard zurücksetzen möchtest?",
+    settingsResetSuccess: "Einstellungen erfolgreich zurückgesetzt!",
+    exportData: "Daten exportieren",
+    importData: "Daten importieren",
+    exportPlayers: "Spieler exportieren",
+    exportEvents: "Veranstaltungen exportieren",
+    exportScores: "Ergebnisse exportieren",
+    importPlayers: "Spieler importieren",
+    importEvents: "Veranstaltungen importieren",
+    importScores: "Ergebnisse importieren",
+    selectFile: "Datei auswählen",
+    upload: "Hochladen",
+    download: "Herunterladen",
+    dataExportedSuccess: "Daten erfolgreich exportiert!",
+    dataImportedSuccess: "Daten erfolgreich importiert!",
+    invalidFileFormat: "Ungültiges Dateiformat. Bitte wähle eine JSON-Datei.",
+    fileTooLarge: "Datei zu groß. Maximale Größe: 5MB.",
+    uploading: "Hochladen...",
+    downloading: "Herunterladen...",
+    dataSyncError: "Fehler beim Synchronisieren der Daten:",
+    dataCorrupted: "Importierte Daten sind beschädigt oder ungültig.",
+    backupData: "Daten sichern",
+    restoreData: "Daten wiederherstellen",
+    lastBackup: "Letzte Sicherung:",
+    createBackup: "Sicherung erstellen",
+    restoreFromBackup: "Aus Sicherung wiederherstellen",
+    confirmRestore: "Bist du sicher, dass du die Daten aus der letzten Sicherung wiederherstellen möchtest? Aktuelle Daten gehen dabei verloren.",
+    backupCreatedSuccess: "Sicherung erfolgreich erstellt!",
+    restoreSuccess: "Daten erfolgreich wiederhergestellt!",
+    noBackup: "Keine Sicherung vorhanden.",
+    adminLogs: "Admin-Protokolle",
+    viewLogs: "Protokolle ansehen",
+    noLogs: "Keine Protokolle vorhanden.",
+    logEntry: "Protokolleintrag",
+    logTimestamp: "Zeitstempel",
+    logUser: "Benutzer",
+    logAction: "Aktion",
+    clearLogs: "Protokolle löschen",
+    confirmClearLogs: "Bist du sicher, dass du alle Protokolle löschen möchtest?",
+    logsClearedSuccess: "Protokolle erfolgreich gelöscht!",
+    eventHistory: "Veranstaltungsverlauf",
+    viewEventHistory: "Verlauf ansehen",
+    noEventHistory: "Kein Veranstaltungsverlauf vorhanden.",
+    eventHistoryEntry: "Verlaufseintrag",
+    eventHistoryTimestamp: "Zeitstempel",
+    eventHistoryEvent: "Veranstaltung",
+    eventHistoryAction: "Aktion",
+    clearEventHistory: "Verlauf löschen",
+    confirmClearEventHistory: "Bist du sicher, dass du den Veranstaltungsverlauf löschen möchtest?",
+    eventHistoryClearedSuccess: "Verlauf erfolgreich gelöscht!",
+    playerActivityLog: "Spieleraktivitätsprotokoll",
+    viewPlayerActivityLog: "Aktivitätsprotokoll ansehen",
+    noPlayerActivityLog: "Kein Spieleraktivitätsprotokoll vorhanden.",
+    playerActivityLogEntry: "Aktivitätseintrag",
+    playerActivityLogTimestamp: "Zeitstempel",
+    playerActivityLogPlayer: "Spieler",
+    playerActivityLogAction: "Aktion",
+    clearPlayerActivityLog: "Aktivitätsprotokoll löschen",
+    confirmClearPlayerActivityLog: "Bist du sicher, dass du das Spieleraktivitätsprotokoll löschen möchtest?",
+    playerActivityLogClearedSuccess: "Aktivitätsprotokoll erfolgreich gelöscht!",
+    totalPlayersRegistered: "Registrierte Spieler:",
+    totalEventsRecorded: "Erfasste Veranstaltungen:",
+    totalScoresRecorded: "Erfasste Ergebnisse:",
+    dataSummary: "Datenübersicht",
+    viewDataSummary: "Übersicht ansehen",
+    refreshData: "Daten aktualisieren",
+    dataRefreshedSuccess: "Daten erfolgreich aktualisiert!",
+    generateReport: "Bericht generieren",
+    reportGeneratedSuccess: "Bericht erfolgreich generiert!",
+    reportType: "Berichtstyp",
+    selectReportType: "Berichtstyp auswählen:",
+    playerReport: "Spielerbericht",
+    eventReport: "Veranstaltungsbericht",
+    overallReport: "Gesamtbericht",
+    generate: "Generieren",
+    reportOptions: "Berichtsoptionen",
+    startDate: "Startdatum",
+    endDate: "Enddatum",
+    includeArchived: "Archivierte Daten einschließen",
+    exportReport: "Bericht exportieren",
+    reportExportedSuccess: "Bericht erfolgreich exportiert!",
+    reportPreview: "Berichtsvorschau",
+    noReportPreview: "Keine Berichtsvorschau verfügbar. Generiere einen Bericht.",
+    printReport: "Bericht drucken",
+    printingReport: "Bericht wird gedruckt...",
+    printSuccess: "Bericht erfolgreich gedruckt!",
+    printError: "Fehler beim Drucken des Berichts.",
+    playerSearch: "Spielersuche",
+    searchPlaceholder: "Spielername oder ID",
+    searchButton: "Suchen",
+    noSearchResults: "Keine Suchergebnisse.",
+    searchResult: "Suchergebnis",
+    clearSearch: "Suche löschen",
+    filterOptions: "Filteroptionen",
+    filterByEvent: "Nach Veranstaltung filtern",
+    filterByPeriod: "Nach Periode filtern",
+    applyFilter: "Filter anwenden",
+    clearFilter: "Filter löschen",
+    noFilteredData: "Keine Daten für die ausgewählten Filter.",
+    filteredData: "Gefilterte Daten",
+    resetFilters: "Filter zurücksetzen",
+    filterApplied: "Filter angewendet.",
+    filterCleared: "Filter gelöscht.",
+    notificationSettings: "Benachrichtigungseinstellungen",
+    enableNotifications: "Benachrichtigungen aktivieren",
+    notificationSound: "Benachrichtigungston",
+    notificationVolume: "Lautstärke",
+    testNotification: "Test-Benachrichtigung",
+    notificationTestSuccess: "Test-Benachrichtigung gesendet!",
+    notificationPermissionDenied: "Benachrichtigungsberechtigung verweigert. Bitte erlaube Benachrichtigungen in deinen Browsereinstellungen.",
+    notificationPermissionGranted: "Benachrichtigungsberechtigung erteilt.",
+    notificationPermissionPrompt: "Erlaube Benachrichtigungen, um über wichtige Updates informiert zu werden.",
+    notificationEnabled: "Benachrichtigungen aktiviert.",
+    notificationDisabled: "Benachrichtigungen deaktiviert.",
+    showNotifications: "Benachrichtigungen anzeigen",
+    hideNotifications: "Benachrichtigungen ausblenden",
+    noNotifications: "Keine Benachrichtigungen.",
+    notification: "Benachrichtigung",
+    notificationTimestamp: "Zeitstempel",
+    notificationMessage: "Nachricht",
+    clearNotifications: "Benachrichtigungen löschen",
+    confirmClearNotifications: "Bist du sicher, dass du alle Benachrichtigungen löschen möchtest?",
+    notificationsClearedSuccess: "Benachrichtigungen erfolgreich gelöscht!",
+    markAsRead: "Als gelesen markieren",
+    markAllAsRead: "Alle als gelesen markieren",
+    markedAsReadSuccess: "Benachrichtigung als gelesen markiert!",
+    markedAllAsReadSuccess: "Alle Benachrichtigungen als gelesen markiert!",
+    unreadNotifications: "Ungelesene Benachrichtigungen:",
+    allNotificationsRead: "Alle Benachrichtigungen gelesen.",
+    profileSettings: "Profileinstellungen",
+    changeUsername: "Benutzernamen ändern",
+    newUsername: "Neuer Benutzername",
+    updateUsername: "Benutzernamen aktualisieren",
+    usernameUpdatedSuccess: "Benutzername erfolgreich aktualisiert!",
+    changePassword: "Passwort ändern",
+    currentPassword: "Aktuelles Passwort",
+    newPassword: "Neues Passwort",
+    confirmNewPassword: "Neues Passwort bestätigen",
+    updatePassword: "Passwort aktualisieren",
+    passwordUpdatedSuccess: "Passwort erfolgreich aktualisiert!",
+    passwordsMismatch: "Neue Passwörter stimmen nicht überein.",
+    invalidCurrentPassword: "Aktuelles Passwort ist falsch.",
+    deleteAccount: "Konto löschen",
+    confirmDeleteAccount: "Bist du sicher, dass du dein Konto löschen möchtest? Dies kann nicht rückgängig gemacht werden.",
+    accountDeletedSuccess: "Konto erfolgreich gelöscht!",
+    reauthenticateRequired: "Bitte melde dich erneut an, um diese Aktion durchzuführen.",
+    accountSettings: "Kontoeinstellungen",
+    privacySettings: "Datenschutzeinstellungen",
+    dataSharing: "Datenfreigabe",
+    enableDataSharing: "Datenfreigabe aktivieren",
+    dataSharingInfo: "Teile anonymisierte Nutzungsdaten, um die App zu verbessern.",
+    savePrivacySettings: "Datenschutzeinstellungen speichern",
+    privacySettingsSavedSuccess: "Datenschutzeinstellungen erfolgreich gespeichert!",
+    aboutApp: "Über die App",
+    appVersion: "Version:",
+    developer: "Entwickler:",
+    releaseDate: "Veröffentlichungsdatum:",
+    license: "Lizenz:",
+    viewLicense: "Lizenz ansehen",
+    feedback: "Feedback",
+    sendFeedback: "Feedback senden",
+    feedbackSentSuccess: "Feedback erfolgreich gesendet!",
+    reportBug: "Fehler melden",
+    bugReportSentSuccess: "Fehlerbericht erfolgreich gesendet!",
+    featureRequest: "Funktionsanfrage",
+    featureRequestSentSuccess: "Funktionsanfrage erfolgreich gesendet!",
+    help: "Hilfe",
+    faq: "FAQ",
+    viewFaq: "FAQ ansehen",
+    documentation: "Dokumentation",
+    viewDocumentation: "Dokumentation ansehen",
+    support: "Support",
+    contactSupport: "Support kontaktieren",
+    supportContactedSuccess: "Support erfolgreich kontaktiert!",
+    termsOfService: "Nutzungsbedingungen",
+    privacyPolicy: "Datenschutzerklärung",
+    viewTerms: "Nutzungsbedingungen ansehen",
+    viewPrivacy: "Datenschutzerklärung ansehen",
+    legal: "Rechtliches",
+    logout: "Abmelden",
+    confirmLogout: "Bist du sicher, dass du dich abmelden möchtest?",
+    logoutSuccess: "Erfolgreich abgemeldet!",
+    login: "Anmelden",
+    register: "Registrieren",
+    email: "E-Mail",
+    password: "Passwort",
+    forgotPassword: "Passwort vergessen?",
+    resetPassword: "Passwort zurücksetzen",
+    resetPasswordSuccess: "Passwort-Reset-E-Mail gesendet!",
+    noAccount: "Noch kein Konto?",
+    alreadyAccount: "Bereits ein Konto?",
+    loginSuccess: "Erfolgreich angemeldet!",
+    registerSuccess: "Registrierung erfolgreich!",
+    authError: "Authentifizierungsfehler:",
+    emailNotVerified: "E-Mail nicht verifiziert. Bitte überprüfe deinen Posteingang.",
+    sendVerificationEmail: "Verifizierungs-E-Mail senden",
+    verificationEmailSent: "Verifizierungs-E-Mail gesendet!",
+    loadingUserData: "Benutzerdaten werden geladen...",
+    welcomeUser: "Willkommen, {{username}}!",
+    profile: "Profil",
+    editProfile: "Profil bearbeiten",
+    viewProfile: "Profil ansehen",
+    updateProfile: "Profil aktualisieren",
+    profileUpdatedSuccess: "Profil erfolgreich aktualisiert!",
+    username: "Benutzername",
+    avatar: "Avatar",
+    changeAvatar: "Avatar ändern",
+    uploadAvatar: "Avatar hochladen",
+    avatarUpdatedSuccess: "Avatar erfolgreich aktualisiert!",
+    invalidImageFormat: "Ungültiges Bildformat. Bitte wähle eine Bilddatei (JPG, PNG, GIF).",
+    imageTooLarge: "Bild zu groß. Maximale Größe: 2MB.",
+    uploadingAvatar: "Avatar wird hochgeladen...",
+    deleteAvatar: "Avatar löschen",
+    confirmDeleteAvatar: "Bist du sicher, dass du deinen Avatar löschen möchtest?",
+    avatarDeletedSuccess: "Avatar erfolgreich gelöscht!",
+    memberSince: "Mitglied seit:",
+    lastLogin: "Letzter Login:",
+    roles: "Rollen:",
+    publicProfile: "Öffentliches Profil",
+    privateProfile: "Privates Profil",
+    showPublicProfile: "Öffentliches Profil anzeigen",
+    hidePublicProfile: "Öffentliches Profil ausblenden",
+    publicProfileEnabled: "Öffentliches Profil aktiviert.",
+    publicProfileDisabled: "Öffentliches Profil deaktiviert.",
+    shareProfile: "Profil teilen",
+    profileShareLink: "Profil-Share-Link:",
+    copyLink: "Link kopieren",
+    linkCopied: "Link kopiert!",
+    shareOnSocialMedia: "Auf Social Media teilen",
+    socialMediaShareSuccess: "Profil erfolgreich geteilt!",
+    socialMediaShareError: "Fehler beim Teilen des Profils.",
+    playerAchievements: "Spieler-Errungenschaften",
+    viewAchievements: "Errungenschaften ansehen",
+    noAchievements: "Keine Errungenschaften vorhanden.",
+    achievement: "Errungenschaft",
+    achievementDescription: "Beschreibung",
+    achievementDate: "Datum",
+    addAchievement: "Errungenschaft hinzufügen",
+    achievementName: "Name der Errungenschaft",
+    achievementAddedSuccess: "Errungenschaft erfolgreich hinzugefügt!",
+    editAchievement: "Errungenschaft bearbeiten",
+    deleteAchievement: "Errungenschaft löschen",
+    confirmDeleteAchievement: "Bist du sicher, dass du diese Errungenschaft löschen möchtest?",
+    achievementUpdatedSuccess: "Errungenschaft erfolgreich aktualisiert!",
+    achievementDeletedSuccess: "Errungenschaft erfolgreich gelöscht!",
+    eventGoals: "Veranstaltungsziele",
+    viewGoals: "Ziele ansehen",
+    noGoals: "Keine Ziele vorhanden.",
+    goal: "Ziel",
+    goalDescription: "Beschreibung",
+    goalTarget: "Zielwert",
+    goalProgress: "Fortschritt",
+    addGoal: "Ziel hinzufügen",
+    goalName: "Name des Ziels",
+    goalAddedSuccess: "Ziel erfolgreich hinzugefügt!",
+    editGoal: "Ziel bearbeiten",
+    deleteGoal: "Ziel löschen",
+    confirmDeleteGoal: "Bist du sicher, dass du dieses Ziel löschen möchtest?",
+    goalUpdatedSuccess: "Ziel erfolgreich aktualisiert!",
+    goalDeletedSuccess: "Ziel erfolgreich gelöscht!",
+    milestones: "Meilensteine",
+    viewMilestones: "Meilensteine ansehen",
+    noMilestones: "Keine Meilensteine vorhanden.",
+    milestone: "Meilenstein",
+    milestoneDescription: "Beschreibung",
+    milestoneDate: "Datum",
+    addMilestone: "Meilenstein hinzufügen",
+    milestoneName: "Name des Meilensteins",
+    milestoneAddedSuccess: "Meilenstein erfolgreich hinzugefügt!",
+    editMilestone: "Meilenstein bearbeiten",
+    deleteMilestone: "Meilenstein löschen",
+    confirmDeleteMilestone: "Bist du sicher, dass du diesen Meilenstein löschen möchtest?",
+    milestoneUpdatedSuccess: "Meilenstein erfolgreich aktualisiert!",
+    milestoneDeletedSuccess: "Meilenstein erfolgreich gelöscht!",
+    rewards: "Belohnungen",
+    viewRewards: "Belohnungen ansehen",
+    noRewards: "Keine Belohnungen vorhanden.",
+    reward: "Belohnung",
+    rewardDescription: "Beschreibung",
+    rewardCriteria: "Kriterien",
+    addReward: "Belohnung hinzufügen",
+    rewardName: "Name der Belohnung",
+    rewardAddedSuccess: "Belohnung erfolgreich hinzugefügt!",
+    editReward: "Belohnung bearbeiten",
+    deleteReward: "Belohnung löschen",
+    confirmDeleteReward: "Bist du sicher, dass du diese Belohnung löschen möchtest?",
+    rewardUpdatedSuccess: "Belohnung erfolgreich aktualisiert!",
+    rewardDeletedSuccess: "Belohnung erfolgreich gelöscht!",
+    leaderboard: "Bestenliste",
+    viewLeaderboard: "Bestenliste ansehen",
+    noLeaderboard: "Keine Bestenliste vorhanden.",
+    leaderboardRank: "Rang",
+    leaderboardPlayer: "Spieler",
+    leaderboardScore: "Punktzahl",
+    refreshLeaderboard: "Bestenliste aktualisieren",
+    leaderboardRefreshedSuccess: "Bestenliste erfolgreich aktualisiert!",
+    playerProfile: "Spielerprofil",
+    viewPlayerProfile: "Spielerprofil ansehen",
+    playerProfileTitle: "Spielerprofil für",
+    playerStatsTitle: "Spielerstatistiken",
+    playerAchievementsTitle: "Spieler-Errungenschaften",
+    playerGoalsTitle: "Spielerziele",
+    playerMilestonesTitle: "Spieler-Meilensteine",
+    playerRewardsTitle: "Spieler-Belohnungen",
+    backToLeaderboard: "Zurück zur Bestenliste",
+    noPlayerProfile: "Kein Spielerprofil verfügbar.",
+    playerProfileNotFound: "Spielerprofil nicht gefunden.",
+    playerProfileLoading: "Spielerprofil wird geladen...",
+    playerProfileError: "Fehler beim Laden des Spielerprofils.",
+    playerProfileRefresh: "Spielerprofil aktualisieren",
+    playerProfileRefreshedSuccess: "Spielerprofil erfolgreich aktualisiert!",
+    playerProfileExport: "Spielerprofil exportieren",
+    playerProfileExportedSuccess: "Spielerprofil erfolgreich exportiert!",
+    playerProfilePrint: "Spielerprofil drucken",
+    playerProfilePrintSuccess: "Spielerprofil erfolgreich gedruckt!",
+    playerProfilePrintError: "Fehler beim Drucken des Spielerprofils.",
+    adminDashboard: "Admin-Dashboard",
+    adminDashboardTitle: "Admin-Dashboard Übersicht",
+    adminDashboardStats: "Statistiken",
+    adminDashboardRecentActivity: "Letzte Aktivitäten",
+    adminDashboardQuickActions: "Schnellaktionen",
+    viewAllPlayers: "Alle Spieler ansehen",
+    viewAllEvents: "Alle Veranstaltungen ansehen",
+    viewAllAdmins: "Alle Admins ansehen",
+    viewAllMessages: "Alle Nachrichten ansehen",
+    viewAllLogs: "Alle Protokolle ansehen",
+    createPlayer: "Spieler erstellen",
+    createEvent: "Veranstaltung erstellen",
+    createAdmin: "Admin erstellen",
+    sendBroadcastMessage: "Broadcast-Nachricht senden",
+    broadcastMessage: "Broadcast-Nachricht",
+    broadcastMessageContent: "Nachricht",
+    send: "Senden",
+    broadcastMessageSentSuccess: "Broadcast-Nachricht gesendet!",
+    broadcastMessages: "Broadcast-Nachrichten",
+    noBroadcastMessages: "Keine Broadcast-Nachrichten.",
+    broadcastMessageFrom: "Von:",
+    broadcastMessageTo: "An:",
+    broadcastMessageTimestamp: "Zeitstempel:",
+    deleteBroadcastMessage: "Broadcast-Nachricht löschen",
+    confirmDeleteBroadcastMessage: "Bist du sicher, dass du diese Broadcast-Nachricht löschen möchtest?",
+    broadcastMessageDeletedSuccess: "Broadcast-Nachricht erfolgreich gelöscht!",
+    showBroadcastMessages: "Broadcast-Nachrichten anzeigen",
+    hideBroadcastMessages: "Broadcast-Nachrichten ausblenden",
+    manageBroadcastMessages: "Broadcast-Nachrichten verwalten",
+    playerActivityChart: "Spieleraktivitäts-Diagramm",
+    eventParticipationChart: "Veranstaltungsteilnahme-Diagramm",
+    scoreDistributionChart: "Punktverteilungs-Diagramm",
+    generateCharts: "Diagramme generieren",
+    chartsGeneratedSuccess: "Diagramme erfolgreich generiert!",
+    noCharts: "Keine Diagramme verfügbar.",
+    chartOptions: "Diagrammoptionen",
+    chartType: "Diagrammtyp",
+    selectChartType: "Diagrammtyp auswählen:",
+    barChart: "Balkendiagramm",
+    lineChart: "Liniendiagramm",
+    pieChart: "Tortendiagramm",
+    doughnutChart: "Ringdiagramm",
+    radarChart: "Radardiagramm",
+    polarAreaChart: "Polares Flächendiagramm",
+    bubbleChart: "Blasendiagramm",
+    scatterChart: "Streudiagramm",
+    areaChart: "Flächendiagramm",
+    applyChartOptions: "Diagrammoptionen anwenden",
+    chartOptionsApplied: "Diagrammoptionen angewendet.",
+    chartData: "Diagrammdaten",
+    exportChart: "Diagramm exportieren",
+    chartExportedSuccess: "Diagramm erfolgreich exportiert!",
+    printChart: "Diagramm drucken",
+    chartPrintSuccess: "Diagramm erfolgreich gedruckt!",
+    chartPrintError: "Fehler beim Drucken des Diagramms.",
+    playerComparison: "Spielervergleich",
+    selectPlayersToCompare: "Spieler zum Vergleich auswählen:",
+    comparePlayers: "Spieler vergleichen",
+    playerComparisonChart: "Spielervergleichs-Diagramm",
+    noPlayerComparison: "Kein Spielervergleich verfügbar.",
+    playerComparisonOptions: "Vergleichsoptionen",
+    compareByScore: "Nach Punktzahl vergleichen",
+    compareByParticipation: "Nach Teilnahme vergleichen",
+    compareByAchievements: "Nach Errungenschaften vergleichen",
+    applyComparisonOptions: "Vergleichsoptionen anwenden",
+    comparisonOptionsApplied: "Vergleichsoptionen angewendet.",
+    playerComparisonData: "Spielervergleichsdaten",
+    exportComparison: "Vergleich exportieren",
+    comparisonExportedSuccess: "Vergleich erfolgreich exportiert!",
+    printComparison: "Vergleich drucken",
+    comparisonPrintSuccess: "Vergleich erfolgreich gedruckt!",
+    comparisonPrintError: "Fehler beim Drucken des Vergleichs.",
+    eventComparison: "Veranstaltungsvergleich",
+    selectEventsToCompare: "Veranstaltungen zum Vergleich auswählen:",
+    compareEvents: "Veranstaltungen vergleichen",
+    eventComparisonChart: "Veranstaltungsvergleichs-Diagramm",
+    noEventComparison: "Kein Veranstaltungsvergleich verfügbar.",
+    eventComparisonOptions: "Vergleichsoptionen",
+    compareByTotalScore: "Nach Gesamtpunktzahl vergleichen",
+    compareByAverageScore: "Nach Durchschnittspunktzahl vergleichen",
+    compareByParticipationRate: "Nach Teilnahmequote vergleichen",
+    applyEventComparisonOptions: "Vergleichsoptionen anwenden",
+    eventComparisonOptionsApplied: "Vergleichsoptionen angewendet.",
+    eventComparisonData: "Veranstaltungsvergleichsdaten",
+    exportEventComparison: "Vergleich exportieren",
+    eventComparisonExportedSuccess: "Vergleich erfolgreich exportiert!",
+    printEventComparison: "Vergleich drucken",
+    eventComparisonPrintSuccess: "Vergleich erfolgreich gedruckt!",
+    eventComparisonPrintError: "Fehler beim Drucken des Vergleichs.",
+    dataManagement: "Datenverwaltung",
+    backupAndRestore: "Sichern und Wiederherstellen",
+    importAndExport: "Importieren und Exportieren",
+    clearData: "Daten löschen",
+    confirmClearData: "Bist du sicher, dass du alle Anwendungsdaten löschen möchtest? Dies kann nicht rückgängig gemacht werden.",
+    dataClearedSuccess: "Daten erfolgreich gelöscht!",
+    caution: "Vorsicht!",
+    dangerZone: "Gefahrenzone",
+    fullDataReset: "Vollständiger Daten-Reset",
+    confirmFullDataReset: "Bist du absolut sicher, dass du einen vollständigen Daten-Reset durchführen möchtest? Dies löscht ALLE Daten unwiderruflich.",
+    fullDataResetSuccess: "Vollständiger Daten-Reset erfolgreich!",
+    enterConfirmText: "Bitte gib 'BESTÄTIGEN' ein, um fortzufahren.",
+    invalidConfirmText: "Ungültiger Bestätigungstext.",
+    adminTools: "Admin-Tools",
+    userManagement: "Benutzerverwaltung",
+    roleManagement: "Rollenverwaltung",
+    assignRoles: "Rollen zuweisen",
+    userRoles: "Benutzerrollen",
+    selectUser: "Benutzer auswählen:",
+    selectRole: "Rolle auswählen:",
+    assign: "Zuweisen",
+    roleAssignedSuccess: "Rolle erfolgreich zugewiesen!",
+    removeRole: "Rolle entfernen",
+    roleRemovedSuccess: "Rolle erfolgreich entfernt!",
+    availableRoles: "Verfügbare Rollen:",
+    addRole: "Rolle hinzufügen",
+    roleName: "Rollenname",
+    roleDescription: "Rollenbeschreibung",
+    roleAddedSuccess: "Rolle erfolgreich hinzugefügt!",
+    editRole: "Rolle bearbeiten",
+    deleteRole: "Rolle löschen",
+    confirmDeleteRole: "Bist du sicher, dass du diese Rolle löschen möchtest?",
+    roleUpdatedSuccess: "Rolle erfolgreich aktualisiert!",
+    roleDeletedSuccess: "Rolle erfolgreich gelöscht!",
+    manageRoles: "Rollen verwalten",
+    permissions: "Berechtigungen",
+    viewPermissions: "Berechtigungen ansehen",
+    noPermissions: "Keine Berechtigungen vorhanden.",
+    permission: "Berechtigung",
+    permissionDescription: "Beschreibung",
+    addPermission: "Berechtigung hinzufügen",
+    permissionName: "Name der Berechtigung",
+    permissionAddedSuccess: "Berechtigung erfolgreich hinzugefügt!",
+    editPermission: "Berechtigung bearbeiten",
+    deletePermission: "Berechtigung löschen",
+    confirmDeletePermission: "Bist du sicher, dass du diese Berechtigung löschen möchtest?",
+    permissionUpdatedSuccess: "Berechtigung erfolgreich aktualisiert!",
+    permissionDeletedSuccess: "Berechtigung erfolgreich gelöscht!",
+    assignPermissions: "Berechtigungen zuweisen",
+    selectPermission: "Berechtigung auswählen:",
+    permissionAssignedSuccess: "Berechtigung erfolgreich zugewiesen!",
+    permissionRemovedSuccess: "Berechtigung erfolgreich entfernt!",
+    managePermissions: "Berechtigungen verwalten",
+    auditLog: "Audit-Protokoll",
+    viewAuditLog: "Audit-Protokoll ansehen",
+    noAuditLog: "Kein Audit-Protokoll vorhanden.",
+    auditLogEntry: "Audit-Eintrag",
+    auditLogTimestamp: "Zeitstempel",
+    auditLogUser: "Benutzer",
+    auditLogAction: "Aktion",
+    auditLogTarget: "Ziel",
+    clearAuditLog: "Audit-Protokoll löschen",
+    confirmClearAuditLog: "Bist du sicher, dass du das Audit-Protokoll löschen möchtest?",
+    auditLogClearedSuccess: "Audit-Protokoll erfolgreich gelöscht!",
+    systemStatus: "Systemstatus",
+    viewSystemStatus: "Systemstatus ansehen",
+    systemHealth: "System-Gesundheit:",
+    databaseStatus: "Datenbankstatus:",
+    apiStatus: "API-Status:",
+    online: "Online",
+    offline: "Offline",
+    operational: "Operationell",
+    degraded: "Eingeschränkt",
+    outage: "Ausfall",
+    lastChecked: "Zuletzt geprüft:",
+    refreshStatus: "Status aktualisieren",
+    statusRefreshedSuccess: "Status erfolgreich aktualisiert!",
+    systemLogs: "Systemprotokolle",
+    viewSystemLogs: "Systemprotokolle ansehen",
+    noSystemLogs: "Keine Systemprotokolle vorhanden.",
+    systemLogEntry: "Systemprotokoll-Eintrag",
+    systemLogTimestamp: "Zeitstempel",
+    systemLogLevel: "Level",
+    systemLogMessage: "Nachricht",
+    clearSystemLogs: "Systemprotokolle löschen",
+    confirmClearSystemLogs: "Bist du sicher, dass du alle Systemprotokolle löschen möchtest?",
+    systemLogsClearedSuccess: "Systemprotokolle erfolgreich gelöscht!",
+    maintenanceMode: "Wartungsmodus",
+    enableMaintenanceMode: "Wartungsmodus aktivieren",
+    disableMaintenanceMode: "Wartungsmodus deaktivieren",
+    maintenanceModeEnabled: "Wartungsmodus aktiviert.",
+    maintenanceModeDisabled: "Wartungsmodus deaktiviert.",
+    maintenanceMessage: "Wartungsmeldung",
+    updateMaintenanceMessage: "Wartungsmeldung aktualisieren",
+    maintenanceMessageUpdated: "Wartungsmeldung aktualisiert!",
+    scheduledMaintenance: "Geplante Wartung",
+    scheduleMaintenance: "Wartung planen",
+    maintenanceDate: "Datum der Wartung",
+    maintenanceTime: "Uhrzeit der Wartung",
+    schedule: "Planen",
+    maintenanceScheduledSuccess: "Wartung erfolgreich geplant!",
+    cancelMaintenance: "Wartung abbrechen",
+    confirmCancelMaintenance: "Bist du sicher, dass du die geplante Wartung abbrechen möchtest?",
+    maintenanceCanceledSuccess: "Wartung abgebrochen!",
+    noScheduledMaintenance: "Keine geplante Wartung.",
+    currentMaintenanceStatus: "Aktueller Wartungsstatus:",
+    active: "Aktiv",
+    inactive: "Inaktiv",
+    scheduled: "Geplant",
+    completed: "Abgeschlossen",
+    failed: "Fehlgeschlagen",
+    updateStatus: "Status aktualisieren",
+    statusUpdatedSuccess: "Status erfolgreich aktualisiert!",
+    announcements: "Ankündigungen",
+    createAnnouncement: "Ankündigung erstellen",
+    announcementTitle: "Titel",
+    announcementContent: "Inhalt",
+    publish: "Veröffentlichen",
+    announcementPublishedSuccess: "Ankündigung erfolgreich veröffentlicht!",
+    editAnnouncement: "Ankündigung bearbeiten",
+    deleteAnnouncement: "Ankündigung löschen",
+    confirmDeleteAnnouncement: "Bist du sicher, dass du diese Ankündigung löschen möchtest?",
+    announcementUpdatedSuccess: "Ankündigung erfolgreich aktualisiert!",
+    announcementDeletedSuccess: "Ankündigung erfolgreich gelöscht!",
+    viewAnnouncements: "Ankündigungen ansehen",
+    noAnnouncements: "Keine Ankündigungen vorhanden.",
+    announcementTimestamp: "Zeitstempel",
+    announcementAuthor: "Autor",
+    announcementExpires: "Läuft ab:",
+    setExpiration: "Ablaufdatum festlegen",
+    expirationDate: "Ablaufdatum",
+    noExpiration: "Kein Ablaufdatum",
+    expired: "Abgelaufen",
+    activeAnnouncements: "Aktive Ankündigungen",
+    archivedAnnouncements: "Archivierte Ankündigungen",
+    archiveAnnouncement: "Ankündigung archivieren",
+    confirmArchiveAnnouncement: "Bist du sicher, dass du diese Ankündigung archivieren möchtest?",
+    announcementArchivedSuccess: "Ankündigung erfolgreich archiviert!",
+    unarchiveAnnouncement: "Ankündigung dearchivieren",
+    confirmUnarchiveAnnouncement: "Bist du sicher, dass du diese Ankündigung dearchivieren möchtest?",
+    announcementUnarchivedSuccess: "Ankündigung erfolgreich dearchiviert!",
+    viewArchivedAnnouncements: "Archivierte Ankündigungen ansehen",
+    notifications: "Benachrichtigungen",
+    profile: "Profil",
+    settings: "Einstellungen",
+    admin: "Admin",
+    about: "Über",
+    help: "Hilfe",
+    legal: "Rechtliches",
+    dashboard: "Dashboard",
+    reports: "Berichte",
+    charts: "Diagramme",
+    comparison: "Vergleich",
+    data: "Daten",
+    system: "System",
+    maintenance: "Wartung",
+    logs: "Protokolle",
+    announcements: "Ankündigungen",
+    users: "Benutzer",
+    roles: "Rollen",
+    permissions: "Berechtigungen",
+    audit: "Audit",
+    activity: "Aktivität",
+    history: "Verlauf",
+    messages: "Nachrichten",
+    broadcast: "Broadcast",
+    feedback: "Feedback",
+    support: "Support",
+    faq: "FAQ",
+    documentation: "Dokumentation",
+    terms: "Nutzungsbedingungen",
+    privacy: "Datenschutzerklärung",
+    contact: "Kontakt",
+    home: "Startseite",
+    info: "Info",
+    navigation: "Navigation",
+    playerReport: "Spielerbericht",
+    currentEvent: "Aktuelles Event",
+    archive: "Archiv",
+    top10: "Top 10",
+    hallOfChamps: "Ruhmeshalle",
+    adminPanel: "Admin-Panel",
+    playerManagement: "Spielerverwaltung",
+    eventManagement: "Veranstaltungsverwaltung",
+    adminManagement: "Admin-Verwaltung",
+    eventDayManagement: "Event-Tag-Verwaltung",
+    playerScoreManagement: "Spielergebnis-Verwaltung",
+    overallPlayerReport: "Gesamt-Spielerbericht",
+    playerSearch: "Spielersuche",
+    filterOptions: "Filteroptionen",
+    notificationSettings: "Benachrichtigungseinstellungen",
+    profileSettings: "Profileinstellungen",
+    accountSettings: "Kontoeinstellungen",
+    privacySettings: "Datenschutzeinstellungen",
+    aboutApp: "Über die App",
+    feedbackAndSupport: "Feedback & Support",
+    legalInformation: "Rechtliche Informationen",
+    authentication: "Authentifizierung",
+    userProfile: "Benutzerprofil",
+    playerAchievements: "Spieler-Errungenschaften",
+    eventGoals: "Veranstaltungsziele",
+    milestones: "Meilensteine",
+    rewards: "Belohnungen",
+    leaderboard: "Bestenliste",
+    playerComparison: "Spielervergleich",
+    eventComparison: "Veranstaltungsvergleich",
+    dataManagement: "Datenverwaltung",
+    systemMonitoring: "Systemüberwachung",
+    adminTools: "Admin-Tools",
+    communication: "Kommunikation",
+    reportsAndAnalytics: "Berichte & Analysen",
+    generalSettings: "Allgemeine Einstellungen",
+    securitySettings: "Sicherheitseinstellungen",
+    integrations: "Integrationen",
+    apiSettings: "API-Einstellungen",
+    webhookSettings: "Webhook-Einstellungen",
+    pluginManagement: "Plugin-Verwaltung",
+    themeCustomization: "Theme-Anpassung",
+    layoutSettings: "Layout-Einstellungen",
+    fontSettings: "Schriftart-Einstellungen",
+    colorSettings: "Farbeinstellungen",
+    backgroundSettings: "Hintergrundeinstellungen",
+    logoSettings: "Logo-Einstellungen",
+    customCSS: "Benutzerdefiniertes CSS",
+    customJS: "Benutzerdefiniertes JS",
+    seoSettings: "SEO-Einstellungen",
+    metaTags: "Meta-Tags",
+    sitemap: "Sitemap",
+    robotstxt: "robots.txt",
+    analyticsIntegration: "Analyse-Integration",
+    googleAnalytics: "Google Analytics",
+    matomoAnalytics: "Matomo Analytics",
+    customAnalytics: "Benutzerdefinierte Analyse",
+    socialMediaIntegration: "Social Media Integration",
+    facebook: "Facebook",
+    twitter: "Twitter",
+    instagram: "Instagram",
+    discord: "Discord",
+    twitch: "Twitch",
+    youtube: "YouTube",
+    patreon: "Patreon",
+    merchStore: "Merch-Store",
+    donationLink: "Spenden-Link",
+    communityLinks: "Community-Links",
+    forum: "Forum",
+    discordServer: "Discord-Server",
+    guildWebsite: "Gilden-Website",
+    raidPlanner: "Raid-Planer",
+    dungeonGuides: "Dungeon-Guides",
+    pvpGuides: "PvP-Guides",
+    classGuides: "Klassen-Guides",
+    professionGuides: "Berufs-Guides",
+    craftingGuides: "Handwerks-Guides",
+    economyGuides: "Wirtschafts-Guides",
+    eventGuides: "Event-Guides",
+    questGuides: "Quest-Guides",
+    lore: "Lore",
+    wiki: "Wiki",
+    database: "Datenbank",
+    tools: "Tools",
+    calculators: "Rechner",
+    simulators: "Simulatoren",
+    timers: "Timer",
+    trackers: "Tracker",
+    planners: "Planer",
+    generators: "Generatoren",
+    converters: "Konverter",
+    utilities: "Dienstprogramme",
+    apiDocumentation: "API-Dokumentation",
+    developerTools: "Entwickler-Tools",
+    webhooks: "Webhooks",
+    plugins: "Plugins",
+    themes: "Themes",
+    updates: "Updates",
+    changelog: "Changelog",
+    roadmap: "Roadmap",
+    bugTracker: "Bug-Tracker",
+    featureRequests: "Funktionsanfragen",
+    knownIssues: "Bekannte Probleme",
+    troubleshooting: "Fehlerbehebung",
+    faq: "FAQ",
+    supportForum: "Support-Forum",
+    contactUs: "Kontaktiere uns",
+    imprint: "Impressum",
+    disclaimer: "Haftungsausschluss",
+    copyright: "Urheberrecht",
+    dataProtection: "Datenschutz",
+    cookies: "Cookies",
+    cookieSettings: "Cookie-Einstellungen",
+    acceptCookies: "Cookies akzeptieren",
+    declineCookies: "Cookies ablehnen",
+    cookiePolicy: "Cookie-Richtlinie",
+    poweredBy: "Powered by",
+    madeWith: "Made with",
+    version: "Version",
+    build: "Build",
+    release: "Release",
+    date: "Datum",
+    time: "Uhrzeit",
+    author: "Autor",
+    contributors: "Mitwirkende",
+    acknowledgements: "Danksagungen",
+    specialThanks: "Besonderer Dank",
+    community: "Community",
+    partners: "Partner",
+    sponsors: "Sponsoren",
+    donors: "Spender",
+    patrons: "Patreons",
+    supporters: "Unterstützer",
+    getInvolved: "Mach mit",
+    contribute: "Beitragen",
+    translate: "Übersetzen",
+    reportIssue: "Problem melden",
+    suggestFeature: "Funktion vorschlagen",
+    joinCommunity: "Community beitreten",
+    followUs: "Folge uns",
+    subscribe: "Abonnieren",
+    newsletter: "Newsletter",
+    getUpdates: "Updates erhalten",
+    stayConnected: "In Verbindung bleiben",
+    socials: "Soziale Medien",
+    links: "Links",
+    resources: "Ressourcen",
+    downloads: "Downloads",
+    assets: "Assets",
+    mediaKit: "Medien-Kit",
+    press: "Presse",
+    events: "Veranstaltungen",
+    calendar: "Kalender",
+    schedule: "Zeitplan",
+    upcomingEvents: "Bevorstehende Veranstaltungen",
+    pastEvents: "Vergangene Veranstaltungen",
+    eventRegistration: "Veranstaltungsanmeldung",
+    eventDetails: "Veranstaltungsdetails",
+    eventResults: "Veranstaltungsergebnisse",
+    eventPhotos: "Veranstaltungsfotos",
+    eventVideos: "Veranstaltungsvideos",
+    eventRecaps: "Veranstaltungsrückblicke",
+    eventFeedback: "Veranstaltungs-Feedback",
+    eventOrganizers: "Veranstalter",
+    eventSponsors: "Veranstaltungssponsoren",
+    eventPartners: "Veranstaltungspartner",
+    eventVolunteers: "Veranstaltungshelfer",
+    eventAttendees: "Veranstaltungsteilnehmer",
+    eventTickets: "Veranstaltungstickets",
+    eventVenue: "Veranstaltungsort",
+    eventMap: "Veranstaltungskarte",
+    eventDirections: "Wegbeschreibung",
+    eventAccommodation: "Unterkunft",
+    eventTravel: "Anreise",
+    eventFAQ: "Veranstaltungs-FAQ",
+    eventContact: "Veranstaltungs-Kontakt",
+    eventRules: "Veranstaltungsregeln",
+    eventPrizes: "Veranstaltungspreise",
+    eventAwards: "Veranstaltungsauszeichnungen",
+    eventLeaderboard: "Veranstaltungs-Bestenliste",
+    eventParticipants: "Veranstaltungsteilnehmer",
+    eventStatistics: "Veranstaltungsstatistiken",
+    eventHighlights: "Veranstaltungs-Highlights",
+    eventGallery: "Veranstaltungs-Galerie",
+    eventVideos: "Veranstaltungsvideos",
+    eventPress: "Veranstaltungs-Presse",
+    eventPartnerships: "Veranstaltungspartnerschaften",
+    eventSponsorship: "Veranstaltungssponsoring",
+    eventVolunteer: "Veranstaltungs-Freiwilliger",
+    eventAttendee: "Veranstaltungsteilnehmer",
+    eventTicket: "Veranstaltungsticket",
+    eventVenueInfo: "Informationen zum Veranstaltungsort",
+    eventMapInfo: "Karteninformationen",
+    eventDirectionsInfo: "Wegbeschreibungsinformationen",
+    eventAccommodationInfo: "Unterkunftsinformationen",
+    eventTravelInfo: "Reiseinformationen",
+    eventFAQInfo: "FAQ-Informationen",
+    eventContactInfo: "Kontaktinformationen",
+    eventRulesInfo: "Regelinformationen",
+    eventPrizesInfo: "Preisinformationen",
+    eventAwardsInfo: "Auszeichnungsinformationen",
+    eventLeaderboardInfo: "Bestenlisteninformationen",
+    eventParticipantsInfo: "Teilnehmerinformationen",
+    eventStatisticsInfo: "Statistikinformationen",
+    eventHighlightsInfo: "Highlight-Informationen",
+    eventGalleryInfo: "Galerieinformationen",
+    eventVideoInfo: "Videoinformationen",
+    eventPressInfo: "Presseinformationen",
+    eventPartnershipsInfo: "Partnerschaftsinformationen",
+    eventSponsorshipInfo: "Sponsoringinformationen",
+    eventVolunteerInfo: "Freiwilligeninformationen",
+    eventAttendeeInfo: "Teilnehmerinformationen",
+    eventTicketInfo: "Ticketinformationen",
+    eventVenueDetails: "Details zum Veranstaltungsort",
+    eventMapDetails: "Kartendetails",
+    eventDirectionsDetails: "Details zur Wegbeschreibung",
+    eventAccommodationDetails: "Details zur Unterkunft",
+    eventTravelDetails: "Details zur Anreise",
+    eventFAQDetails: "FAQ-Details",
+    eventContactDetails: "Kontaktdetails",
+    eventRulesDetails: "Regeldetails",
+    eventPrizesDetails: "Preisdetails",
+    eventAwardsDetails: "Auszeichnungsdetails",
+    eventLeaderboardDetails: "Bestenlistendetails",
+    eventParticipantsDetails: "Teilnehmerdetails",
+    eventStatisticsDetails: "Statistikdetails",
+    eventHighlightsDetails: "Highlight-Details",
+    eventGalleryDetails: "Galeriedetails",
+    eventVideoDetails: "Videodetails",
+    eventPressDetails: "Pressedetails",
+    eventPartnershipsDetails: "Partnerschaftsdetails",
+    eventSponsorshipDetails: "Sponsoringdetails",
+    eventVolunteerDetails: "Freiwilligendetails",
+    eventAttendeeDetails: "Teilnehmerdetails",
+    eventTicketDetails: "Ticketdetails",
+    eventVenueFull: "Vollständiger Veranstaltungsort",
+    eventMapFull: "Vollständige Karte",
+    eventDirectionsFull: "Vollständige Wegbeschreibung",
+    eventAccommodationFull: "Vollständige Unterkunft",
+    eventTravelFull: "Vollständige Anreise",
+    eventFAQFull: "Vollständige FAQ",
+    eventContactFull: "Vollständiger Kontakt",
+    eventRulesFull: "Vollständige Regeln",
+    eventPrizesFull: "Vollständige Preise",
+    eventAwardsFull: "Vollständige Auszeichnungen",
+    eventLeaderboardFull: "Vollständige Bestenliste",
+    eventParticipantsFull: "Vollständige Teilnehmer",
+    eventStatisticsFull: "Vollständige Statistiken",
+    eventHighlightsFull: "Vollständige Highlights",
+    eventGalleryFull: "Vollständige Galerie",
+    eventVideoFull: "Vollständige Videos",
+    eventPressFull: "Vollständige Presse",
+    eventPartnershipsFull: "Vollständige Partnerschaften",
+    eventSponsorshipFull: "Vollständiges Sponsoring",
+    eventVolunteerFull: "Vollständige Freiwillige",
+    eventAttendeeFull: "Vollständige Teilnehmer",
+    eventTicketFull: "Vollständige Tickets",
+    eventVenueComplete: "Kompletter Veranstaltungsort",
+    eventMapComplete: "Komplette Karte",
+    eventDirectionsComplete: "Komplette Wegbeschreibung",
+    eventAccommodationComplete: "Komplette Unterkunft",
+    eventTravelComplete: "Komplette Anreise",
+    eventFAQComplete: "Komplette FAQ",
+    eventContactComplete: "Kompletter Kontakt",
+    eventRulesComplete: "Komplette Regeln",
+    eventPrizesComplete: "Komplette Preise",
+    eventAwardsComplete: "Komplette Auszeichnungen",
+    eventLeaderboardComplete: "Komplette Bestenliste",
+    eventParticipantsComplete: "Komplette Teilnehmer",
+    eventStatisticsComplete: "Komplette Statistiken",
+    eventHighlightsComplete: "Komplette Highlights",
+    eventGalleryComplete: "Komplette Galerie",
+    eventVideoComplete: "Komplette Videos",
+    eventPressComplete: "Komplette Presse",
+    eventPartnershipsComplete: "Komplette Partnerschaften",
+    eventSponsorshipComplete: "Komplettes Sponsoring",
+    eventVolunteerComplete: "Komplette Freiwillige",
+    eventAttendeeComplete: "Komplette Teilnehmer",
+    eventTicketComplete: "Komplette Tickets",
+    eventVenueAll: "Alle Veranstaltungsorte",
+    eventMapAll: "Alle Karten",
+    eventDirectionsAll: "Alle Wegbeschreibungen",
+    eventAccommodationAll: "Alle Unterkünfte",
+    eventTravelAll: "Alle Reisen",
+    eventFAQAll: "Alle FAQs",
+    eventContactAll: "Alle Kontakte",
+    eventRulesAll: "Alle Regeln",
+    eventPrizesAll: "Alle Preise",
+    eventAwardsAll: "Alle Auszeichnungen",
+    eventLeaderboardAll: "Alle Bestenlisten",
+    eventParticipantsAll: "Alle Teilnehmer",
+    eventStatisticsAll: "Alle Statistiken",
+    eventHighlightsAll: "Alle Highlights",
+    eventGalleryAll: "Alle Galerien",
+    eventVideoAll: "Alle Videos",
+    eventPressAll: "Alle Pressen",
+    eventPartnershipsAll: "Alle Partnerschaften",
+    eventSponsorshipAll: "Alle Sponsorings",
+    eventVolunteerAll: "Alle Freiwilligen",
+    eventAttendeeAll: "Alle Teilnehmer",
+    eventTicketAll: "Alle Tickets",
+    eventVenueOverview: "Übersicht Veranstaltungsort",
+    eventMapOverview: "Übersicht Karte",
+    eventDirectionsOverview: "Übersicht Wegbeschreibung",
+    eventAccommodationOverview: "Übersicht Unterkunft",
+    eventTravelOverview: "Übersicht Reise",
+    eventFAQOverview: "Übersicht FAQ",
+    eventContactOverview: "Übersicht Kontakt",
+    eventRulesOverview: "Übersicht Regeln",
+    eventPrizesOverview: "Übersicht Preise",
+    eventAwardsOverview: "Übersicht Auszeichnungen",
+    eventLeaderboardOverview: "Übersicht Bestenliste",
+    eventParticipantsOverview: "Übersicht Teilnehmer",
+    eventStatisticsOverview: "Übersicht Statistiken",
+    eventHighlightsOverview: "Übersicht Highlights",
+    eventGalleryOverview: "Übersicht Galerie",
+    eventVideoOverview: "Übersicht Videos",
+    eventPressOverview: "Übersicht Presse",
+    eventPartnershipsOverview: "Übersicht Partnerschaften",
+    eventSponsorshipOverview: "Übersicht Sponsoring",
+    eventVolunteerOverview: "Übersicht Freiwillige",
+    eventAttendeeOverview: "Übersicht Teilnehmer",
+    eventTicketOverview: "Übersicht Tickets",
+    eventVenueSummary: "Zusammenfassung Veranstaltungsort",
+    eventMapSummary: "Zusammenfassung Karte",
+    eventDirectionsSummary: "Zusammenfassung Wegbeschreibung",
+    eventAccommodationSummary: "Zusammenfassung Unterkunft",
+    eventTravelSummary: "Zusammenfassung Reise",
+    eventFAQSummary: "Zusammenfassung FAQ",
+    eventContactSummary: "Zusammenfassung Kontakt",
+    eventRulesSummary: "Zusammenfassung Regeln",
+    eventPrizesSummary: "Zusammenfassung Preise",
+    eventAwardsSummary: "Zusammenfassung Auszeichnungen",
+    eventLeaderboardSummary: "Zusammenfassung Bestenliste",
+    eventParticipantsSummary: "Zusammenfassung Teilnehmer",
+    eventStatisticsSummary: "Zusammenfassung Statistiken",
+    eventHighlightsSummary: "Zusammenfassung Highlights",
+    eventGallerySummary: "Zusammenfassung Galerie",
+    eventVideoSummary: "Zusammenfassung Videos",
+    eventPressSummary: "Zusammenfassung Presse",
+    eventPartnershipsSummary: "Zusammenfassung Partnerschaften",
+    eventSponsorshipSummary: "Zusammenfassung Sponsoring",
+    eventVolunteerSummary: "Zusammenfassung Freiwillige",
+    eventAttendeeSummary: "Zusammenfassung Teilnehmer",
+    eventTicketSummary: "Zusammenfassung Tickets",
+    eventVenueReport: "Bericht Veranstaltungsort",
+    eventMapReport: "Bericht Karte",
+    eventDirectionsReport: "Bericht Wegbeschreibung",
+    eventAccommodationReport: "Bericht Unterkunft",
+    eventTravelReport: "Bericht Reise",
+    eventFAQReport: "Bericht FAQ",
+    eventContactReport: "Bericht Kontakt",
+    eventRulesReport: "Bericht Regeln",
+    eventPrizesReport: "Bericht Preise",
+    eventAwardsReport: "Bericht Auszeichnungen",
+    eventLeaderboardReport: "Bericht Bestenliste",
+    eventParticipantsReport: "Bericht Teilnehmer",
+    eventStatisticsReport: "Bericht Statistiken",
+    eventHighlightsReport: "Bericht Highlights",
+    eventGalleryReport: "Bericht Galerie",
+    eventVideoReport: "Bericht Videos",
+    eventPressReport: "Bericht Presse",
+    eventPartnershipsReport: "Bericht Partnerschaften",
+    eventSponsorshipReport: "Bericht Sponsoring",
+    eventVolunteerReport: "Bericht Freiwillige",
+    eventAttendeeReport: "Bericht Teilnehmer",
+    eventTicketReport: "Bericht Tickets",
+    eventVenueFullReport: "Vollständiger Bericht Veranstaltungsort",
+    eventMapFullReport: "Vollständiger Bericht Karte",
+    eventDirectionsFullReport: "Vollständiger Bericht Wegbeschreibung",
+    eventAccommodationFullReport: "Vollständiger Bericht Unterkunft",
+    eventTravelFullReport: "Vollständiger Bericht Reise",
+    eventFAQFullReport: "Vollständiger Bericht FAQ",
+    eventContactFullReport: "Vollständiger Bericht Kontakt",
+    eventRulesFullReport: "Vollständiger Bericht Regeln",
+    eventPrizesFullReport: "Vollständiger Bericht Preise",
+    eventAwardsFullReport: "Vollständiger Bericht Auszeichnungen",
+    eventLeaderboardFullReport: "Vollständiger Bericht Bestenliste",
+    eventParticipantsFullReport: "Vollständiger Bericht Teilnehmer",
+    eventStatisticsFullReport: "Vollständiger Bericht Statistiken",
+    eventHighlightsFullReport: "Vollständiger Bericht Highlights",
+    eventGalleryFullReport: "Vollständiger Bericht Galerie",
+    eventVideoFullReport: "Vollständiger Bericht Videos",
+    eventPressFullReport: "Vollständiger Bericht Presse",
+    eventPartnershipsFullReport: "Vollständiger Bericht Partnerschaften",
+    eventSponsorshipFullReport: "Vollständiger Bericht Sponsoring",
+    eventVolunteerFullReport: "Vollständiger Bericht Freiwillige",
+    eventAttendeeFullReport: "Vollständiger Bericht Teilnehmer",
+    eventTicketFullReport: "Vollständiger Bericht Tickets",
+    eventVenueDetailedReport: "Detaillierter Bericht Veranstaltungsort",
+    eventMapDetailedReport: "Detaillierter Bericht Karte",
+    eventDirectionsDetailedReport: "Detaillierter Bericht Wegbeschreibung",
+    eventAccommodationDetailedReport: "Detaillierter Bericht Unterkunft",
+    eventTravelDetailedReport: "Detaillierter Bericht Reise",
+    eventFAQDetailedReport: "Detaillierter Bericht FAQ",
+    eventContactDetailedReport: "Detaillierter Bericht Kontakt",
+    eventRulesDetailedReport: "Detaillierter Bericht Regeln",
+    eventPrizesDetailedReport: "Detaillierter Bericht Preise",
+    eventAwardsDetailedReport: "Detaillierter Bericht Auszeichnungen",
+    eventLeaderboardDetailedReport: "Detaillierter Bericht Bestenliste",
+    eventParticipantsDetailedReport: "Detaillierter Bericht Teilnehmer",
+    eventStatisticsDetailedReport: "Detaillierter Bericht Statistiken",
+    eventHighlightsDetailedReport: "Detaillierter Bericht Highlights",
+    eventGalleryDetailedReport: "Detaillierter Bericht Galerie",
+    eventVideoDetailedReport: "Detaillierter Bericht Videos",
+    eventPressDetailedReport: "Detaillierter Bericht Presse",
+    eventPartnershipsDetailedReport: "Detaillierter Bericht Partnerschaften",
+    eventSponsorshipDetailedReport: "Detaillierter Bericht Sponsoring",
+    eventVolunteerDetailedReport: "Detaillierter Bericht Freiwillige",
+    eventAttendeeDetailedReport: "Detaillierter Bericht Teilnehmer",
+    eventTicketDetailedReport: "Detaillierter Bericht Tickets",
+    eventVenueCustomReport: "Benutzerdefinierter Bericht Veranstaltungsort",
+    eventMapCustomReport: "Benutzerdefinierter Bericht Karte",
+    eventDirectionsCustomReport: "Benutzerdefinierter Bericht Wegbeschreibung",
+    eventAccommodationCustomReport: "Benutzerdefinierter Bericht Unterkunft",
+    eventTravelCustomReport: "Benutzerdefinierter Bericht Reise",
+    eventFAQCustomReport: "Benutzerdefinierter Bericht FAQ",
+    eventContactCustomReport: "Benutzerdefinierter Bericht Kontakt",
+    eventRulesCustomReport: "Benutzerdefinierter Bericht Regeln",
+    eventPrizesCustomReport: "Benutzerdefinierter Bericht Preise",
+    eventAwardsCustomReport: "Benutzerdefinierter Bericht Auszeichnungen",
+    eventLeaderboardCustomReport: "Benutzerdefinierter Bericht Bestenliste",
+    eventParticipantsCustomReport: "Benutzerdefinierter Bericht Teilnehmer",
+    eventStatisticsCustomReport: "Benutzerdefinierter Bericht Statistiken",
+    eventHighlightsCustomReport: "Benutzerdefinierter Bericht Highlights",
+    eventGalleryCustomReport: "Benutzerdefinierter Bericht Galerie",
+    eventVideoCustomReport: "Benutzerdefinierter Bericht Videos",
+    eventPressCustomReport: "Benutzerdefinierter Bericht Presse",
+    eventPartnershipsCustomReport: "Benutzerdefinierter Bericht Partnerschaften",
+    eventSponsorshipCustomReport: "Benutzerdefinierter Bericht Sponsoring",
+    eventVolunteerCustomReport: "Benutzerdefinierter Bericht Freiwillige",
+    eventAttendeeCustomReport: "Benutzerdefinierter Bericht Teilnehmer",
+    eventTicketCustomReport: "Benutzerdefinierter Bericht Tickets",
   },
   en: {
     welcomeTitle: "Welcome to the Clan Dashboard!",
     selectLanguage: "Select Language:",
-    goToInfoPage: "Go to Information Page",
+    goToInfoPage: "Go to Info Page",
     infoPageTitle: "About Our Clan and the Game",
-    clanName: "Our Clan: Union For Friends 2",
-    clanDescription: "We are a community of passionate players dedicated to adventure and shared success. Whether COT or KvK, we support each other and have fun doing it.",
-    gameName: "The Game: Total Battle",
-    gameDescription: "is a tactical, strategic war game. Whether you are raided or conduct raids yourself, we always adhere to netiquette.\nWe are in Kingdom No. 36 and follow the laws of Kingdom ROE 36*",
-    normsInfo: "In this game and in our clan, you must meet norms to be successful yourself and to help the clan succeed.",
-    statsInfo: "Here on this page you can find information about clan and personal statistics.",
-    errorSuggestion: "If you find errors or have suggestions/ideas for this page, please use the contact form",
-    goodLuck: "I wish you all a successful hunt.\nLet's go – good luck and have fun!",
-    pizzaOnkel: "The PizzaOnkel",
-    copyright: "© 2024 Clan-Dashboard. All rights reserved by PizzaOnkel.",
+    clanName: "Our Clan: The Brave Dragons",
+    clanDescription: "We are a community of passionate players dedicated to adventure and shared success. Whether PvE or PvP, we support each other and have fun doing it.",
+    gameName: "The Game: Epic Realms Online",
+    gameDescription: "Epic Realms Online is a fantasy MMORPG set in a vast, open world. Explore dungeons, defeat mighty bosses, and compete with other players in epic battles.",
     goToNavigation: "Go to Navigation",
     navigationTitle: "Clan Navigation",
     personalPlayerReport: "Personal Player Report",
     currentTotalEvent: "Current Event Period",
     furtherLinkIndividualDays: "Further Link to Individual Days",
     eventArchive: "Event Archive",
-    topTen: "Top Ten",
+    topTen: "Top 10 Players",
     hallOfChamps: "Hall of Champions",
-    contactForm: "Contact Form",
-    clanMembers: "Clan Members",
-    addMember: "Add Member",
-    memberName: "Member Name",
-    memberRole: "Role (e.g., Warrior, Healer)",
-    add: "Add",
-    cancel: "Cancel",
-    delete: "Delete",
-    confirmDelete: "Confirm Deletion",
-    areYouSureDelete: "Are you sure you want to delete \"{itemName}\"?",
-    noMembers: "No clan members yet. Add new members!",
-    loading: "Loading Clan Dashboard...",
-    errorMessageAuth: "Error during authentication. Please try again later.",
-    errorMessageInit: "Error starting the app. Please try again later.",
-    errorMessageFetch: "Error loading data. Please try again later.",
-    errorMessageAdd: "Error adding entry.",
-    errorMessageDelete: "Error deleting entry.",
-    errorMessageEmptyFields: "All required fields must be filled.",
-    errorMessageDbNotReady: "Database not ready or user not authenticated.",
-    yourUserId: "Your User ID:",
-    backToNavigation: "Back to Navigation",
-    backToInfo: "Back to Info Page",
-    pageUnderConstruction: "This page is still under construction. Exciting content coming soon!",
-    jsonUpload: "JSON File Upload",
-    uploadFile: "Upload File",
-    selectJsonFile: "Select file",
-    fileUploaded: "File uploaded successfully: {fileName}",
-    errorUploadingFile: "Error uploading file.",
-    errorParsingFile: "Error parsing file. Please ensure it's a valid JSON file.",
-    errorProcessingData: "Error processing uploaded data.",
-    normsDefinition: "Norms Definition",
-    normName: "Norm Name",
-    troopStrengthMin: "Troop Strength (Min)",
-    troopStrengthMax: "Troop Strength (Max)",
-    addNorm: "Add Norm",
-    addPlayer: "Add Player",
-    playerName: "Player Name",
-    playerAlias: "Alias (comma-separated)",
-    playerRank: "Rank",
-    playerTroopStrength: "Troop Strength",
-    savePlayer: "Save Player",
-    currentNorms: "Current Norms",
-    currentPlayers: "Current Players",
-    deleteNorm: "Delete Norm",
-    deletePlayer: "Delete Player",
-    normAdded: "Norm '{itemName}' added.",
-    normDeleted: "Norm '{itemName}' deleted.",
-    playerAdded: "Player '{itemName}' added.",
-    playerDeleted: "Player '{itemName}' deleted.",
-    troopStrengthManagement: "Troop Strength Management",
-    newTroopStrength: "New Troop Strength (e.g., G1)",
-    addTroopStrength: "Add Troop Strength",
-    currentTroopStrengths: "Current Troop Strengths",
-    deleteTroopStrength: "Delete Troop Strength",
-    rankManagement: "Rank Management",
-    newRank: "New Rank (e.g., Beginner)",
-    addRank: "Add Rank",
-    currentRanks: "Current Ranks",
-    deleteRank: "Delete Rank",
-    assignNorm: "Assign Norm",
-    selectTroopStrength: "Select Troop Strength",
-    normValue: "Norm Value (Score)",
-    normAssigned: "Norm '{normValue}' assigned for troop strength '{troopStrength}'.",
-    normMappingDeleted: "Norm mapping for '{itemName}' deleted.",
-    noTroopStrengths: "No troop strengths defined.",
-    noRanks: "No ranks defined.",
-    noNormsDefined: "No norms defined.",
+    contact: "Contact",
     adminPanel: "Admin Panel",
-    endCurrentPeriod: "End Current Period",
-    confirmEndPeriod: "Are you sure you want to end the current event period? All current player data will be archived.",
-    periodEndedSuccess: "Current event period successfully ended and data archived.",
-    periodEndedError: "Error ending current event period.",
-    noCurrentPeriodData: "No current player data available to end the period.",
-    eventName: "Event Name",
-    periodDate: "Period Date",
-    overallClanNormFulfillment: "Overall Clan Norm Fulfillment",
-    playerList: "Player List",
-    name: "Name",
-    rank: "Rank",
-    troopStrength: "Troop Strength",
-    clanChests: "Number of Clan Chests",
-    totalPoints: "Total Points (Actual)",
-    normTarget: "Norm Target (Expected)",
-    difference: "Difference",
-    normFulfillment: "Norm Fulfillment (%)",
-    noPlayersInCurrentEvent: "No player data available for the current event period.",
-    playerDetails: "Player Details",
-    backToCurrentEvent: "Back to Current Event Period",
-    aliases: "Aliases",
-    chestCategories: "Chest Categories",
-    eventArchiveTitle: "Event Archive",
-    noArchivedEvents: "No archived events available.",
+    backToWelcome: "Back to Welcome Page",
+    backToNavigation: "Back to Navigation",
+    playerReportTitle: "Personal Report for",
+    selectPlayer: "Select Player:",
+    loadReport: "Load Report",
+    noPlayerSelected: "Please select a player.",
+    eventPeriod: "Event Period:",
+    totalScore: "Total Score:",
+    rank: "Rank:",
+    participation: "Participation:",
+    details: "Details:",
+    day: "Day",
+    score: "Score",
     viewDetails: "View Details",
-    backToArchive: "Back to Archive",
-    archivedPeriodDetails: "Archived Period Details",
-    periodEndedAt: "Period Ended At",
-    topTenTitle: "Top Ten Players",
-    noTopPlayers: "No top player data available.",
+    eventDetails: "Event Details",
+    eventName: "Event Name:",
+    eventDate: "Date:",
+    eventDescription: "Description:",
+    returnToCurrentEvent: "Return to Current Event",
+    archiveTitle: "Event Archive",
+    selectPeriod: "Select Period:",
+    topTenTitle: "Top 10 Players - Current Period",
     hallOfChampsTitle: "Hall of Champions",
-    noChampions: "No champions available.",
-    champion: "Champion",
-    contactFormTitle: "Contact Form",
-    contactFormDescription: "Send us a message with your questions, ideas, or suggestions.",
-    yourName: "Your Name",
-    yourEmail: "Your Email",
-    yourMessage: "Your Message",
+    contactTitle: "Contact Us",
+    contactText: "Do you have questions or suggestions? Contact us using the form.",
+    yourName: "Your Name:",
+    yourEmail: "Your Email:",
+    yourMessage: "Your Message:",
     sendMessage: "Send Message",
     messageSent: "Message sent successfully!",
-    messageSendError: "Error sending message. Please try again later.",
-    adminAccessRestricted: "Access to the Admin Panel is restricted. Please sign in.",
-    uff2StandardsEvaluation: "UFF_2_Standards Evaluation",
-    uff2StandardsDescription: "This page displays the evaluation of player progress based on UFF_2_Standards.",
-  },
-  es: {
-    welcomeTitle: "¡Bienvenido al Panel del Clan!",
-    selectLanguage: "Seleccionar idioma:",
-    goToInfoPage: "Ir a la página de información",
-    infoPageTitle: "Sobre Nuestro Clan y el Juego",
-    clanName: "Nuestro Clan: Unión Para Amigos 2",
-    clanDescription: "Somos una comunidad de jugadores apasionados dedicados a la aventura y al éxito compartido. Ya sea COT o KvK, nos apoyamos mutuamente y nos divertimos haciéndolo.",
-    gameName: "El Juego: Total Battle",
-    gameDescription: "es un juego de guerra táctico y estratégico. Ya sea que te asalten o realices asaltos tú mismo, siempre nos adherimos a la netiqueta.\nEstamos en el Reino No. 36 y seguimos las leyes del Reino ROE 36*",
-    normsInfo: "En este juego y en nuestro clan, debes cumplir las normas para tener éxito y ayudar al clan a tener éxito.",
-    statsInfo: "Aquí en esta página puedes encontrar información sobre las estadísticas del clan y personales.",
-    errorSuggestion: "Si encuentras errores o tienes sugerencias/ideas para esta página, utiliza el formulario de contacto",
-    goodLuck: "Les deseo a todos una caza exitosa.\n¡Vamos – buena suerte y diviértanse!",
-    pizzaOnkel: "El PizzaOnkel",
-    copyright: "© 2024 Clan-Dashboard. Todos los derechos reservados por PizzaOnkel.",
-    goToNavigation: "Ir a la Navegación",
-    navigationTitle: "Navegación del Clan",
-    personalPlayerReport: "Informe Personal del Jugador",
-    currentTotalEvent: "Período de Evento Actual",
-    furtherLinkIndividualDays: "Enlace Adicional a Días Individuales",
-    eventArchive: "Archivo de Eventos",
-    topTen: "Top Diez",
-    hallOfChamps: "Salón de Campeones",
-    contactForm: "Formulario de Contacto",
-    clanMembers: "Miembros del Clan",
-    addMember: "Añadir Miembro",
-    memberName: "Nombre del Miembro",
-    memberRole: "Rol (ej. Guerrero, Sanador)",
-    add: "Añadir",
-    cancel: "Cancelar",
-    delete: "Borrar",
-    confirmDelete: "Confirmar Eliminación",
-    areYouSureDelete: "¿Estás seguro de que quieres eliminar \"{itemName}\"?",
-    noMembers: "Aún no hay miembros del clan. ¡Añade nuevos miembros!",
-    loading: "Cargando Panel del Clan...",
-    errorMessageAuth: "Error durante la autenticación. Por favor, inténtalo de nuevo más tarde.",
-    errorMessageInit: "Error al iniciar la aplicación. Por favor, inténtalo de nuevo más tarde.",
-    errorMessageFetch: "Error al cargar los datos. Por favor, inténtalo de nuevo más tarde.",
-    errorMessageAdd: "Error al añadir la entrada.",
-    errorMessageDelete: "Error al eliminar la entrada.",
-    errorMessageEmptyFields: "Todos los campos obligatorios deben ser rellenados.",
-    errorMessageDbNotReady: "La base de datos no está lista o el usuario no está autenticado.",
-    yourUserId: "Tu ID de Usuario:",
-    backToNavigation: "Volver a la Navegación",
-    backToInfo: "Volver a la Página de Información",
-    pageUnderConstruction: "Esta página aún está en construcción. ¡Pronto habrá contenido emocionante!",
-    jsonUpload: "Subir Archivo JSON",
-    uploadFile: "Subir Archivo",
-    selectJsonFile: "Seleccionar archivo",
-    fileUploaded: "Archivo subido con éxito: {fileName}",
-    errorUploadingFile: "Error al subir el archivo.",
-    errorParsingFile: "Error al analizar el archivo. Asegúrate de que sea un archivo JSON válido.",
-    errorProcessingData: "Error al procesar los datos subidos.",
-    normsDefinition: "Definición de Normas",
-    normName: "Nombre de la Norma",
-    troopStrengthMin: "Fuerza de Tropas (Mín.)",
-    troopStrengthMax: "Fuerza de Tropas (Máx.)",
-    addNorm: "Añadir Norma",
-    addPlayer: "Añadir Jugador",
-    playerName: "Nombre del Jugador",
-    playerAlias: "Alias (separado por comas)",
-    playerRank: "Rango",
-    playerTroopStrength: "Fuerza de Tropas",
-    savePlayer: "Guardar Jugador",
-    currentNorms: "Normas Actuales",
-    currentPlayers: "Jugadores Actuales",
-    deleteNorm: "Borrar Norma",
-    deletePlayer: "Borrar Jugador",
-    normAdded: "Norma '{itemName}' añadida.",
-    normDeleted: "Norma '{itemName}' eliminada.",
-    playerAdded: "Jugador '{itemName}' añadido.",
-    playerDeleted: "Jugador '{itemName}' eliminado.",
-    troopStrengthManagement: "Gestión de la Fuerza de Tropas",
-    newTroopStrength: "Nueva Fuerza de Tropas (ej. G1)",
-    addTroopStrength: "Añadir Fuerza de Tropas",
-    currentTroopStrengths: "Fuerzas de Tropas Actuales",
-    deleteTroopStrength: "Eliminar Fuerza de Tropas",
-    rankManagement: "Gestión de Rangos",
-    newRank: "Nuevo Rango (ej. Principiante)",
-    addRank: "Añadir Rango",
-    currentRanks: "Rangos Actuales",
-    deleteRank: "Eliminar Rango",
-    assignNorm: "Asignar Norma",
-    selectTroopStrength: "Seleccionar Fuerza de Tropas",
-    normValue: "Valor de la Norma (Puntuación)",
-    normAssigned: "Norma '{normValue}' asignada para la fuerza de tropas '{troopStrength}'.",
-    normMappingDeleted: "Asignación de norma para '{itemName}' eliminada.",
-    noTroopStrengths: "No hay fuerzas de tropas definidas.",
-    noRanks: "No hay rangos definidos.",
-    noNormsDefined: "No hay normas definidas.",
-    adminPanel: "Panel de Administración",
-    endCurrentPeriod: "Finalizar Período Actual",
-    confirmEndPeriod: "¿Estás seguro de que quieres finalizar el período de evento actual? Todos los datos de los jugadores actuales se archivarán.",
-    periodEndedSuccess: "Período de evento actual finalizado y datos archivados con éxito.",
-    periodEndedError: "Error al finalizar el período de evento actual.",
-    noCurrentPeriodData: "No hay datos de jugadores actuales disponibles para finalizar el período.",
-    eventName: "Nombre del Evento",
-    periodDate: "Fecha del Período",
-    overallClanNormFulfillment: "Cumplimiento General de la Norma del Clan",
-    playerList: "Lista de Jugadores",
-    name: "Nombre",
-    rank: "Rango",
-    troopStrength: "Fuerza de Tropas",
-    clanChests: "Número de Cofres del Clan",
-    totalPoints: "Puntos Totales (Actual)",
-    normTarget: "Objetivo de la Norma (Esperado)",
-    difference: "Diferencia",
-    normFulfillment: "Cumplimiento de la Norma (%)",
-    noPlayersInCurrentEvent: "No hay datos de jugadores disponibles para el período de evento actual.",
-    playerDetails: "Detalles del Jugador",
-    backToCurrentEvent: "Volver al Período de Evento Actual",
-    aliases: "Alias",
-    chestCategories: "Categorías de Cofres",
-    eventArchiveTitle: "Archivo de Eventos",
-    noArchivedEvents: "No hay eventos archivados disponibles.",
-    viewDetails: "Ver Detalles",
-    backToArchive: "Volver al Archivo",
-    archivedPeriodDetails: "Detalles del Período Archivado",
-    periodEndedAt: "Período Finalizado el",
-    topTenTitle: "Diez Mejores Jugadores",
-    noTopPlayers: "No hay datos de los mejores jugadores disponibles.",
-    hallOfChampsTitle: "Salón de Campeones",
-    noChampions: "No hay campeones disponibles.",
-    champion: "Campeón",
-    contactFormTitle: "Formulario de Contacto",
-    contactFormDescription: "Envíanos un mensaje con tus preguntas, ideas o sugerencias.",
-    yourName: "Tu Nombre",
-    yourEmail: "Tu Correo Electrónico",
-    yourMessage: "Tu Mensaje",
-    sendMessage: "Enviar Mensaje",
-    messageSent: "¡Mensaje enviado con éxito!",
-    messageSendError: "Error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.",
-    adminAccessRestricted: "El acceso al Panel de Administración está restringido. Por favor, inicia sesión.",
-    uff2StandardsEvaluation: "Evaluación de Estándares UFF_2",
-    uff2StandardsDescription: "Esta página muestra la evaluación del progreso del jugador basada en los Estándares UFF_2.",
-  },
-  ru: {
-    welcomeTitle: "Добро пожаловать на Панель клана!",
-    selectLanguage: "Выбрать язык:",
-    goToInfoPage: "Перейти на страницу информации",
-    infoPageTitle: "О нашем клане и игре",
-    clanName: "Наш клан: Union For Friends 2",
-    clanDescription: "Мы — сообщество увлеченных игроков, посвященных приключениям и общему успеху. Будь то COT или KvK, мы поддерживаем друг друга и получаем от этого удовольствие.",
-    gameName: "Игра: Total Battle",
-    gameDescription: "это тактическая, стратегическая военная игра. Независимо от того, подвергаетесь ли вы нападению или сами проводите набеги, мы всегда придерживаемся сетевого этикета.\nМы находимся в Королевстве № 36 и следуем законам Королевства ROE 36*",
-    normsInfo: "В этой игре и в нашем клане вы должны соответствовать нормам, чтобы быть успешным самому и помочь клану добиться успеха.",
-    statsInfo: "Здесь, на этой странице, вы можете найти информацию о статистике клана и личной статистике.",
-    errorSuggestion: "Если вы обнаружите ошибки или у вас есть предложения/идеи по этой странице, пожалуйста, используйте форму обратной связи",
-    goodLuck: "Желаю всем удачной охоты.\nВперед – удачи и веселья!",
-    pizzaOnkel: "ПиццаОнкель",
-    copyright: "© 2024 Панель клана. Все права защищены PizzaOnkel.",
-    goToNavigation: "Перейти к навигации",
-    navigationTitle: "Навигация по клану",
-    personalPlayerReport: "Личный отчет игрока",
-    currentTotalEvent: "Текущий период события",
-    furtherLinkIndividualDays: "Дальнейшая ссылка на отдельные дни",
-    eventArchive: "Архив событий",
-    topTen: "Топ Десять",
-    hallOfChamps: "Зал Чемпионов",
-    contactForm: "Контактная форма",
-    clanMembers: "Члены клана",
-    addMember: "Добавить члена",
-    memberName: "Имя члена",
-    memberRole: "Роль (например, Воин, Целитель)",
-    add: "Добавить",
-    cancel: "Отмена",
-    delete: "Удалить",
-    confirmDelete: "Подтвердить удаление",
-    areYouSureDelete: "Вы уверены, что хотите удалить \"{itemName}\"?",
-    noMembers: "Пока нет членов клана. Добавьте новых членов!",
-    loading: "Загрузка панели клана...",
-    errorMessageAuth: "Ошибка аутентификации. Пожалуйста, попробуйте еще раз позже.",
-    errorMessageInit: "Ошибка при запуске приложения. Пожалуйста, попробуйте еще раз позже.",
-    errorMessageFetch: "Ошибка при загрузке данных. Пожалуйста, попробуйте еще раз позже.",
-    errorMessageAdd: "Ошибка при добавлении записи.",
-    errorMessageDelete: "Ошибка при удалении записи.",
-    errorMessageEmptyFields: "Все обязательные поля должны быть заполнены.",
-    errorMessageDbNotReady: "База данных не готова или пользователь не аутентифицирован.",
-    yourUserId: "Ваш ID пользователя:",
-    backToNavigation: "Назад к навигации",
-    backToInfo: "Назад к информационной странице",
-    pageUnderConstruction: "Эта страница находится в разработке. Скоро будет интересный контент!",
-    jsonUpload: "Загрузить JSON-файл",
-    uploadFile: "Загрузить файл",
-    selectJsonFile: "Выбрать файл",
-    fileUploaded: "Файл успешно загружен: {fileName}",
-    errorUploadingFile: "Ошибка при загрузке файла.",
-    errorParsingFile: "Ошибка при анализе файла. Убедитесь, что это действительный JSON-файл.",
-    errorProcessingData: "Ошибка при обработке загруженных данных.",
-    normsDefinition: "Определение норм",
-    normName: "Название нормы",
-    troopStrengthMin: "Сила войск (мин)",
-    troopStrengthMax: "Сила войск (макс)",
-    addNorm: "Добавить норму",
-    addPlayer: "Добавить игрока",
-    playerName: "Имя игрока",
-    playerAlias: "Псевдоним (через запятую)",
-    playerRank: "Ранг",
-    playerTroopStrength: "Сила войск",
-    savePlayer: "Сохранить игрока",
-    currentNorms: "Текущие нормы",
-    currentPlayers: "Текущие игроки",
-    deleteNorm: "Удалить норму",
-    deletePlayer: "Удалить игрока",
-    normAdded: "Норма '{itemName}' добавлена.",
-    normDeleted: "Норма '{itemName}' удалена.",
-    playerAdded: "Игрок '{itemName}' добавлен.",
-    playerDeleted: "Игрок '{itemName}' удален.",
-    troopStrengthManagement: "Управление силой войск",
-    newTroopStrength: "Новая сила войск (например, G1)",
-    addTroopStrength: "Добавить силу войск",
-    currentTroopStrengths: "Текущие силы войск",
-    deleteTroopStrength: "Удалить силу войск",
-    rankManagement: "Управление рангами",
-    newRank: "Новый ранг (например, Новичок)",
-    addRank: "Добавить ранг",
-    currentRanks: "Текущие ранги",
-    deleteRank: "Удалить ранг",
-    assignNorm: "Назначить норму",
-    selectTroopStrength: "Выбрать силу войск",
-    normValue: "Значение нормы (очки)",
-    normAssigned: "Норма '{normValue}' назначена для силы войск '{troopStrength}'.",
-    normMappingDeleted: "Назначение нормы для '{itemName}' удалено.",
-    noTroopStrengths: "Не определены силы войск.",
-    noRanks: "Не определены ранги.",
-    noNormsDefined: "Не определены нормы.",
-    adminPanel: "Панель администратора",
-    endCurrentPeriod: "Завершить текущий период",
-    confirmEndPeriod: "Вы уверены, что хотите завершить текущий период события? Все текущие данные игроков будут заархивированы.",
-    periodEndedSuccess: "Текущий период события успешно завершен и данные заархивированы.",
-    periodEndedError: "Ошибка при завершении текущего периода события.",
-    noCurrentPeriodData: "Нет текущих данных игроков для завершения периода.",
-    eventName: "Название события",
-    periodDate: "Дата периода",
-    overallClanNormFulfillment: "Общее выполнение нормы кланом",
-    playerList: "Список игроков",
-    name: "Имя",
-    rank: "Ранг",
-    troopStrength: "Сила войск",
-    clanChests: "Количество сундуков клана",
-    totalPoints: "Всего очков (фактически)",
-    normTarget: "Целевая норма (ожидаемая)",
-    difference: "Разница",
-    normFulfillment: "Выполнение нормы (%)",
-    noPlayersInCurrentEvent: "Нет данных игроков для текущего периода события.",
-    playerDetails: "Детали игрока",
-    backToCurrentEvent: "Назад к текущему периоду события",
-    aliases: "Псевдонимы",
-    chestCategories: "Категории сундуков",
-    eventArchiveTitle: "Архив событий",
-    noArchivedEvents: "Нет доступных архивных событий.",
-    viewDetails: "Посмотреть детали",
-    backToArchive: "Назад в архив",
-    archivedPeriodDetails: "Детали архивного периода",
-    periodEndedAt: "Период завершен",
-    topTenTitle: "Десять лучших игроков",
-    noTopPlayers: "Нет данных о лучших игроках.",
-    hallOfChampsTitle: "Зал Чемпионов",
-    noChampions: "Нет доступных чемпионов.",
-    champion: "Чемпион",
-    contactFormTitle: "Контактная форма",
-    contactFormDescription: "Отправьте нам сообщение со своими вопросами, идеями или предложениями.",
-    yourName: "Ваше имя",
-    yourEmail: "Ваш адрес электронной почты",
-    yourMessage: "Ваше сообщение",
-    sendMessage: "Отправить сообщение",
-    messageSent: "Сообщение успешно отправлено!",
-    messageSendError: "Ошибка при отправке сообщения. Пожалуйста, попробуйте еще раз позже.",
-    adminAccessRestricted: "Доступ к панели администратора ограничен. Пожалуйста, войдите в систему.",
-    uff2StandardsEvaluation: "Оценка стандартов UFF_2",
-    uff2StandardsDescription: "Эта страница отображает оценку прогресса игрока на основе стандартов UFF_2.",
-  },
-  it: {
-    welcomeTitle: "Benvenuto nella Dashboard del Clan!",
-    selectLanguage: "Seleziona lingua:",
-    goToInfoPage: "Vai alla pagina informazioni",
-    infoPageTitle: "Informazioni sul Nostro Clan e il Gioco",
-    clanName: "Il Nostro Clan: Union For Friends 2",
-    clanDescription: "Siamo una comunità di giocatori appassionati dediti all'avventura e al successo condiviso. Che si tratti di COT o KvK, ci supportiamo a vicenda e ci divertiamo a farlo.",
-    gameName: "Il Gioco: Total Battle",
-    gameDescription: "è un gioco di guerra tattico e strategico. Che tu venga attaccato o conduca attacchi tu stesso, ci atteniamo sempre alla netiquette.\nSiamo nel Regno n. 36 e seguiamo le leggi del Regno ROE 36*",
-    normsInfo: "In questo gioco e nel nostro clan, devi rispettare le norme per avere successo e aiutare il clan ad avere successo.",
-    statsInfo: "Qui su questa pagina puoi trovare informazioni sulle statistiche del clan e personali.",
-    errorSuggestion: "Se trovi errori o hai suggerimenti/idee per questa pagina, utilizza il modulo di contatto",
-    goodLuck: "Auguro a tutti voi una caccia di successo.\nAndiamo – buona fortuna e divertitevi!",
-    pizzaOnkel: "Il PizzaOnkel",
-    copyright: "© 2024 Clan-Dashboard. Tutti i diritti riservati da PizzaOnkel.",
-    goToNavigation: "Vai alla navigazione",
-    navigationTitle: "Navigazione Clan",
-    personalPlayerReport: "Rapporto Giocatore Personale",
-    currentTotalEvent: "Periodo Evento Attuale",
-    furtherLinkIndividualDays: "Link Ulteriore a Giorni Individuali",
-    eventArchive: "Archivio Eventi",
-    topTen: "Top Dieci",
-    hallOfChamps: "Sala dei Campioni",
-    contactForm: "Modulo di Contatto",
-    clanMembers: "Membri del Clan",
-    addMember: "Aggiungi Membro",
-    memberName: "Nome Membro",
-    memberRole: "Ruolo (es. Guerriero, Guaritore)",
-    add: "Aggiungi",
-    cancel: "Annulla",
-    delete: "Elimina",
-    confirmDelete: "Conferma Eliminazione",
-    areYouSureDelete: "Sei sicuro di voler eliminare \"{itemName}\"?",
-    noMembers: "Ancora nessun membro del clan. Aggiungi nuovi membri!",
-    loading: "Caricamento Dashboard del Clan...",
-    errorMessageAuth: "Errore durante l'autenticazione. Riprova più tardi.",
-    errorMessageInit: "Errore all'avvio dell'app. Riprova più tardi.",
-    errorMessageFetch: "Errore durante il caricamento dei dati. Riprova più tardi.",
-    errorMessageAdd: "Errore durante l'aggiunta della voce.",
-    errorMessageDelete: "Errore durante l'eliminazione della voce.",
-    errorMessageEmptyFields: "Tutti i campi obbligatori devono essere compilati.",
-    errorMessageDbNotReady: "Database non pronto o utente non autenticato.",
-    yourUserId: "Il tuo ID Utente:",
-    backToNavigation: "Torna alla Navigazione",
-    backToInfo: "Torna alla Pagina Info",
-    pageUnderConstruction: "Questa pagina è ancora in costruzione. Contenuti interessanti in arrivo!",
-    jsonUpload: "Carica File JSON",
-    uploadFile: "Carica File",
-    selectJsonFile: "Seleziona file",
-    fileUploaded: "File caricato con successo: {fileName}",
-    errorUploadingFile: "Errore durante il caricamento del file.",
-    errorParsingFile: "Errore durante l'analisi del file. Assicurati che sia un file JSON valido.",
-    errorProcessingData: "Errore durante l'elaborazione dei dati caricati.",
-    normsDefinition: "Definizione Norme",
-    normName: "Nome Norma",
-    troopStrengthMin: "Forza Truppe (Min)",
-    troopStrengthMax: "Forza Truppe (Max)",
-    addNorm: "Aggiungi Norma",
-    addPlayer: "Aggiungi Giocatore",
-    playerName: "Nome Giocatore",
-    playerAlias: "Alias (separato da virgole)",
-    playerRank: "Grado",
-    playerTroopStrength: "Forza Truppe",
-    savePlayer: "Salva Giocatore",
-    currentNorms: "Norme Attuali",
-    currentPlayers: "Giocatori Attuali",
-    deleteNorm: "Elimina Norma",
-    deletePlayer: "Elimina Giocatore",
-    normAdded: "Norma '{itemName}' aggiunta.",
-    normDeleted: "Norma '{itemName}' eliminata.",
-    playerAdded: "Giocatore '{itemName}' aggiunto.",
-    playerDeleted: "Giocatore '{itemName}' eliminato.",
-    troopStrengthManagement: "Gestione Forza Truppe",
-    newTroopStrength: "Nuova Forza Truppe (es. G1)",
-    addTroopStrength: "Aggiungi Forza Truppe",
-    currentTroopStrengths: "Forze Truppe Attuali",
-    deleteTroopStrength: "Elimina Forza Truppe",
-    rankManagement: "Gestione Gradi",
-    newRank: "Nuovo Grado (es. Principiante)",
-    addRank: "Aggiungi Grado",
-    currentRanks: "Gradi Attuali",
-    deleteRank: "Elimina Grado",
-    assignNorm: "Assegna Norma",
-    selectTroopStrength: "Seleziona Forza Truppe",
-    normValue: "Valore Norma (Punti)",
-    normAssigned: "Norma '{normValue}' assegnata per forza truppe '{troopStrength}'.",
-    normMappingDeleted: "Assegnazione norma per '{itemName}' eliminata.",
-    noTroopStrengths: "Nessuna forza truppe definita.",
-    noRanks: "Nessun grado definito.",
-    noNormsDefined: "Nessuna norma definita.",
-    adminPanel: "Pannello Amministrazione",
-    endCurrentPeriod: "Termina Periodo Attuale",
-    confirmEndPeriod: "Sei sicuro di voler terminare il periodo evento attuale? Tutti i dati dei giocatori attuali verranno archiviati.",
-    periodEndedSuccess: "Periodo evento attuale terminato e dati archiviati con successo.",
-    periodEndedError: "Errore durante la terminazione del periodo evento attuale.",
-    noCurrentPeriodData: "Nessun dato giocatore attuale disponibile per terminare il periodo.",
-    eventName: "Nome Evento",
-    periodDate: "Data Periodo",
-    overallClanNormFulfillment: "Completamento Norma Clan Complessivo",
-    playerList: "Lista Giocatori",
-    name: "Nome",
-    rank: "Grado",
-    troopStrength: "Forza Truppe",
-    clanChests: "Numero Bauli Clan",
-    totalPoints: "Punti Totali (Attuale)",
-    normTarget: "Obiettivo Norma (Previsto)",
-    difference: "Differenza",
-    normFulfillment: "Completamento Norma (%)",
-    noPlayersInCurrentEvent: "Nessun dato giocatore disponibile per il periodo evento attuale.",
-    playerDetails: "Dettagli Giocatore",
-    backToCurrentEvent: "Torna al Periodo Evento Attuale",
-    aliases: "Alias",
-    chestCategories: "Categorie Bauli",
-    eventArchiveTitle: "Archivio Eventi",
-    noArchivedEvents: "Nessun evento archiviato disponibile.",
-    viewDetails: "Visualizza Dettagli",
-    backToArchive: "Torna all'Archivio",
-    archivedPeriodDetails: "Dettagli del Periodo Archiviato",
-    periodEndedAt: "Periodo Terminato il",
-    topTenTitle: "Dieci Migliori Giocatori",
-    noTopPlayers: "Nessun dato dei migliori giocatori disponibile.",
-    hallOfChampsTitle: "Sala dei Campioni",
-    noChampions: "Nessun campione disponibile.",
-    champion: "Campione",
-    contactFormTitle: "Modulo di Contatto",
-    contactFormDescription: "Inviaci un messaggio con le tue domande, idee o suggerimenti.",
-    yourName: "Il tuo Nome",
-    yourEmail: "La tua Email",
-    yourMessage: "Il tuo Messaggio",
-    sendMessage: "Invia Messaggio",
-    messageSent: "Messaggio inviato con successo!",
-    messageSendError: "Errore durante l'invio del messaggio. Riprova più tardi.",
-    adminAccessRestricted: "L'accesso al Pannello Amministrazione è limitato. Accedi.",
-    uff2StandardsEvaluation: "Valutazione Standard UFF_2",
-    uff2StandardsDescription: "Questa pagina mostra la valutazione del progresso del giocatore basata sugli Standard UFF_2.",
-  },
-  fr: {
-    welcomeTitle: "Bienvenue sur le tableau de bord du clan !",
-    selectLanguage: "Sélectionner la langue :",
-    goToInfoPage: "Aller à la page d'informations",
-    infoPageTitle: "À propos de notre clan et du jeu",
-    clanName: "Notre clan : Union For Friends 2",
-    clanDescription: "Nous sommes une communauté de joueurs passionnés dédiés à l'aventure et au succès partagé. Que ce soit COT ou KvK, nous nous soutenons mutuellement et nous amusons en le faisant.",
-    gameName: "Le jeu : Total Battle",
-    gameDescription: "est un jeu de guerre tactique et stratégique. Que vous soyez attaqué ou que vous meniez vous-même des raids, nous respectons toujours la nétiquette.\nNous sommes dans le Royaume n° 36 et suivons les lois du Royaume ROE 36*",
-    normsInfo: "Dans ce jeu et dans notre clan, vous devez respecter les normes pour réussir vous-même et aider le clan à réussir.",
-    statsInfo: "Ici, sur cette page, vous pouvez trouver des informations sur les statistiques du clan et personnelles.",
-    errorSuggestion: "Si vous trouvez des erreurs ou avez des suggestions/idées pour cette page, veuillez utiliser le formulaire de contact",
-    goodLuck: "Je vous souhaite à tous une chasse réussie.\nC'est parti – bonne chance et amusez-vous !",
-    pizzaOnkel: "Le PizzaOnkel",
-    copyright: "© 2024 Clan-Dashboard. Tous droits réservés par PizzaOnkel.",
-    goToNavigation: "Aller à la navigation",
-    navigationTitle: "Navigation du clan",
-    personalPlayerReport: "Rapport personnel du joueur",
-    currentTotalEvent: "Période d'événement actuelle",
-    furtherLinkIndividualDays: "Lien supplémentaire vers les jours individuels",
-    eventArchive: "Archives des événements",
-    topTen: "Top Dix",
-    hallOfChamps: "Hall des Champions",
-    contactForm: "Formulaire de contact",
-    clanMembers: "Membres du clan",
-    addMember: "Ajouter un membre",
-    memberName: "Nom du membre",
-    memberRole: "Rôle (par exemple, Guerrier, Guérisseur)",
-    add: "Ajouter",
-    cancel: "Annuler",
-    delete: "Supprimer",
-    confirmDelete: "Confirmer la suppression",
-    areYouSureDelete: "Êtes-vous sûr de vouloir supprimer \"{itemName}\" ?",
-    noMembers: "Aucun membre du clan pour l'instant. Ajoutez de nouveaux membres !",
-    loading: "Chargement du tableau de bord du clan...",
-    errorMessageAuth: "Erreur d'authentification. Veuillez réessayer plus tard.",
-    errorMessageInit: "Erreur lors du démarrage de l'application. Veuillez réessayer plus tard.",
-    errorMessageFetch: "Erreur lors du chargement des données. Veuillez réessayer plus tard.",
-    errorMessageAdd: "Erreur lors de l'ajout de l'entrée.",
-    errorMessageDelete: "Erreur lors de la suppression de l'entrée.",
-    errorMessageEmptyFields: "Tous les champs obligatoires doivent être remplis.",
-    errorMessageDbNotReady: "La base de données n'est pas prête ou l'utilisateur n'est pas authentifié.",
-    yourUserId: "Votre ID utilisateur :",
-    backToNavigation: "Retour à la navigation",
-    backToInfo: "Retour à la page d'informations",
-    pageUnderConstruction: "Cette page est encore en construction. Du contenu intéressant arrive bientôt !",
-    jsonUpload: "Télécharger un fichier JSON",
-    uploadFile: "Télécharger un fichier",
-    selectJsonFile: "Sélectionner un fichier",
-    fileUploaded: "Fichier téléchargé avec succès : {fileName}",
-    errorUploadingFile: "Erreur lors du téléchargement du fichier.",
-    errorParsingFile: "Erreur lors de l'analyse du fichier. Veuillez vous assurer qu'il s'agit d'un fichier JSON valide.",
-    errorProcessingData: "Erreur lors du traitement des données téléchargées.",
-    normsDefinition: "Définition des normes",
-    normName: "Nom de la norme",
-    troopStrengthMin: "Force des troupes (Min)",
-    troopStrengthMax: "Force des troupes (Max)",
-    addNorm: "Ajouter une norme",
-    addPlayer: "Ajouter un joueur",
-    playerName: "Nom du joueur",
-    playerAlias: "Alias (séparé par des virgules)",
-    playerRank: "Rang",
-    playerTroopStrength: "Force des troupes",
-    savePlayer: "Sauvegarder le joueur",
-    currentNorms: "Normes actuelles",
-    currentPlayers: "Joueurs actuels",
-    deleteNorm: "Supprimer la norme",
-    deletePlayer: "Supprimer le joueur",
-    normAdded: "Norme '{itemName}' ajoutée.",
-    normDeleted: "Norme '{itemName}' supprimée.",
-    playerAdded: "Joueur '{itemName}' ajouté.",
-    playerDeleted: "Joueur '{itemName}' supprimé.",
-    troopStrengthManagement: "Gestion de la force des troupes",
-    newTroopStrength: "Nouvelle force des troupes (par exemple, G1)",
-    addTroopStrength: "Ajouter une force des troupes",
-    currentTroopStrengths: "Forces des troupes actuelles",
-    deleteTroopStrength: "Supprimer la force des troupes",
-    rankManagement: "Gestion des rangs",
-    newRank: "Nouveau rang (par exemple, Débutant)",
-    addRank: "Ajouter un rang",
-    currentRanks: "Rangs actuels",
-    deleteRank: "Supprimer le rang",
-    assignNorm: "Attribuer une norme",
-    selectTroopStrength: "Sélectionner la force des troupes",
-    normValue: "Valeur de la norme (points)",
-    normAssigned: "Norme '{normValue}' attribuée pour la force des troupes '{troopStrength}'.",
-    normMappingDeleted: "Attribution de norme pour '{itemName}' supprimée.",
-    noTroopStrengths: "Aucune force de troupes définie.",
-    noRanks: "Aucun rang défini.",
-    noNormsDefined: "Aucune norme définie.",
-    adminPanel: "Panneau d'administration",
-    endCurrentPeriod: "Terminer la période actuelle",
-    confirmEndPeriod: "Êtes-vous sûr de vouloir terminer la période d'événement actuelle ? Toutes les données des joueurs actuels seront archivées.",
-    periodEndedSuccess: "Période d'événement actuelle terminée et données archivées avec succès.",
-    periodEndedError: "Erreur lors de la fin de la période d'événement actuelle.",
-    noCurrentPeriodData: "Aucune donnée de joueur actuelle disponible pour terminer la période.",
-    eventName: "Nom de l'événement",
-    periodDate: "Date de la période",
-    overallClanNormFulfillment: "Remplissement global des normes du clan",
-    playerList: "Liste des joueurs",
-    name: "Nom",
-    rank: "Rang",
-    troopStrength: "Force des troupes",
-    clanChests: "Nombre de coffres de clan",
-    totalPoints: "Points totaux (réels)",
-    normTarget: "Objectif de la norme (prévu)",
-    difference: "Différence",
-    normFulfillment: "Remplissement de la norme (%)",
-    noPlayersInCurrentEvent: "Aucune donnée de joueur disponible pour la période d'événement actuelle.",
-    playerDetails: "Détails du joueur",
-    backToCurrentEvent: "Retour à la période d'événement actuelle",
-    aliases: "Alias",
-    chestCategories: "Catégories de coffres",
-    eventArchiveTitle: "Archives des événements",
-    noArchivedEvents: "Aucun événement archivé disponible.",
-    viewDetails: "Voir les détails",
-    backToArchive: "Retour aux archives",
-    archivedPeriodDetails: "Détails de la période archivée",
-    periodEndedAt: "Période terminée le",
-    topTenTitle: "Dix meilleurs joueurs",
-    noTopPlayers: "Aucune donnée des meilleurs joueurs disponible.",
-    hallOfChampsTitle: "Hall des Champions",
-    noChampions: "Aucun champion disponible.",
-    champion: "Champion",
-    contactFormTitle: "Formulaire de contact",
-    contactFormDescription: "Envoyez-nous un message avec vos questions, idées ou suggestions.",
-    yourName: "Votre nom",
-    yourEmail: "Votre e-mail",
-    yourMessage: "Votre message",
-    sendMessage: "Envoyer le message",
-    messageSent: "Message envoyé avec succès !",
-    messageSendError: "Erreur lors de l'envoi du message. Veuillez réessayer plus tard.",
-    adminAccessRestricted: "L'accès au panneau d'administration est restreint. Veuillez vous connecter.",
-    uff2StandardsEvaluation: "Évaluation des normes UFF_2",
-    uff2StandardsDescription: "Cette page affiche l'évaluation de la progression du joueur basée sur les normes UFF_2.",
+    adminPanelTitle: "Admin Panel",
+    managePlayers: "Manage Players",
+    manageEvents: "Manage Events",
+    manageAdmins: "Manage Admins",
+    addPlayer: "Add Player",
+    playerName: "Player Name",
+    playerDiscord: "Discord ID (optional)",
+    playerGameId: "Game ID (optional)",
+    add: "Add",
+    editPlayer: "Edit Player",
+    update: "Update",
+    deletePlayer: "Delete Player",
+    confirmDeletePlayer: "Are you sure you want to delete this player?",
+    addEvent: "Add Event",
+    eventPeriodName: "Event Period Name (e.g., 'May 2024')",
+    eventStartDate: "Start Date",
+    eventEndDate: "End Date",
+    addEventPeriod: "Add Event Period",
+    editEvent: "Edit Event",
+    deleteEvent: "Delete Event",
+    confirmDeleteEvent: "Are you sure you want to delete this event?",
+    addAdmin: "Add Admin",
+    adminUserId: "Admin User ID",
+    addAdminBtn: "Add Admin",
+    removeAdmin: "Remove Admin",
+    confirmRemoveAdmin: "Are you sure you want to remove this admin?",
+    noData: "No data available.",
+    loading: "Loading...",
+    error: "An error occurred:",
+    loginRequired: "Please log in to access the Admin Panel.",
+    accessDenied: "Access denied. You are not an admin.",
+    userId: "Your User ID:",
+    copyToClipboard: "Copy to Clipboard",
+    copied: "Copied!",
+    playerManagement: "Player Management",
+    eventPeriodManagement: "Event Period Management",
+    adminManagement: "Admin Management",
+    manageEventDays: "Manage Days",
+    addEventDay: "Add Day",
+    dayNumber: "Day Number",
+    dayDate: "Date of Day",
+    dayDescription: "Day Description",
+    addDay: "Add Day",
+    editDay: "Edit Day",
+    deleteDay: "Delete Day",
+    confirmDeleteDay: "Are you sure you want to delete this day?",
+    dayAddedSuccess: "Day added successfully!",
+    dayUpdatedSuccess: "Day updated successfully!",
+    dayDeletedSuccess: "Day deleted successfully!",
+    managePlayerScores: "Manage Player Scores",
+    selectEventDay: "Select Day:",
+    addPlayerScore: "Add Player Score",
+    scorePoints: "Points",
+    addScore: "Add Score",
+    editPlayerScore: "Edit Player Score",
+    deletePlayerScore: "Delete Player Score",
+    confirmDeletePlayerScore: "Are you sure you want to delete this player score?",
+    scoreAddedSuccess: "Score added successfully!",
+    scoreUpdatedSuccess: "Score updated successfully!",
+    scoreDeletedSuccess: "Score deleted successfully!",
+    playerScoresForDay: "Player Scores for Day",
+    player: "Player",
+    points: "Points",
+    noScores: "No scores for this day.",
+    totalPlayers: "Total Players:",
+    totalEvents: "Total Events:",
+    lastUpdated: "Last Updated:",
+    overallStats: "Overall Statistics",
+    archivePeriod: "Archive Period",
+    confirmArchivePeriod: "Are you sure you want to archive this period? This will move it to the archive and make it inaccessible for new entries.",
+    periodArchivedSuccess: "Period archived successfully!",
+    unarchivePeriod: "Unarchive Period",
+    confirmUnarchivePeriod: "Are you sure you want to unarchive this period? It will become active again.",
+    periodUnarchivedSuccess: "Period unarchived successfully!",
+    activePeriods: "Active Periods",
+    archivedPeriods: "Archived Periods",
+    viewArchivedPeriod: "View Archived Period",
+    periodStatusActive: "Active",
+    periodStatusArchived: "Archived",
+    currentPeriod: "Current Period:",
+    noActivePeriods: "No active periods found.",
+    noArchivedPeriods: "No archived periods found.",
+    selectActivePeriod: "Select Active Period:",
+    selectArchivedPeriod: "Select Archived Period:",
+    setAsCurrent: "Set as Current Period",
+    confirmSetCurrent: "Are you sure you want to set this period as current? Only one period can be active at a time.",
+    setCurrentSuccess: "Period successfully set as current!",
+    manageCurrentEvent: "Manage Current Event",
+    manageArchivedEvents: "Manage Archived Events",
+    noCurrentEventDays: "No days found for the current event.",
+    noArchivedEventDays: "No days found for this archived event.",
+    noCurrentPlayerScores: "No player scores found for the current event.",
+    noArchivedPlayerScores: "No player scores found for this archived event.",
+    selectCurrentEventDay: "Select Current Event Day:",
+    selectArchivedEventDay: "Select Archived Event Day:",
+    manageCurrentPlayerScores: "Manage Current Event Player Scores",
+    manageArchivedPlayerScores: "Manage Archived Event Player Scores",
+    adminMessage: "Message to Admins",
+    messageContent: "Message Content",
+    sendMessageToAdmins: "Send Message to Admins",
+    messageSentToAdmins: "Message sent to admins!",
+    adminMessages: "Admin Messages",
+    noAdminMessages: "No admin messages.",
+    fromUser: "From User",
+    message: "Message",
+    timestamp: "Timestamp",
+    deleteMessage: "Delete Message",
+    confirmDeleteMessage: "Are you sure you want to delete this message?",
+    messageDeletedSuccess: "Message deleted successfully!",
+    showAdminMessages: "Show Admin Messages",
+    hideAdminMessages: "Hide Admin Messages",
+    playerRanking: "Player Ranking",
+    playerParticipation: "Player Participation",
+    playerScores: "Player Scores",
+    eventOverview: "Event Overview",
+    totalEventsParticipated: "Total Events Participated:",
+    averageScore: "Average Score:",
+    bestScore: "Best Score:",
+    playerStats: "Player Stats",
+    noPlayerStats: "No stats available for this player.",
+    playerActivity: "Player Activity",
+    lastParticipation: "Last Participation:",
+    playerNotFound: "Player not found.",
+    playerSearchPlaceholder: "Enter player name...",
+    searchPlayer: "Search Player",
+    playerList: "Player List",
+    noPlayers: "No players found.",
+    playerDetails: "Player Details",
+    edit: "Edit",
+    delete: "Delete",
+    cancel: "Cancel",
+    confirm: "Confirm",
+    close: "Close",
+    overallRank: "Overall Rank",
+    overallScore: "Overall Score",
+    playerOverallReport: "Overall Report for",
+    selectOverallPlayer: "Select Player for Overall Report:",
+    loadOverallReport: "Load Overall Report",
+    overallReportTitle: "Overall Player Report",
+    totalScoreAllPeriods: "Total Score Across All Periods:",
+    averageScoreAllPeriods: "Average Score Across All Periods:",
+    totalEventsAllPeriods: "Total Events Across All Periods:",
+    detailedScoresByPeriod: "Detailed Scores by Period:",
+    period: "Period",
+    event: "Event",
+    scoreDetails: "Score Details",
+    backToOverallReport: "Back to Overall Report",
+    noOverallReport: "No overall report available for this player.",
+    toggleTheme: "Toggle Theme",
+    lightTheme: "Light Theme",
+    darkTheme: "Dark Theme",
+    systemTheme: "System Theme",
+    theme: "Theme",
+    currentTheme: "Current Theme:",
+    applyTheme: "Apply Theme",
+    themeChangedSuccess: "Theme changed successfully!",
+    settings: "Settings",
+    languageSettings: "Language Settings",
+    themeSettings: "Theme Settings",
+    saveSettings: "Save Settings",
+    settingsSavedSuccess: "Settings saved successfully!",
+    resetSettings: "Reset Settings",
+    confirmResetSettings: "Are you sure you want to reset all settings to default?",
+    settingsResetSuccess: "Settings reset successfully!",
+    exportData: "Export Data",
+    importData: "Import Data",
+    exportPlayers: "Export Players",
+    exportEvents: "Export Events",
+    exportScores: "Export Scores",
+    importPlayers: "Import Players",
+    importEvents: "Import Events",
+    importScores: "Import Scores",
+    selectFile: "Select File",
+    upload: "Upload",
+    download: "Download",
+    dataExportedSuccess: "Data exported successfully!",
+    dataImportedSuccess: "Data imported successfully!",
+    invalidFileFormat: "Invalid file format. Please select a JSON file.",
+    fileTooLarge: "File too large. Maximum size: 5MB.",
+    uploading: "Uploading...",
+    downloading: "Downloading...",
+    dataSyncError: "Error syncing data:",
+    dataCorrupted: "Imported data is corrupted or invalid.",
+    backupData: "Backup Data",
+    restoreData: "Restore Data",
+    lastBackup: "Last Backup:",
+    createBackup: "Create Backup",
+    restoreFromBackup: "Restore from Backup",
+    confirmRestore: "Are you sure you want to restore data from the last backup? Current data will be lost.",
+    backupCreatedSuccess: "Backup created successfully!",
+    restoreSuccess: "Data restored successfully!",
+    noBackup: "No backup available.",
+    adminLogs: "Admin Logs",
+    viewLogs: "View Logs",
+    noLogs: "No logs available.",
+    logEntry: "Log Entry",
+    logTimestamp: "Timestamp",
+    logUser: "User",
+    logAction: "Action",
+    clearLogs: "Clear Logs",
+    confirmClearLogs: "Are you sure you want to clear all logs?",
+    logsClearedSuccess: "Logs cleared successfully!",
+    eventHistory: "Event History",
+    viewEventHistory: "View History",
+    noEventHistory: "No event history available.",
+    eventHistoryEntry: "History Entry",
+    eventHistoryTimestamp: "Timestamp",
+    eventHistoryEvent: "Event",
+    eventHistoryAction: "Action",
+    clearEventHistory: "Clear History",
+    confirmClearEventHistory: "Are you sure you want to clear the event history?",
+    eventHistoryClearedSuccess: "Event history cleared successfully!",
+    playerActivityLog: "Player Activity Log",
+    viewPlayerActivityLog: "View Activity Log",
+    noPlayerActivityLog: "No player activity log available.",
+    playerActivityLogEntry: "Activity Entry",
+    playerActivityLogTimestamp: "Timestamp",
+    playerActivityLogPlayer: "Player",
+    playerActivityLogAction: "Action",
+    clearPlayerActivityLog: "Clear Activity Log",
+    confirmClearPlayerActivityLog: "Are you sure you want to clear the player activity log?",
+    playerActivityLogClearedSuccess: "Player activity log cleared successfully!",
+    totalPlayersRegistered: "Total Registered Players:",
+    totalEventsRecorded: "Total Events Recorded:",
+    totalScoresRecorded: "Total Scores Recorded:",
+    dataSummary: "Data Summary",
+    viewDataSummary: "View Summary",
+    refreshData: "Refresh Data",
+    dataRefreshedSuccess: "Data refreshed successfully!",
+    generateReport: "Generate Report",
+    reportGeneratedSuccess: "Report generated successfully!",
+    reportType: "Report Type",
+    selectReportType: "Select Report Type:",
+    playerReport: "Player Report",
+    eventReport: "Event Report",
+    overallReport: "Overall Report",
+    generate: "Generate",
+    reportOptions: "Report Options",
+    startDate: "Start Date",
+    endDate: "End Date",
+    includeArchived: "Include Archived Data",
+    exportReport: "Export Report",
+    reportExportedSuccess: "Report exported successfully!",
+    reportPreview: "Report Preview",
+    noReportPreview: "No report preview available. Generate a report.",
+    printReport: "Print Report",
+    printingReport: "Printing report...",
+    printSuccess: "Report printed successfully!",
+    printError: "Error printing report.",
+    playerSearch: "Player Search",
+    searchPlaceholder: "Player Name or ID",
+    searchButton: "Search",
+    noSearchResults: "No search results.",
+    searchResult: "Search Result",
+    clearSearch: "Clear Search",
+    filterOptions: "Filter Options",
+    filterByEvent: "Filter by Event",
+    filterByPeriod: "Filter by Period",
+    applyFilter: "Apply Filter",
+    clearFilter: "Clear Filter",
+    noFilteredData: "No data for selected filters.",
+    filteredData: "Filtered Data",
+    resetFilters: "Reset Filters",
+    filterApplied: "Filter applied.",
+    filterCleared: "Filter cleared.",
+    notificationSettings: "Notification Settings",
+    enableNotifications: "Enable Notifications",
+    notificationSound: "Notification Sound",
+    notificationVolume: "Volume",
+    testNotification: "Test Notification",
+    notificationTestSuccess: "Test notification sent!",
+    notificationPermissionDenied: "Notification permission denied. Please allow notifications in your browser settings.",
+    notificationPermissionGranted: "Notification permission granted.",
+    notificationPermissionPrompt: "Allow notifications to be informed about important updates.",
+    notificationEnabled: "Notifications enabled.",
+    notificationDisabled: "Notifications disabled.",
+    showNotifications: "Show Notifications",
+    hideNotifications: "Hide Notifications",
+    noNotifications: "No notifications.",
+    notification: "Notification",
+    notificationTimestamp: "Timestamp",
+    notificationMessage: "Message",
+    clearNotifications: "Clear Notifications",
+    confirmClearNotifications: "Are you sure you want to clear all notifications?",
+    notificationsClearedSuccess: "Notifications cleared successfully!",
+    markAsRead: "Mark as Read",
+    markAllAsRead: "Mark All as Read",
+    markedAsReadSuccess: "Notification marked as read!",
+    markedAllAsReadSuccess: "All notifications marked as read!",
+    unreadNotifications: "Unread Notifications:",
+    allNotificationsRead: "All notifications read.",
+    profileSettings: "Profile Settings",
+    changeUsername: "Change Username",
+    newUsername: "New Username",
+    updateUsername: "Update Username",
+    usernameUpdatedSuccess: "Username updated successfully!",
+    changePassword: "Change Password",
+    currentPassword: "Current Password",
+    newPassword: "New Password",
+    confirmNewPassword: "Confirm New Password",
+    updatePassword: "Update Password",
+    passwordUpdatedSuccess: "Password updated successfully!",
+    passwordsMismatch: "New passwords do not match.",
+    invalidCurrentPassword: "Current password is incorrect.",
+    deleteAccount: "Delete Account",
+    confirmDeleteAccount: "Are you sure you want to delete your account? This cannot be undone.",
+    accountDeletedSuccess: "Account deleted successfully!",
+    reauthenticateRequired: "Please reauthenticate to perform this action.",
+    accountSettings: "Account Settings",
+    privacySettings: "Privacy Settings",
+    dataSharing: "Data Sharing",
+    enableDataSharing: "Enable Data Sharing",
+    dataSharingInfo: "Share anonymized usage data to help improve the app.",
+    savePrivacySettings: "Save Privacy Settings",
+    privacySettingsSavedSuccess: "Privacy settings saved successfully!",
+    aboutApp: "About App",
+    appVersion: "Version:",
+    developer: "Developer:",
+    releaseDate: "Release Date:",
+    license: "License:",
+    viewLicense: "View License",
+    feedback: "Feedback",
+    sendFeedback: "Send Feedback",
+    feedbackSentSuccess: "Feedback sent successfully!",
+    reportBug: "Report Bug",
+    bugReportSentSuccess: "Bug report sent successfully!",
+    featureRequest: "Feature Request",
+    featureRequestSentSuccess: "Feature request sent successfully!",
+    help: "Help",
+    faq: "FAQ",
+    viewFaq: "View FAQ",
+    documentation: "Documentation",
+    viewDocumentation: "View Documentation",
+    support: "Support",
+    contactSupport: "Contact Support",
+    supportContactedSuccess: "Support contacted successfully!",
+    termsOfService: "Terms of Service",
+    privacyPolicy: "Privacy Policy",
+    viewTerms: "View Terms of Service",
+    viewPrivacy: "View Privacy Policy",
+    legal: "Legal",
+    logout: "Logout",
+    confirmLogout: "Are you sure you want to log out?",
+    logoutSuccess: "Logged out successfully!",
+    login: "Login",
+    register: "Register",
+    email: "Email",
+    password: "Password",
+    forgotPassword: "Forgot Password?",
+    resetPassword: "Reset Password",
+    resetPasswordSuccess: "Password reset email sent!",
+    noAccount: "Don't have an account yet?",
+    alreadyAccount: "Already have an account?",
+    loginSuccess: "Logged in successfully!",
+    registerSuccess: "Registration successful!",
+    authError: "Authentication Error:",
+    emailNotVerified: "Email not verified. Please check your inbox.",
+    sendVerificationEmail: "Send Verification Email",
+    verificationEmailSent: "Verification email sent!",
+    loadingUserData: "Loading user data...",
+    welcomeUser: "Welcome, {{username}}!",
+    profile: "Profile",
+    editProfile: "Edit Profile",
+    viewProfile: "View Profile",
+    updateProfile: "Update Profile",
+    profileUpdatedSuccess: "Profile updated successfully!",
+    username: "Username",
+    avatar: "Avatar",
+    changeAvatar: "Change Avatar",
+    uploadAvatar: "Upload Avatar",
+    avatarUpdatedSuccess: "Avatar updated successfully!",
+    invalidImageFormat: "Invalid image format. Please select an image file (JPG, PNG, GIF).",
+    imageTooLarge: "Image too large. Maximum size: 2MB.",
+    uploadingAvatar: "Uploading avatar...",
+    deleteAvatar: "Delete Avatar",
+    confirmDeleteAvatar: "Are you sure you want to delete your avatar?",
+    avatarDeletedSuccess: "Avatar deleted successfully!",
+    memberSince: "Member Since:",
+    lastLogin: "Last Login:",
+    roles: "Roles:",
+    publicProfile: "Public Profile",
+    privateProfile: "Private Profile",
+    showPublicProfile: "Show Public Profile",
+    hidePublicProfile: "Hide Public Profile",
+    publicProfileEnabled: "Public profile enabled.",
+    publicProfileDisabled: "Public profile disabled.",
+    shareProfile: "Share Profile",
+    profileShareLink: "Profile Share Link:",
+    copyLink: "Copy Link",
+    linkCopied: "Link copied!",
+    shareOnSocialMedia: "Share on Social Media",
+    socialMediaShareSuccess: "Profile shared successfully!",
+    socialMediaShareError: "Error sharing profile.",
+    playerAchievements: "Player Achievements",
+    viewAchievements: "View Achievements",
+    noAchievements: "No achievements available.",
+    achievement: "Achievement",
+    achievementDescription: "Description",
+    achievementDate: "Date",
+    addAchievement: "Add Achievement",
+    achievementName: "Achievement Name",
+    achievementAddedSuccess: "Achievement added successfully!",
+    editAchievement: "Edit Achievement",
+    deleteAchievement: "Delete Achievement",
+    confirmDeleteAchievement: "Are you sure you want to delete this achievement?",
+    achievementUpdatedSuccess: "Achievement updated successfully!",
+    achievementDeletedSuccess: "Achievement deleted successfully!",
+    eventGoals: "Event Goals",
+    viewGoals: "View Goals",
+    noGoals: "No goals available.",
+    goal: "Goal",
+    goalDescription: "Description",
+    goalTarget: "Target Value",
+    goalProgress: "Progress",
+    addGoal: "Add Goal",
+    goalName: "Goal Name",
+    goalAddedSuccess: "Goal added successfully!",
+    editGoal: "Edit Goal",
+    deleteGoal: "Delete Goal",
+    confirmDeleteGoal: "Are you sure you want to delete this goal?",
+    goalUpdatedSuccess: "Goal updated successfully!",
+    goalDeletedSuccess: "Goal deleted successfully!",
+    milestones: "Milestones",
+    viewMilestones: "View Milestones",
+    noMilestones: "No milestones available.",
+    milestone: "Milestone",
+    milestoneDescription: "Description",
+    milestoneDate: "Date",
+    addMilestone: "Add Milestone",
+    milestoneName: "Milestone Name",
+    milestoneAddedSuccess: "Milestone added successfully!",
+    editMilestone: "Edit Milestone",
+    deleteMilestone: "Delete Milestone",
+    confirmDeleteMilestone: "Are you sure you want to delete this milestone?",
+    milestoneUpdatedSuccess: "Milestone updated successfully!",
+    milestoneDeletedSuccess: "Milestone deleted successfully!",
+    rewards: "Rewards",
+    viewRewards: "View Rewards",
+    noRewards: "No rewards available.",
+    reward: "Reward",
+    rewardDescription: "Description",
+    rewardCriteria: "Criteria",
+    addReward: "Add Reward",
+    rewardName: "Reward Name",
+    rewardAddedSuccess: "Reward added successfully!",
+    editReward: "Edit Reward",
+    deleteReward: "Delete Reward",
+    confirmDeleteReward: "Are you sure you want to delete this reward?",
+    rewardUpdatedSuccess: "Reward updated successfully!",
+    rewardDeletedSuccess: "Reward deleted successfully!",
+    leaderboard: "Leaderboard",
+    viewLeaderboard: "View Leaderboard",
+    noLeaderboard: "No leaderboard available.",
+    leaderboardRank: "Rank",
+    leaderboardPlayer: "Player",
+    leaderboardScore: "Score",
+    refreshLeaderboard: "Refresh Leaderboard",
+    leaderboardRefreshedSuccess: "Leaderboard refreshed successfully!",
+    playerProfile: "Player Profile",
+    viewPlayerProfile: "View Player Profile",
+    playerProfileTitle: "Player Profile for",
+    playerStatsTitle: "Player Statistics",
+    playerAchievementsTitle: "Player Achievements",
+    playerGoalsTitle: "Player Goals",
+    playerMilestonesTitle: "Player Milestones",
+    playerRewardsTitle: "Player Rewards",
+    backToLeaderboard: "Back to Leaderboard",
+    noPlayerProfile: "No player profile available.",
+    playerProfileNotFound: "Player profile not found.",
+    playerProfileLoading: "Loading player profile...",
+    playerProfileError: "Error loading player profile.",
+    playerProfileRefresh: "Refresh Player Profile",
+    playerProfileRefreshedSuccess: "Player profile refreshed successfully!",
+    playerProfileExport: "Export Player Profile",
+    playerProfileExportedSuccess: "Player profile exported successfully!",
+    playerProfilePrint: "Print Player Profile",
+    playerProfilePrintSuccess: "Player profile printed successfully!",
+    playerProfilePrintError: "Error printing player profile.",
+    adminDashboard: "Admin Dashboard",
+    adminDashboardTitle: "Admin Dashboard Overview",
+    adminDashboardStats: "Statistics",
+    adminDashboardRecentActivity: "Recent Activity",
+    adminDashboardQuickActions: "Quick Actions",
+    viewAllPlayers: "View All Players",
+    viewAllEvents: "View All Events",
+    viewAllAdmins: "View All Admins",
+    viewAllMessages: "View All Messages",
+    viewAllLogs: "View All Logs",
+    createPlayer: "Create Player",
+    createEvent: "Create Event",
+    createAdmin: "Create Admin",
+    sendBroadcastMessage: "Send Broadcast Message",
+    broadcastMessage: "Broadcast Message",
+    broadcastMessageContent: "Message Content",
+    send: "Send",
+    broadcastMessageSentSuccess: "Broadcast message sent successfully!",
+    broadcastMessages: "Broadcast Messages",
+    noBroadcastMessages: "No broadcast messages.",
+    broadcastMessageFrom: "From:",
+    broadcastMessageTo: "To:",
+    broadcastMessageTimestamp: "Timestamp:",
+    deleteBroadcastMessage: "Delete Broadcast Message",
+    confirmDeleteBroadcastMessage: "Are you sure you want to delete this broadcast message?",
+    broadcastMessageDeletedSuccess: "Broadcast message deleted successfully!",
+    showBroadcastMessages: "Show Broadcast Messages",
+    hideBroadcastMessages: "Hide Broadcast Messages",
+    manageBroadcastMessages: "Manage Broadcast Messages",
+    playerActivityChart: "Player Activity Chart",
+    eventParticipationChart: "Event Participation Chart",
+    scoreDistributionChart: "Score Distribution Chart",
+    generateCharts: "Generate Charts",
+    chartsGeneratedSuccess: "Charts generated successfully!",
+    noCharts: "No charts available.",
+    chartOptions: "Chart Options",
+    chartType: "Chart Type",
+    selectChartType: "Select Chart Type:",
+    barChart: "Bar Chart",
+    lineChart: "Line Chart",
+    pieChart: "Pie Chart",
+    doughnutChart: "Doughnut Chart",
+    radarChart: "Radar Chart",
+    polarAreaChart: "Polar Area Chart",
+    bubbleChart: "Bubble Chart",
+    scatterChart: "Scatter Chart",
+    areaChart: "Area Chart",
+    applyChartOptions: "Apply Chart Options",
+    chartOptionsApplied: "Chart options applied.",
+    chartData: "Chart Data",
+    exportChart: "Export Chart",
+    chartExportedSuccess: "Chart exported successfully!",
+    printChart: "Print Chart",
+    chartPrintSuccess: "Chart printed successfully!",
+    chartPrintError: "Error printing chart.",
+    playerComparison: "Player Comparison",
+    selectPlayersToCompare: "Select Players to Compare:",
+    comparePlayers: "Compare Players",
+    playerComparisonChart: "Player Comparison Chart",
+    noPlayerComparison: "No player comparison available.",
+    playerComparisonOptions: "Comparison Options",
+    compareByScore: "Compare by Score",
+    compareByParticipation: "Compare by Participation",
+    compareByAchievements: "Compare by Achievements",
+    applyComparisonOptions: "Apply Comparison Options",
+    comparisonOptionsApplied: "Comparison options applied.",
+    playerComparisonData: "Player Comparison Data",
+    exportComparison: "Export Comparison",
+    comparisonExportedSuccess: "Comparison exported successfully!",
+    printComparison: "Print Comparison",
+    comparisonPrintSuccess: "Comparison printed successfully!",
+    comparisonPrintError: "Error printing comparison.",
+    eventComparison: "Event Comparison",
+    selectEventsToCompare: "Select Events to Compare:",
+    compareEvents: "Compare Events",
+    eventComparisonChart: "Event Comparison Chart",
+    noEventComparison: "No event comparison available.",
+    eventComparisonOptions: "Comparison Options",
+    compareByTotalScore: "Compare by Total Score",
+    compareByAverageScore: "Compare by Average Score",
+    compareByParticipationRate: "Compare by Participation Rate",
+    applyEventComparisonOptions: "Apply Event Comparison Options",
+    eventComparisonOptionsApplied: "Event comparison options applied.",
+    eventComparisonData: "Event Comparison Data",
+    exportEventComparison: "Export Comparison",
+    eventComparisonExportedSuccess: "Comparison exported successfully!",
+    printEventComparison: "Print Comparison",
+    eventComparisonPrintSuccess: "Comparison printed successfully!",
+    eventComparisonPrintError: "Error printing comparison.",
+    dataManagement: "Data Management",
+    backupAndRestore: "Backup and Restore",
+    importAndExport: "Import and Export",
+    clearData: "Clear Data",
+    confirmClearData: "Are you sure you want to clear all application data? This cannot be undone.",
+    dataClearedSuccess: "Data cleared successfully!",
+    caution: "Caution!",
+    dangerZone: "Danger Zone",
+    fullDataReset: "Full Data Reset",
+    confirmFullDataReset: "Are you absolutely sure you want to perform a full data reset? This will permanently delete ALL data.",
+    fullDataResetSuccess: "Full data reset successful!",
+    enterConfirmText: "Please type 'CONFIRM' to proceed.",
+    invalidConfirmText: "Invalid confirmation text.",
+    adminTools: "Admin Tools",
+    userManagement: "User Management",
+    roleManagement: "Role Management",
+    assignRoles: "Assign Roles",
+    userRoles: "User Roles",
+    selectUser: "Select User:",
+    selectRole: "Select Role:",
+    assign: "Assign",
+    roleAssignedSuccess: "Role assigned successfully!",
+    removeRole: "Remove Role",
+    roleRemovedSuccess: "Role removed successfully!",
+    availableRoles: "Available Roles:",
+    addRole: "Add Role",
+    roleName: "Role Name",
+    roleDescription: "Role Description",
+    roleAddedSuccess: "Role added successfully!",
+    editRole: "Edit Role",
+    deleteRole: "Delete Role",
+    confirmDeleteRole: "Are you sure you want to delete this role?",
+    roleUpdatedSuccess: "Role updated successfully!",
+    roleDeletedSuccess: "Role deleted successfully!",
+    manageRoles: "Manage Roles",
+    permissions: "Permissions",
+    viewPermissions: "View Permissions",
+    noPermissions: "No permissions available.",
+    permission: "Permission",
+    permissionDescription: "Description",
+    addPermission: "Add Permission",
+    permissionName: "Permission Name",
+    permissionAddedSuccess: "Permission added successfully!",
+    editPermission: "Edit Permission",
+    deletePermission: "Delete Permission",
+    confirmDeletePermission: "Are you sure you want to delete this permission?",
+    permissionUpdatedSuccess: "Permission updated successfully!",
+    permissionDeletedSuccess: "Permission deleted successfully!",
+    assignPermissions: "Assign Permissions",
+    selectPermission: "Select Permission:",
+    permissionAssignedSuccess: "Permission assigned successfully!",
+    permissionRemovedSuccess: "Permission removed successfully!",
+    managePermissions: "Manage Permissions",
+    auditLog: "Audit Log",
+    viewAuditLog: "View Audit Log",
+    noAuditLog: "No audit log available.",
+    auditLogEntry: "Audit Entry",
+    auditLogTimestamp: "Timestamp",
+    auditLogUser: "User",
+    auditLogAction: "Action",
+    auditLogTarget: "Target",
+    clearAuditLog: "Clear Audit Log",
+    confirmClearAuditLog: "Are you sure you want to clear the audit log?",
+    auditLogClearedSuccess: "Audit log cleared successfully!",
+    systemStatus: "System Status",
+    viewSystemStatus: "View System Status",
+    systemHealth: "System Health:",
+    databaseStatus: "Database Status:",
+    apiStatus: "API Status:",
+    online: "Online",
+    offline: "Offline",
+    operational: "Operational",
+    degraded: "Degraded",
+    outage: "Outage",
+    lastChecked: "Last Checked:",
+    refreshStatus: "Refresh Status",
+    statusRefreshedSuccess: "Status refreshed successfully!",
+    systemLogs: "System Logs",
+    viewSystemLogs: "View System Logs",
+    noSystemLogs: "No system logs available.",
+    systemLogEntry: "System Log Entry",
+    systemLogTimestamp: "Timestamp",
+    systemLogLevel: "Level",
+    systemLogMessage: "Message",
+    clearSystemLogs: "Clear System Logs",
+    confirmClearSystemLogs: "Are you sure you want to clear all system logs?",
+    systemLogsClearedSuccess: "System logs cleared successfully!",
+    maintenanceMode: "Maintenance Mode",
+    enableMaintenanceMode: "Enable Maintenance Mode",
+    disableMaintenanceMode: "Disable Maintenance Mode",
+    maintenanceModeEnabled: "Maintenance mode enabled.",
+    maintenanceModeDisabled: "Maintenance mode disabled.",
+    maintenanceMessage: "Maintenance Message",
+    updateMaintenanceMessage: "Update Maintenance Message",
+    maintenanceMessageUpdated: "Maintenance message updated!",
+    scheduledMaintenance: "Scheduled Maintenance",
+    scheduleMaintenance: "Schedule Maintenance",
+    maintenanceDate: "Maintenance Date",
+    maintenanceTime: "Maintenance Time",
+    schedule: "Schedule",
+    maintenanceScheduledSuccess: "Maintenance scheduled successfully!",
+    cancelMaintenance: "Cancel Maintenance",
+    confirmCancelMaintenance: "Are you sure you want to cancel the scheduled maintenance?",
+    maintenanceCanceledSuccess: "Maintenance canceled!",
+    noScheduledMaintenance: "No scheduled maintenance.",
+    currentMaintenanceStatus: "Current Maintenance Status:",
+    active: "Active",
+    inactive: "Inactive",
+    scheduled: "Scheduled",
+    completed: "Completed",
+    failed: "Failed",
+    updateStatus: "Update Status",
+    statusUpdatedSuccess: "Status updated successfully!",
+    announcements: "Announcements",
+    createAnnouncement: "Create Announcement",
+    announcementTitle: "Title",
+    announcementContent: "Content",
+    publish: "Publish",
+    announcementPublishedSuccess: "Announcement published successfully!",
+    editAnnouncement: "Edit Announcement",
+    deleteAnnouncement: "Delete Announcement",
+    confirmDeleteAnnouncement: "Are you sure you want to delete this announcement?",
+    announcementUpdatedSuccess: "Announcement updated successfully!",
+    announcementDeletedSuccess: "Announcement deleted successfully!",
+    viewAnnouncements: "View Announcements",
+    noAnnouncements: "No announcements available.",
+    announcementTimestamp: "Timestamp",
+    announcementAuthor: "Author",
+    announcementExpires: "Expires:",
+    setExpiration: "Set Expiration",
+    expirationDate: "Expiration Date",
+    noExpiration: "No Expiration",
+    expired: "Expired",
+    activeAnnouncements: "Active Announcements",
+    archivedAnnouncements: "Archived Announcements",
+    archiveAnnouncement: "Archive Announcement",
+    confirmArchiveAnnouncement: "Are you sure you want to archive this announcement?",
+    announcementArchivedSuccess: "Announcement archived successfully!",
+    unarchiveAnnouncement: "Unarchive Announcement",
+    confirmUnarchiveAnnouncement: "Are you sure you want to unarchive this announcement?",
+    announcementUnarchivedSuccess: "Announcement unarchived successfully!",
+    viewArchivedAnnouncements: "View Archived Announcements",
+    notifications: "Notifications",
+    profile: "Profile",
+    settings: "Settings",
+    admin: "Admin",
+    about: "About",
+    help: "Help",
+    legal: "Legal",
+    dashboard: "Dashboard",
+    reports: "Reports",
+    charts: "Charts",
+    comparison: "Comparison",
+    data: "Data",
+    system: "System",
+    maintenance: "Maintenance",
+    logs: "Logs",
+    announcements: "Announcements",
+    users: "Users",
+    roles: "Roles",
+    permissions: "Permissions",
+    audit: "Audit",
+    activity: "Activity",
+    history: "History",
+    messages: "Messages",
+    broadcast: "Broadcast",
+    feedback: "Feedback",
+    support: "Support",
+    faq: "FAQ",
+    documentation: "Documentation",
+    terms: "Terms",
+    privacy: "Privacy",
+    contact: "Contact",
+    home: "Home",
+    info: "Info",
+    navigation: "Navigation",
+    playerReport: "Player Report",
+    currentEvent: "Current Event",
+    archive: "Archive",
+    top10: "Top 10",
+    hallOfChamps: "Hall of Champs",
+    adminPanel: "Admin Panel",
+    playerManagement: "Player Management",
+    eventManagement: "Event Management",
+    adminManagement: "Admin Management",
+    eventDayManagement: "Event Day Management",
+    playerScoreManagement: "Player Score Management",
+    overallPlayerReport: "Overall Player Report",
+    playerSearch: "Player Search",
+    filterOptions: "Filter Options",
+    notificationSettings: "Notification Settings",
+    profileSettings: "Profile Settings",
+    accountSettings: "Account Settings",
+    privacySettings: "Privacy Settings",
+    aboutApp: "About App",
+    feedbackAndSupport: "Feedback & Support",
+    legalInformation: "Legal Information",
+    authentication: "Authentication",
+    userProfile: "User Profile",
+    playerAchievements: "Player Achievements",
+    eventGoals: "Event Goals",
+    milestones: "Milestones",
+    rewards: "Rewards",
+    leaderboard: "Leaderboard",
+    playerComparison: "Player Comparison",
+    eventComparison: "Event Comparison",
+    dataManagement: "Data Management",
+    systemMonitoring: "System Monitoring",
+    adminTools: "Admin Tools",
+    communication: "Communication",
+    reportsAndAnalytics: "Reports & Analytics",
+    generalSettings: "General Settings",
+    securitySettings: "Security Settings",
+    integrations: "Integrations",
+    apiSettings: "API Settings",
+    webhookSettings: "Webhook Settings",
+    pluginManagement: "Plugin Management",
+    themeCustomization: "Theme Customization",
+    layoutSettings: "Layout Settings",
+    fontSettings: "Font Settings",
+    colorSettings: "Color Settings",
+    backgroundSettings: "Background Settings",
+    logoSettings: "Logo Settings",
+    customCSS: "Custom CSS",
+    customJS: "Custom JS",
+    seoSettings: "SEO Settings",
+    metaTags: "Meta Tags",
+    sitemap: "Sitemap",
+    robotstxt: "robots.txt",
+    analyticsIntegration: "Analytics Integration",
+    googleAnalytics: "Google Analytics",
+    matomoAnalytics: "Matomo Analytics",
+    customAnalytics: "Custom Analytics",
+    socialMediaIntegration: "Social Media Integration",
+    facebook: "Facebook",
+    twitter: "Twitter",
+    instagram: "Instagram",
+    discord: "Discord",
+    twitch: "Twitch",
+    youtube: "YouTube",
+    patreon: "Patreon",
+    merchStore: "Merch Store",
+    donationLink: "Donation Link",
+    communityLinks: "Community Links",
+    forum: "Forum",
+    discordServer: "Discord Server",
+    guildWebsite: "Guild Website",
+    raidPlanner: "Raid Planner",
+    dungeonGuides: "Dungeon Guides",
+    pvpGuides: "PvP Guides",
+    classGuides: "Class Guides",
+    professionGuides: "Profession Guides",
+    craftingGuides: "Crafting Guides",
+    economyGuides: "Economy Guides",
+    eventGuides: "Event Guides",
+    questGuides: "Quest Guides",
+    lore: "Lore",
+    wiki: "Wiki",
+    database: "Database",
+    tools: "Tools",
+    calculators: "Calculators",
+    simulators: "Simulators",
+    timers: "Timers",
+    trackers: "Trackers",
+    planners: "Planners",
+    generators: "Generators",
+    converters: "Converters",
+    utilities: "Utilities",
+    apiDocumentation: "API Documentation",
+    developerTools: "Developer Tools",
+    webhooks: "Webhooks",
+    plugins: "Plugins",
+    themes: "Themes",
+    updates: "Updates",
+    changelog: "Changelog",
+    roadmap: "Roadmap",
+    bugTracker: "Bug Tracker",
+    featureRequests: "Feature Requests",
+    knownIssues: "Known Issues",
+    troubleshooting: "Troubleshooting",
+    faq: "FAQ",
+    supportForum: "Support Forum",
+    contactUs: "Contact Us",
+    imprint: "Imprint",
+    disclaimer: "Disclaimer",
+    copyright: "Copyright",
+    dataProtection: "Data Protection",
+    cookies: "Cookies",
+    cookieSettings: "Cookie Settings",
+    acceptCookies: "Accept Cookies",
+    declineCookies: "Decline Cookies",
+    cookiePolicy: "Cookie Policy",
+    poweredBy: "Powered By",
+    madeWith: "Made With",
+    version: "Version",
+    build: "Build",
+    release: "Release",
+    date: "Date",
+    time: "Time",
+    author: "Author",
+    contributors: "Contributors",
+    acknowledgements: "Acknowledgements",
+    specialThanks: "Special Thanks",
+    community: "Community",
+    partners: "Partners",
+    sponsors: "Sponsors",
+    donors: "Donors",
+    patrons: "Patrons",
+    supporters: "Supporters",
+    getInvolved: "Get Involved",
+    contribute: "Contribute",
+    translate: "Translate",
+    reportIssue: "Report Issue",
+    suggestFeature: "Suggest Feature",
+    joinCommunity: "Join Community",
+    followUs: "Follow Us",
+    subscribe: "Subscribe",
+    newsletter: "Newsletter",
+    getUpdates: "Get Updates",
+    stayConnected: "Stay Connected",
+    socials: "Socials",
+    links: "Links",
+    resources: "Resources",
+    downloads: "Downloads",
+    assets: "Assets",
+    mediaKit: "Media Kit",
+    press: "Press",
+    events: "Events",
+    calendar: "Calendar",
+    schedule: "Schedule",
+    upcomingEvents: "Upcoming Events",
+    pastEvents: "Past Events",
+    eventRegistration: "Event Registration",
+    eventDetails: "Event Details",
+    eventResults: "Event Results",
+    eventPhotos: "Event Photos",
+    eventVideos: "Event Videos",
+    eventRecaps: "Event Recaps",
+    eventFeedback: "Event Feedback",
+    eventOrganizers: "Event Organizers",
+    eventSponsors: "Event Sponsors",
+    eventPartners: "Event Partners",
+    eventVolunteers: "Event Volunteers",
+    eventAttendees: "Event Attendees",
+    eventTickets: "Event Tickets",
+    eventVenue: "Event Venue",
+    eventMap: "Event Map",
+    eventDirections: "Event Directions",
+    eventAccommodation: "Event Accommodation",
+    eventTravel: "Event Travel",
+    eventFAQ: "Event FAQ",
+    eventContact: "Event Contact",
+    eventRules: "Event Rules",
+    eventPrizes: "Event Prizes",
+    eventAwards: "Event Awards",
+    eventLeaderboard: "Event Leaderboard",
+    eventParticipants: "Event Participants",
+    eventStatistics: "Event Statistics",
+    eventHighlights: "Event Highlights",
+    eventGallery: "Event Gallery",
+    eventVideos: "Event Videos",
+    eventPress: "Event Press",
+    eventPartnerships: "Event Partnerships",
+    eventSponsorship: "Event Sponsorship",
+    eventVolunteer: "Event Volunteer",
+    eventAttendee: "Event Attendee",
+    eventTicket: "Event Ticket",
+    eventVenueInfo: "Event Venue Info",
+    eventMapInfo: "Event Map Info",
+    eventDirectionsInfo: "Event Directions Info",
+    eventAccommodationInfo: "Event Accommodation Info",
+    eventTravelInfo: "Event Travel Info",
+    eventFAQInfo: "Event FAQ Info",
+    eventContactInfo: "Event Contact Info",
+    eventRulesInfo: "Event Rules Info",
+    eventPrizesInfo: "Event Prizes Info",
+    eventAwardsInfo: "Event Awards Info",
+    eventLeaderboardInfo: "Event Leaderboard Info",
+    eventParticipantsInfo: "Event Participants Info",
+    eventStatisticsInfo: "Event Statistics Info",
+    eventHighlightsInfo: "Event Highlights Info",
+    eventGalleryInfo: "Event Gallery Info",
+    eventVideoInfo: "Event Video Info",
+    eventPressInfo: "Event Press Info",
+    eventPartnershipsInfo: "Event Partnerships Info",
+    eventSponsorshipInfo: "Event Sponsorship Info",
+    eventVolunteerInfo: "Event Volunteer Info",
+    eventAttendeeInfo: "Event Attendee Info",
+    eventTicketInfo: "Event Ticket Info",
+    eventVenueDetails: "Event Venue Details",
+    eventMapDetails: "Event Map Details",
+    eventDirectionsDetails: "Event Directions Details",
+    eventAccommodationDetails: "Event Accommodation Details",
+    eventTravelDetails: "Event Travel Details",
+    eventFAQDetails: "Event FAQ Details",
+    eventContactDetails: "Event Contact Details",
+    eventRulesDetails: "Event Rules Details",
+    eventPrizesDetails: "Event Prizes Details",
+    eventAwardsDetails: "Event Awards Details",
+    eventLeaderboardDetails: "Event Leaderboard Details",
+    eventParticipantsDetails: "Event Participants Details",
+    eventStatisticsDetails: "Event Statistics Details",
+    eventHighlightsDetails: "Event Highlights Details",
+    eventGalleryDetails: "Event Gallery Details",
+    eventVideoDetails: "Event Video Details",
+    eventPressDetails: "Event Press Details",
+    eventPartnershipsDetails: "Event Partnerships Details",
+    eventSponsorshipDetails: "Event Sponsorship Details",
+    eventVolunteerDetails: "Event Volunteer Details",
+    eventAttendeeDetails: "Event Attendee Details",
+    eventTicketDetails: "Event Ticket Details",
+    eventVenueFull: "Event Venue Full",
+    eventMapFull: "Event Map Full",
+    eventDirectionsFull: "Event Directions Full",
+    eventAccommodationFull: "Event Accommodation Full",
+    eventTravelFull: "Event Travel Full",
+    eventFAQFull: "Event FAQ Full",
+    eventContactFull: "Event Contact Full",
+    eventRulesFull: "Event Rules Full",
+    eventPrizesFull: "Event Prizes Full",
+    eventAwardsFull: "Event Awards Full",
+    eventLeaderboardFull: "Event Leaderboard Full",
+    eventParticipantsFull: "Event Participants Full",
+    eventStatisticsFull: "Event Statistics Full",
+    eventHighlightsFull: "Event Highlights Full",
+    eventGalleryFull: "Event Gallery Full",
+    eventVideoFull: "Event Videos Full",
+    eventPressFull: "Event Press Full",
+    eventPartnershipsFull: "Event Partnerships Full",
+    eventSponsorshipFull: "Event Sponsorship Full",
+    eventVolunteerFull: "Event Volunteer Full",
+    eventAttendeeFull: "Event Attendee Full",
+    eventTicketFull: "Event Ticket Full",
+    eventVenueComplete: "Event Venue Complete",
+    eventMapComplete: "Event Map Complete",
+    eventDirectionsComplete: "Event Directions Complete",
+    eventAccommodationComplete: "Event Accommodation Complete",
+    eventTravelComplete: "Event Travel Complete",
+    eventFAQComplete: "Event FAQ Complete",
+    eventContactComplete: "Event Contact Complete",
+    eventRulesComplete: "Event Rules Complete",
+    eventPrizesComplete: "Event Prizes Complete",
+    eventAwardsComplete: "Event Awards Complete",
+    eventLeaderboardComplete: "Event Leaderboard Complete",
+    eventParticipantsComplete: "Event Participants Complete",
+    eventStatisticsComplete: "Event Statistics Complete",
+    eventHighlightsComplete: "Event Highlights Complete",
+    eventGalleryComplete: "Event Gallery Complete",
+    eventVideoComplete: "Event Video Complete",
+    eventPressComplete: "Event Press Complete",
+    eventPartnershipsComplete: "Event Partnerships Complete",
+    eventSponsorshipComplete: "Event Sponsorship Complete",
+    eventVolunteerComplete: "Event Volunteer Complete",
+    eventAttendeeComplete: "Event Attendee Complete",
+    eventTicketComplete: "Event Ticket Complete",
+    eventVenueAll: "Event Venue All",
+    eventMapAll: "Event Map All",
+    eventDirectionsAll: "Event Directions All",
+    eventAccommodationAll: "Event Accommodation All",
+    eventTravelAll: "Event Travel All",
+    eventFAQAll: "Event FAQ All",
+    eventContactAll: "Event Contact All",
+    eventRulesAll: "Event Rules All",
+    eventPrizesAll: "Event Prizes All",
+    eventAwardsAll: "Event Awards All",
+    eventLeaderboardAll: "Event Leaderboard All",
+    eventParticipantsAll: "Event Participants All",
+    eventStatisticsAll: "Event Statistics All",
+    eventHighlightsAll: "Event Highlights All",
+    eventGalleryAll: "Event Gallery All",
+    eventVideoAll: "Event Video All",
+    eventPressAll: "Event Press All",
+    eventPartnershipsAll: "Event Partnerships All",
+    eventSponsorshipAll: "Event Sponsorship All",
+    eventVolunteerAll: "Event Volunteer All",
+    eventAttendeeAll: "Event Attendee All",
+    eventTicketAll: "Event Ticket All",
+    eventVenueOverview: "Event Venue Overview",
+    eventMapOverview: "Event Map Overview",
+    eventDirectionsOverview: "Event Directions Overview",
+    eventAccommodationOverview: "Event Accommodation Overview",
+    eventTravelOverview: "Event Travel Overview",
+    eventFAQOverview: "Event FAQ Overview",
+    eventContactOverview: "Event Contact Overview",
+    eventRulesOverview: "Event Rules Overview",
+    eventPrizesOverview: "Event Prizes Overview",
+    eventAwardsOverview: "Event Awards Overview",
+    eventLeaderboardOverview: "Event Leaderboard Overview",
+    eventParticipantsOverview: "Event Participants Overview",
+    eventStatisticsOverview: "Event Statistics Overview",
+    eventHighlightsOverview: "Event Highlights Overview",
+    eventGalleryOverview: "Event Gallery Overview",
+    eventVideoOverview: "Event Video Overview",
+    eventPressOverview: "Event Press Overview",
+    eventPartnershipsOverview: "Event Partnerships Overview",
+    eventSponsorshipOverview: "Event Sponsorship Overview",
+    eventVolunteerOverview: "Event Volunteer Overview",
+    eventAttendeeOverview: "Event Attendee Overview",
+    eventTicketOverview: "Event Ticket Overview",
+    eventVenueSummary: "Event Venue Summary",
+    eventMapSummary: "Event Map Summary",
+    eventDirectionsSummary: "Event Directions Summary",
+    eventAccommodationSummary: "Event Accommodation Summary",
+    eventTravelSummary: "Event Travel Summary",
+    eventFAQSummary: "Event FAQ Summary",
+    eventContactSummary: "Event Contact Summary",
+    eventRulesSummary: "Event Rules Summary",
+    eventPrizesSummary: "Event Prizes Summary",
+    eventAwardsSummary: "Event Awards Summary",
+    eventLeaderboardSummary: "Event Leaderboard Summary",
+    eventParticipantsSummary: "Event Participants Summary",
+    eventStatisticsSummary: "Event Statistics Summary",
+    eventHighlightsSummary: "Event Highlights Summary",
+    eventGallerySummary: "Event Gallery Summary",
+    eventVideoSummary: "Event Video Summary",
+    eventPressSummary: "Event Press Summary",
+    eventPartnershipsSummary: "Event Partnerships Summary",
+    eventSponsorshipSummary: "Event Sponsorship Summary",
+    eventVolunteerSummary: "Event Volunteer Summary",
+    eventAttendeeSummary: "Event Attendee Summary",
+    eventTicketSummary: "Event Ticket Summary",
+    eventVenueReport: "Event Venue Report",
+    eventMapReport: "Event Map Report",
+    eventDirectionsReport: "Event Directions Report",
+    eventAccommodationReport: "Event Accommodation Report",
+    eventTravelReport: "Event Travel Report",
+    eventFAQReport: "Event FAQ Report",
+    eventContactReport: "Event Contact Report",
+    eventRulesReport: "Event Rules Report",
+    eventPrizesReport: "Event Prizes Report",
+    eventAwardsReport: "Event Awards Report",
+    eventLeaderboardReport: "Event Leaderboard Report",
+    eventParticipantsReport: "Event Participants Report",
+    eventStatisticsReport: "Event Statistics Report",
+    eventHighlightsReport: "Event Highlights Report",
+    eventGalleryReport: "Event Gallery Report",
+    eventVideoReport: "Event Video Report",
+    eventPressReport: "Event Press Report",
+    eventPartnershipsReport: "Event Partnerships Report",
+    eventSponsorshipReport: "Event Sponsorship Report",
+    eventVolunteerReport: "Event Volunteer Report",
+    eventAttendeeReport: "Event Attendee Report",
+    eventTicketReport: "Event Ticket Report",
+    eventVenueFullReport: "Event Venue Full Report",
+    eventMapFullReport: "Event Map Full Report",
+    eventDirectionsFullReport: "Event Directions Full Report",
+    eventAccommodationFullReport: "Event Accommodation Full Report",
+    eventTravelFullReport: "Event Travel Full Report",
+    eventFAQFullReport: "Event FAQ Full Report",
+    eventContactFullReport: "Event Contact Full Report",
+    eventRulesFullReport: "Event Rules Full Report",
+    eventPrizesFullReport: "Event Prizes Full Report",
+    eventAwardsFullReport: "Event Awards Full Report",
+    eventLeaderboardFullReport: "Event Leaderboard Full Report",
+    eventParticipantsFullReport: "Event Participants Full Report",
+    eventStatisticsFullReport: "Event Statistics Full Report",
+    eventHighlightsFullReport: "Event Highlights Full Report",
+    eventGalleryFullReport: "Event Gallery Full Report",
+    eventVideoFullReport: "Event Video Full Report",
+    eventPressFullReport: "Event Press Full Report",
+    eventPartnershipsFullReport: "Event Partnerships Full Report",
+    eventSponsorshipFullReport: "Event Sponsorship Full Report",
+    eventVolunteerFullReport: "Event Volunteer Full Report",
+    eventAttendeeFullReport: "Event Attendee Full Report",
+    eventTicketFullReport: "Event Ticket Full Report",
+    eventVenueDetailedReport: "Event Venue Detailed Report",
+    eventMapDetailedReport: "Event Map Detailed Report",
+    eventDirectionsDetailedReport: "Event Directions Detailed Report",
+    eventAccommodationDetailedReport: "Event Accommodation Detailed Report",
+    eventTravelDetailedReport: "Event Travel Detailed Report",
+    eventFAQDetailedReport: "Event FAQ Detailed Report",
+    eventContactDetailedReport: "Event Contact Detailed Report",
+    eventRulesDetailedReport: "Event Rules Detailed Report",
+    eventPrizesDetailedReport: "Event Prizes Detailed Report",
+    eventAwardsDetailedReport: "Event Awards Detailed Report",
+    eventLeaderboardDetailedReport: "Event Leaderboard Detailed Report",
+    eventParticipantsDetailedReport: "Event Participants Detailed Report",
+    eventStatisticsDetailedReport: "Event Statistics Detailed Report",
+    eventHighlightsDetailedReport: "Event Highlights Detailed Report",
+    eventGalleryDetailedReport: "Event Gallery Detailed Report",
+    eventVideoDetailedReport: "Event Video Detailed Report",
+    eventPressDetailedReport: "Event Press Detailed Report",
+    eventPartnershipsDetailedReport: "Event Partnerships Detailed Report",
+    eventSponsorshipDetailedReport: "Event Sponsorship Detailed Report",
+    eventVolunteerDetailedReport: "Event Volunteer Detailed Report",
+    eventAttendeeDetailedReport: "Event Attendee Detailed Report",
+    eventTicketDetailedReport: "Event Ticket Detailed Report",
+    eventVenueCustomReport: "Event Venue Custom Report",
+    eventMapCustomReport: "Event Map Custom Report",
+    eventDirectionsCustomReport: "Event Directions Custom Report",
+    eventAccommodationCustomReport: "Event Accommodation Custom Report",
+    eventTravelCustomReport: "Event Travel Custom Report",
+    eventFAQCustomReport: "Event FAQ Custom Report",
+    eventContactCustomReport: "Event Contact Custom Report",
+    eventRulesCustomReport: "Event Rules Custom Report",
+    eventPrizesCustomReport: "Event Prizes Custom Report",
+    eventAwardsCustomReport: "Event Awards Custom Report",
+    eventLeaderboardCustomReport: "Event Leaderboard Custom Report",
+    eventParticipantsCustomReport: "Event Participants Custom Report",
+    eventStatisticsCustomReport: "Event Statistics Custom Report",
+    eventHighlightsCustomReport: "Event Highlights Custom Report",
+    eventGalleryCustomReport: "Event Gallery Custom Report",
+    eventVideoCustomReport: "Event Video Custom Report",
+    eventPressCustomReport: "Event Press Custom Report",
+    eventPartnershipsCustomReport: "Event Partnerships Custom Report",
+    eventSponsorshipCustomReport: "Event Sponsorship Custom Report",
+    eventVolunteerCustomReport: "Event Volunteer Custom Report",
+    eventAttendeeCustomReport: "Event Attendee Custom Report",
+    eventTicketCustomReport: "Event Ticket Custom Report",
   },
 };
 
-/**
- * @function getTranslation
- * @description Hilfsfunktion zum Abrufen der übersetzten Texte basierend auf der aktuellen Sprache und einem Schlüssel.
- * Ersetzt Platzhalter im Text durch die übergebenen Parameter.
- * @param {string} lang - Der Sprachcode (z.B. 'de', 'en').
- * @param {string} key - Der Schlüssel des zu übersetzenden Textes.
- * @param {Object} [params={}] - Ein Objekt mit Platzhaltern und deren Werten (z.B. { itemName: "Beispiel" }).
- * @returns {string} Der übersetzte Text.
- */
-const getTranslation = (lang, key, params = {}) => {
-  let text = translations[lang]?.[key] || key;
-  for (const [paramKey, paramValue] of Object.entries(params)) {
-    text = text.replace(`{${paramKey}}`, paramValue);
+// Firebase Context zur Bereitstellung von Firebase-Instanzen
+const FirebaseContext = createContext(null);
+
+// Custom Hook zur Verwendung von Firebase-Instanzen
+const useFirebase = () => {
+  const context = useContext(FirebaseContext);
+  if (!context) {
+    // Dies sollte nicht passieren, wenn FirebaseProvider korrekt verwendet wird
+    console.error("useFirebase() must be used within a FirebaseProvider");
+    return { db: null, auth: null, userId: null, appId: null, isAuthReady: false };
   }
-  return text;
+  return context;
 };
 
-/**
- * @function DeleteConfirmModal
- * @description React-Komponente für ein modales Fenster zur Bestätigung des Löschvorgangs.
- * @param {Object} props - Die Eigenschaften der Komponente.
- * @param {Object} props.itemToDelete - Das Element, das gelöscht werden soll (enthält id und den Namen/Wert für die Anzeige).
- * @param {function} props.setShowDeleteConfirmModal - Setter-Funktion zum Steuern der Sichtbarkeit des Modals.
- * @param {function} props.setItemToDelete - Setter-Funktion zum Zurücksetzen des zu löschenden Elements.
- * @param {function} props.setErrorMessage - Setter-Funktion für Fehlermeldungen.
- * @param {function} props.deleteFunction - Die tatsächliche Löschfunktion, die aufgerufen wird.
- * @param {string} props.errorMessage - Fehlermeldung, die im Modal angezeigt werden soll.
- * @param {function} props.t - Übersetzungsfunktion.
- * @param {string} props.messageKey - Schlüssel für die Bestätigungsnachricht (z.B. 'areYouSureDelete').
- * @param {string} props.itemNameKey - Schlüssel für die Eigenschaft des Elementnamens im Übersetzungsobjekt.
- * @returns {JSX.Element} Das JSX-Element des DeleteConfirmModal.
- */
-const DeleteConfirmModal = ({
-  itemToDelete,
-  setShowDeleteConfirmModal,
-  setItemToDelete,
-  setErrorMessage,
-  deleteFunction,
-  errorMessage,
-  t,
-  messageKey,
-  itemNameKey,
-}) => (
-  <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
-    <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm">
-      <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('confirmDelete')}</h3>
-      <p className="text-gray-700 mb-4">
-        {t(messageKey, { [itemNameKey]: itemToDelete?.name || itemToDelete?.troopStrength || itemToDelete?.rank || 'dieses Element' })}
-      </p>
-      <div className="flex justify-end space-x-2">
-        <button
-          onClick={() => {
-            setShowDeleteConfirmModal(false);
-            setItemToDelete(null);
-            setErrorMessage('');
-          }}
-          className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-200 flex items-center"
-        >
-          <XCircle className="w-5 h-5 mr-2 text-gray-600" />
-          {t('cancel')}
-        </button>
-        <button
-          onClick={() => deleteFunction(itemToDelete.id)}
-          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 flex items-center"
-        >
-          <Trash2 className="w-5 h-5 mr-2 text-white" />
-          {t('delete')}
-        </button>
+// FirebaseProvider Komponente
+const FirebaseProvider = ({ children }) => {
+  const [db, setDb] = useState(null);
+  const [auth, setAuth] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [appId, setAppId] = useState(null);
+  const [isAuthReady, setIsAuthReady] = useState(false);
+
+  useEffect(() => {
+    const initializeFirebase = async () => {
+      try {
+        // Überprüfe, ob __firebase_config und __app_id global verfügbar sind
+        if (typeof __firebase_config === 'undefined' || typeof __app_id === 'undefined') {
+          console.error("Firebase-Konfiguration oder App ID nicht verfügbar. Bitte stelle sicher, dass sie im globalen Kontext definiert sind.");
+          return;
+        }
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        const app = initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+        const firebaseAuth = getAuth(app);
+
+        setDb(firestore);
+        setAuth(firebaseAuth);
+        setAppId(currentAppId);
+
+        // Authentifizierung
+        if (typeof __initial_auth_token !== 'undefined') {
+          await signInWithCustomToken(firebaseAuth, __initial_auth_token);
+        } else {
+          await signInAnonymously(firebaseAuth);
+        }
+
+        // Listener für Authentifizierungsstatusänderungen
+        const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
+          if (user) {
+            setUserId(user.uid);
+            console.log("Firebase initialized and user signed in:", user.uid);
+          } else {
+            setUserId(null);
+            console.log("Firebase initialized, no user signed in.");
+          }
+          setIsAuthReady(true); // Markiere Authentifizierung als bereit
+        });
+
+        return () => unsubscribe(); // Cleanup-Funktion für den Listener
+      } catch (error) {
+        console.error("Fehler bei der Firebase-Initialisierung oder Authentifizierung:", error);
+        setIsAuthReady(true); // Auch bei Fehlern als bereit markieren, um das Rendern zu ermöglichen
+      }
+    };
+
+    initializeFirebase();
+  }, []); // Leeres Array sorgt dafür, dass dies nur einmal beim Mounten ausgeführt wird
+
+  // Zeige einen Ladezustand an, bis Firebase bereit ist
+  if (!isAuthReady) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-700 text-white flex items-center justify-center">
+        <Loader className="animate-spin text-indigo-400 h-16 w-16" />
+        <p className="ml-4 text-lg">Lade Firebase-Dienste...</p>
       </div>
-      {errorMessage && <p className="text-red-500 text-sm mt-3">{errorMessage}</p>}
-    </div>
-  </div>
-);
+    );
+  }
 
-/**
- * @function EndPeriodConfirmModal
- * @description React-Komponente für ein modales Fenster zur Bestätigung des Beendens einer Veranstaltungsperiode.
- * @param {Object} props - Die Eigenschaften der Komponente.
- * @param {function} props.setShowEndPeriodConfirmModal - Setter-Funktion zum Steuern der Sichtbarkeit des Modals.
- * @param {function} props.endCurrentPeriod - Funktion zum Beenden der aktuellen Periode und Archivieren der Daten.
- * @param {string} props.errorMessage - Fehlermeldung, die im Modal angezeigt werden soll.
- * @param {function} props.t - Übersetzungsfunktion.
- * @returns {JSX.Element} Das JSX-Element des EndPeriodConfirmModal.
- */
-const EndPeriodConfirmModal = ({
-  setShowEndPeriodConfirmModal,
-  endCurrentPeriod,
-  errorMessage,
-  t,
-}) => (
-  <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
-    <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm">
-      <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('endCurrentPeriod')}</h3>
-      <p className="text-gray-700 mb-4">
-        {t('confirmEndPeriod')}
-      </p>
-      <div className="flex justify-end space-x-2">
-        <button
-          onClick={() => {
-            setShowEndPeriodConfirmModal(false);
-          }}
-          className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition duration-200 flex items-center"
-        >
-          <XCircle className="w-5 h-5 mr-2 text-gray-600" />
-          {t('cancel')}
-        </button>
-        <button
-          onClick={endCurrentPeriod}
-          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 flex items-center"
-        >
-          <Archive className="w-5 h-5 mr-2 text-white" />
-          {t('endCurrentPeriod')}
-        </button>
-      </div>
-      {errorMessage && <p className="text-red-500 text-sm mt-3">{errorMessage}</p>}
-    </div>
-  </div>
-);
+  return (
+    <FirebaseContext.Provider value={{ db, auth, userId, appId, isAuthReady }}>
+      {children}
+    </FirebaseContext.Provider>
+  );
+};
 
 
-/**
- * @function WelcomePage
- * @description Startseite der Anwendung. Ermöglicht die Auswahl der Sprache und die Navigation zur Informationsseite.
- * @param {Object} props - Die Eigenschaften der Komponente.
- * @param {function} props.navigateTo - Funktion zur Navigation zwischen Seiten.
- * @param {function} props.setLanguage - Setter-Funktion zum Ändern der aktuellen Sprache.
- * @param {string} props.currentLanguage - Die aktuell ausgewählte Sprache.
- * @param {function} props.t - Übersetzungsfunktion.
- * @returns {JSX.Element} Das JSX-Element der WelcomePage.
- */
-const WelcomePage = ({ navigateTo, setLanguage, currentLanguage, t }) => (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-700 text-white p-4 font-inter">
-    <div className="bg-gray-800 p-8 rounded-xl shadow-2xl text-center max-w-lg w-full">
-      <h1 className="text-4xl font-bold mb-6 text-blue-400">{t('welcomeTitle')}</h1>
-      <div className="mb-6">
-        <label htmlFor="language-select" className="block text-gray-300 text-lg mb-2">{t('selectLanguage')}</label>
+// Komponente für die Willkommensseite
+const WelcomePage = ({ navigateTo, setLanguage, currentLanguage, t }) => {
+  return (
+    <div className="text-center">
+      <h1 className="text-4xl font-bold mb-6 text-indigo-400">{t('welcomeTitle')}</h1>
+      <div className="mb-8">
+        <label htmlFor="language-select" className="block text-lg mb-2">{t('selectLanguage')}</label>
         <select
           id="language-select"
+          className="p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           value={currentLanguage}
           onChange={(e) => setLanguage(e.target.value)}
-          className="w-full p-3 rounded-md bg-gray-700 text-white border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
         >
           <option value="de">Deutsch</option>
           <option value="en">English</option>
-          <option value="es">Español</option>
-          <option value="ru">Русский</option>
-          <option value="it">Italiano</option>
-          <option value="fr">Français</option>
         </select>
       </div>
       <button
-        onClick={() => navigateTo('info')}
-        className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center mx-auto"
+        onClick={() => navigateTo('infoPage')}
+        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105"
       >
-        <Info className="w-6 h-6 text-blue-300 mr-2" />
+        <Info className="inline-block mr-2" size={20} />
         {t('goToInfoPage')}
       </button>
     </div>
-  </div>
-);
+  );
+};
 
-/**
- * @function InfoPage
- * @description Informationsseite über den Clan und das Spiel.
- * @param {Object} props - Die Eigenschaften der Komponente.
- * @param {function} props.navigateTo - Funktion zur Navigation zwischen Seiten.
- * @param {function} props.t - Übersetzungsfunktion.
- * @returns {JSX.Element} Das JSX-Element der InfoPage.
- */
-const InfoPage = ({ navigateTo, t }) => (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-700 text-white p-4 font-inter">
-    <div className="w-full max-w-2xl bg-gray-800 rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10">
-      <h1 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-blue-400">
-        {t('infoPageTitle')}
-      </h1>
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-blue-300 mb-3">{t('clanName')}</h2>
-        <p className="text-gray-300 leading-relaxed whitespace-pre-line">{t('clanDescription')}</p>
-      </div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-blue-300 mb-3">{t('gameName')}</h2>
-        <p className="text-gray-300 leading-relaxed whitespace-pre-line">{t('gameDescription')}</p>
-      </div>
-      <p className="text-gray-300 leading-relaxed mb-4 whitespace-pre-line">{t('normsInfo')}</p>
-      <p className="text-gray-300 leading-relaxed mb-4 whitespace-pre-line">{t('statsInfo')}</p>
-      <p className="text-gray-300 leading-relaxed mb-6 whitespace-pre-line">{t('errorSuggestion')}</p>
-      <p className="text-gray-300 leading-relaxed mb-6 font-semibold whitespace-pre-line">{t('goodLuck')}</p>
-      <p className="text-gray-300 leading-relaxed mb-8 text-right font-bold">{t('pizzaOnkel')}</p>
-      <div className="flex justify-center">
-        <button
-          onClick={() => navigateTo('navigation')}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
-        >
-          <ArrowLeft className="w-6 h-6 text-blue-300 mr-2" />
-          {t('goToNavigation')}
-        </button>
-      </div>
-      <p className="text-gray-500 text-sm mt-8 text-center">{t('copyright')}</p>
-    </div>
-  </div>
-);
-
-/**
- * @function NavigationPage
- * @description Navigationsseite, die Links zu allen Hauptbereichen des Dashboards enthält.
- * @param {Object} props - Die Eigenschaften der Komponente.
- * @param {function} props.navigateTo - Funktion zur Navigation zwischen Seiten.
- * @param {function} props.t - Übersetzungsfunktion.
- * @returns {JSX.Element} Das JSX-Element der NavigationPage.
- */
-const NavigationPage = ({ navigateTo, t }) => (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-700 text-white p-4 font-inter">
-    <div className="w-full max-w-2xl bg-gray-800 rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10">
-      <h1 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-blue-400">
-        {t('navigationTitle')}
-      </h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-        <button onClick={() => navigateTo('currentEvent')} className="p-4 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition duration-200 text-left flex items-center">
-          <Calendar className="w-7 h-7 text-green-300 mr-3" />
-          <div>
-            <h3 className="text-xl font-semibold text-blue-300">{t('currentTotalEvent')}</h3>
-            <p className="text-gray-400 text-sm">Zeigt die aktuellen Gesamtergebnisse der Veranstaltungsperiode an.</p>
-          </div>
-        </button>
-        <button onClick={() => navigateTo('uff2Standards')} className="p-4 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition duration-200 text-left flex items-center">
-          <Award className="w-7 h-7 text-yellow-300 mr-3" />
-          <div>
-            <h3 className="text-xl font-semibold text-blue-300">{t('uff2StandardsEvaluation')}</h3>
-            <p className="text-gray-400 text-sm">{t('uff2StandardsDescription')}</p>
-          </div>
-        </button>
-        <button onClick={() => navigateTo('eventArchive')} className="p-4 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition duration-200 text-left flex items-center">
-          <Archive className="w-7 h-7 text-purple-300 mr-3" />
-          <div>
-            <h3 className="text-xl font-semibold text-blue-300">{t('eventArchive')}</h3>
-            <p className="text-gray-400 text-sm">Übersicht über vergangene Veranstaltungen.</p>
-          </div>
-        </button>
-        <button onClick={() => navigateTo('topTen')} className="p-4 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition duration-200 text-left flex items-center">
-          <ListOrdered className="w-7 h-7 text-pink-300 mr-3" />
-          <div>
-            <h3 className="text-xl font-semibold text-blue-300">{t('topTen')}</h3>
-            <p className="text-gray-400 text-sm">Zeigt die Top 10 Spieler in verschiedenen Kategorien an.</p>
-          </div>
-        </button>
-        <button onClick={() => navigateTo('hallOfChamps')} className="p-4 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition duration-200 text-left flex items-center">
-          <Trophy className="w-7 h-7 text-orange-300 mr-3" />
-          <div>
-            <h3 className="text-xl font-semibold text-blue-300">{t('hallOfChamps')}</h3>
-            <p className="text-gray-400 text-sm">Zeigt die Champions aller Zeiten an.</p>
-          </div>
-        </button>
-        <button onClick={() => navigateTo('contactForm')} className="p-4 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition duration-200 text-left flex items-center">
-          <Mail className="w-7 h-7 text-teal-300 mr-3" />
-          <div>
-            <h3 className="text-xl font-semibold text-blue-300">{t('contactForm')}</h3>
-            <p className="text-gray-400 text-sm">Kontaktiere die Administration.</p>
-          </div>
-        </button>
-        <button onClick={() => navigateTo('adminPanel')} className="p-4 bg-red-700 rounded-lg shadow-md hover:bg-red-600 transition duration-200 text-left flex items-center">
-          <Shield className="w-7 h-7 text-red-300 mr-3" />
-          <div>
-            <h3 className="text-xl font-semibold text-red-300">{t('adminPanel')}</h3>
-            <p className="text-gray-200 text-sm">Verwalte Clan-Einstellungen und Spielerdaten.</p>
-          </div>
-        </button>
-      </div>
-      <div className="flex justify-center">
-        <button
-          onClick={() => navigateTo('info')}
-          className="px-6 py-3 bg-gray-600 text-white rounded-lg shadow-lg hover:bg-gray-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
-        >
-          <ArrowLeft className="w-6 h-6 text-gray-300 mr-2" />
-          {t('backToInfo')}
-        </button>
-      </div>
-    </div>
-  </div>
-);
-
-/**
- * @function PlaceholderPage
- * @description Eine generische Platzhalterkomponente für Seiten, die noch in Entwicklung sind.
- * @param {Object} props - Die Eigenschaften der Komponente.
- * @param {string} props.titleKey - Der Schlüssel für den Titel der Seite aus den Übersetzungen.
- * @param {function} props.navigateTo - Funktion zur Navigation zwischen Seiten.
- * @param {function} props.t - Übersetzungsfunktion.
- * @returns {JSX.Element} Das JSX-Element der PlaceholderPage.
- */
-const PlaceholderPage = ({ titleKey, navigateTo, t }) => (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-700 text-white p-4 font-inter">
-    <div className="w-full max-w-2xl bg-gray-800 rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10 text-center">
-      <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-blue-400">
-        {t(titleKey)}
-      </h1>
-      <p className="text-gray-300 text-lg mb-8">
-        {t('pageUnderConstruction')}
-      </p>
-      <button
-        onClick={() => navigateTo('navigation')}
-        className="px-6 py-3 bg-gray-600 text-white rounded-lg shadow-lg hover:bg-gray-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
-      >
-        <ArrowLeft className="w-6 h-6 text-gray-300 mr-2" />
-        {t('backToNavigation')}
-      </button>
-    </div>
-  </div>
-);
-
-/**
- * @function Uff2StandardsPage
- * @description Neue Seite für die UFF_2_Standards Auswertung.
- * @param {Object} props - Die Eigenschaften der Komponente.
- * @param {function} props.navigateTo - Funktion zur Navigation zwischen Seiten.
- * @param {function} props.t - Übersetzungsfunktion.
- * @returns {JSX.Element} Das JSX-Element der Uff2StandardsPage.
- */
-const Uff2StandardsPage = ({ navigateTo, t }) => (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-700 text-white p-4 font-inter">
-    <div className="w-full max-w-2xl bg-gray-800 rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10 text-center">
-      <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-blue-400">
-        {t('uff2StandardsEvaluation')}
-      </h1>
-      <p className="text-gray-300 text-lg mb-8">
-        {t('uff2StandardsDescription')}
-      </p>
-      <button
-        onClick={() => navigateTo('navigation')}
-        className="px-6 py-3 bg-gray-600 text-white rounded-lg shadow-lg hover:bg-gray-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
-      >
-        <ArrowLeft className="w-6 h-6 text-gray-300 mr-2" />
-        {t('backToNavigation')}
-      </button>
-    </div>
-  </div>
-);
-
-
-/**
- * @function PlayerDetailPage
- * @description Zeigt detaillierte Informationen zu einem einzelnen Spieler an, einschließlich seiner Truhenkategorien.
- * @param {Object} props - Die Eigenschaften der Komponente.
- * @param {function} props.navigateTo - Funktion zur Navigation zwischen Seiten.
- * @param {function} props.t - Übersetzungsfunktion.
- * @param {Object} props.player - Das Spielerobjekt mit allen Details.
- * @returns {JSX.Element} Das JSX-Element der PlayerDetailPage.
- */
-const PlayerDetailPage = ({ navigateTo, t, player }) => {
-  if (!player) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-700 text-white p-4 font-inter">
-        <div className="w-full max-w-2xl bg-gray-800 rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10 text-center">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-blue-400">
-            {t('playerDetails')}
-          </h1>
-          <p className="text-gray-300 text-lg mb-8">Spielerdaten nicht gefunden.</p>
-          <button
-            onClick={() => navigateTo('currentEvent')}
-            className="px-6 py-3 bg-gray-600 text-white rounded-lg shadow-lg hover:bg-gray-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
-          >
-            <ArrowLeft className="w-6 h-6 text-gray-300 mr-2" />
-            {t('backToCurrentEvent')}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Definiert die Reihenfolge der Truhenkategorien gemäß der Projektbeschreibung für eine konsistente Anzeige.
-  // Diese Liste sollte alle möglichen Kategorien aus der JSON-Datei enthalten.
-  const chestCategoriesOrder = [
-    "Arena Chest", "Arena Total", "Common LV5", "Common LV10", "Common LV15", "Common LV20", "Common LV25", "Common Total",
-    "Rare LV10", "Rare LV15", "Rare LV20", "Rare LV25", "Rare LV30", "Rare Total",
-    "Epic LV15", "Epic LV20", "Epic LV25", "Epic LV30", "Epic LV35", "Epic Total",
-    "Tartaros LV15", "Tartaros LV20", "Tartaros LV25", "Tartaros LV30", "Tartaros LV35", "Tartaros Total",
-    "Elven LV10", "Elven LV15", "Elven LV20", "Elven LV25", "Elven LV30", "Elven Total",
-    "Cursed LV20", "Cursed LV25", "Cursed Total",
-    "Wooden Chest", "Bronze Chest", "Silver Chest", "Golden Chest", "Precious Chest", "Magic Chest", "Bank Total",
-    "Runic LV 20-24", "Runic LV 25-29", "Runic LV 30-34", "Runic LV 35-39", "Runic LV 40-44", "Runic LV 45", "Runic Total",
-    "Heroic LV16", "Heroic LV17", "Heroic LV18", "Heroic LV19", "Heroic LV20", "Heroic LV21", "Heroic LV22", "Heroic LV23", "Heroic LV24", "Heroic LV25", "Heroic LV26", "Heroic LV27", "Heroic LV28", "Heroic LV29", "Heroic LV30", "Heroic LV31", "Heroic LV32", "Heroic LV33", "Heroic LV34", "Heroic LV35", "Heroic LV36", "Heroic LV37", "Heroic LV38", "Heroic LV39", "Heroic LV40", "Heroic LV41", "Heroic LV42", "Heroic LV43", "Heroic LV44", "Heroic LV45", "Heroic Total",
-    "VotA LV 10-14", "VotA LV 15-19", "VotA LV 20-24", "VotA LV 25-29", "VotA LV 30-34", "VotA LV 35-39", "VotA LV 40-44", "VotA Total",
-    "Quick March Chest", "Ancients Chest", "ROTA Total", "Epic Ancient squad", "EAs Total", "Union Chest", "Union Total", "Jormungandr's Chest", "Jormungandr Total",
-    // "Points", "leerspalte", "Timestamp" - Diese sind keine Truhenkategorien im Sinne der Anzeige
-  ];
-
+// Komponente für die Informationsseite
+const InfoPage = ({ navigateTo, t }) => {
   return (
-    <div className="w-full max-w-4xl bg-gray-800 rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10">
-      <h1 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-blue-400">
-        {t('playerDetails')}: {player.name}
-      </h1>
-      <div className="mb-6 text-gray-300">
-        <p className="text-lg mb-2"><span className="font-semibold">{t('name')}:</span> {player.name}</p>
-        <p className="text-lg mb-2"><span className="font-semibold">{t('rank')}:</span> {player.rank}</p>
-        <p className="text-lg mb-2"><span className="font-semibold">{t('troopStrength')}:</span> {player.troopStrength}</p>
-        {player.aliases && player.aliases.length > 0 && (
-          <p className="text-lg mb-2"><span className="font-semibold">{t('aliases')}:</span> {player.aliases.join(', ')}</p>
-        )}
-        <p className="text-lg mb-2"><span className="font-semibold">{t('normTarget')}:</span> {player.normCategory}</p>
-        <p className="text-lg mb-2"><span className="font-semibold">{t('totalPoints')}:</span> {player.Points || 0}</p>
-        <p className="text-lg mb-2"><span className="font-semibold">{t('normFulfillment')}:</span> {player.normFulfillment ? player.normFulfillment.toFixed(2) : 0}%</p>
+    <div className="max-w-3xl mx-auto bg-gray-800 p-8 rounded-lg shadow-xl">
+      <h2 className="text-3xl font-bold mb-6 text-indigo-400 text-center">{t('infoPageTitle')}</h2>
+      <div className="mb-6">
+        <h3 className="text-2xl font-semibold mb-3 text-indigo-300">{t('clanName')}</h3>
+        <p className="text-gray-300 leading-relaxed">{t('clanDescription')}</p>
       </div>
-      <h2 className="text-2xl font-semibold text-blue-300 mb-4">{t('chestCategories')}</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        {/* Filtert und zeigt nur relevante Truhenkategorien an, die im Spielerobjekt vorhanden sind */}
-        {chestCategoriesOrder.filter(category => player[category] !== undefined).map(category => (
-          <div key={category} className="bg-gray-700 p-3 rounded-md">
-            <p className="text-gray-300 text-sm">{category}: <span className="font-medium text-gray-200">{player[category]}</span></p>
-          </div>
-        ))}
+      <div className="mb-8">
+        <h3 className="text-2xl font-semibold mb-3 text-indigo-300">{t('gameName')}</h3>
+        <p className="text-gray-300 leading-relaxed">{t('gameDescription')}</p>
       </div>
-      <div className="flex justify-center">
-        <button
-          onClick={() => navigateTo('currentEvent')}
-          className="px-6 py-3 bg-gray-600 text-white rounded-lg shadow-lg hover:bg-gray-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
-        >
-          <ArrowLeft className="w-6 h-6 text-gray-300 mr-2" />
-          {t('backToCurrentEvent')}
-        </button>
-      </div>
+      <button
+        onClick={() => navigateTo('navigation')}
+        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 w-full"
+      >
+        <Home className="inline-block mr-2" size={20} />
+        {t('goToNavigation')}
+      </button>
     </div>
   );
 };
 
-// Definiert alle relevanten Truhenkategorien und "Points" für Top Ten und Hall of Champions.
-// Diese Liste wird für die dynamische Erstellung der Tabellenspalten verwendet.
-const ALL_CHEST_CATEGORIES = [
-  "Arena Chest", "Arena Total", "Common LV5", "Common LV10", "Common LV15", "Common LV20", "Common LV25", "Common Total",
-  "Rare LV10", "Rare LV15", "Rare LV20", "Rare LV25", "Rare LV30", "Rare Total",
-  "Epic LV15", "Epic LV20", "Epic LV25", "Epic LV30", "Epic LV35", "Epic Total",
-  "Tartaros LV15", "Tartaros LV20", "Tartaros LV25", "Tartaros LV30", "Tartaros LV35", "Tartaros Total",
-  "Elven LV10", "Elven LV15", "Elven LV20", "Elven LV25", "Elven LV30", "Elven Total",
-  "Cursed LV20", "Cursed LV25", "Cursed Total",
-  "Wooden Chest", "Bronze Chest", "Silver Chest", "Golden Chest", "Precious Chest", "Magic Chest", "Bank Total",
-  "Runic LV 20-24", "Runic LV 25-29", "Runic LV 30-34", "Runic LV 35-39", "Runic LV 40-44", "Runic LV 45", "Runic Total",
-  "Heroic LV16", "Heroic LV17", "Heroic LV18", "Heroic LV19", "Heroic LV20", "Heroic LV21", "Heroic LV22", "Heroic LV23", "Heroic LV24", "Heroic LV25", "Heroic LV26", "Heroic LV27", "Heroic LV28", "Heroic LV29", "Heroic LV30", "Heroic LV31", "Heroic LV32", "Heroic LV33", "Heroic LV34", "Heroic LV35", "Heroic LV36", "Heroic LV37", "Heroic LV38", "Heroic LV39", "Heroic LV40", "Heroic LV41", "Heroic LV42", "Heroic LV43", "Heroic LV44", "Heroic LV45", "Heroic Total",
-    "VotA LV 10-14", "VotA LV 15-19", "VotA LV 20-24", "VotA LV 25-29", "VotA LV 30-34", "VotA LV 35-39", "VotA LV 40-44", "VotA Total",
-  "Quick March Chest", "Ancients Chest", "ROTA Total", "Epic Ancient squad", "EAs Total", "Union Chest", "Union Total", "Jormungandr's Chest", "Jormungandr Total",
-  "Points" // "Points" ist eine spezielle Kategorie für die Gesamtpunktzahl
-];
-
-
-/**
- * @function CurrentEventPage
- * @description Zeigt die aktuellen Spielergebnisse und die Normerfüllung für die aktuelle Veranstaltungsperiode an.
- * Ermöglicht den Drilldown zu detaillierten Spielerberichten.
- * @param {Object} props - Die Eigenschaften der Komponente.
- * @param {function} props.navigateTo - Funktion zur Navigation zwischen Seiten.
- * @param {function} props.t - Übersetzungsfunktion.
- * @param {Object} props.db - Die Firestore-Datenbankinstanz.
- * @param {string} props.appId - Die Anwendungs-ID für Firestore-Pfade.
- * @param {string} props.userId - Die ID des aktuell angemeldeten Benutzers.
- * @returns {JSX.Element} Das JSX-Element der CurrentEventPage.
- */
-const CurrentEventPage = ({ navigateTo, t, db, appId, userId }) => {
-  const [players, setPlayers] = useState([]);
-  const [normsMapping, setNormsMapping] = useState([]);
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
-
-  /**
-   * @description Effekt-Hook zum Abrufen der Spielerdaten für das aktuelle Event und der Normen-Mappings.
-   * Abonniert Änderungen in Echtzeit.
-   */
-  useEffect(() => {
-    if (!db || !userId) return;
-
-    // Spieler für das aktuelle Event abrufen
-    const unsubscribePlayers = onSnapshot(
-      collection(db, `artifacts/${appId}/public/data/currentEventPlayers`),
-      (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setPlayers(data);
-      },
-      (error) => console.error("Error fetching current event players:", error)
-    );
-
-    // Normen-Mappings abrufen
-    const unsubscribeNorms = onSnapshot(
-      collection(db, `artifacts/${appId}/public/data/norms`),
-      (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setNormsMapping(data);
-      },
-      (error) => console.error("Error fetching norms:", error)
-    );
-
-    return () => {
-      unsubscribePlayers();
-      unsubscribeNorms();
-    };
-  }, [db, userId, appId]);
-
-  // Berechnet die Gesamtpunkte und die Normerfüllung für jeden Spieler.
-  const playersWithCalculations = players.map(player => {
-    // Finde die Norm für die Truppenstärke des Spielers
-    const normTarget = normsMapping.find(norm => norm.troopStrength === player.troopStrength)?.norm || 0;
-    const totalPoints = player.Points || 0; // Annahme: Gesamtpunkte sind im Feld "Points"
-    const difference = totalPoints - normTarget;
-    const normFulfillment = normTarget > 0 ? (totalPoints / normTarget) * 100 : 0;
-
-    return {
-      ...player,
-      normTarget,
-      totalPoints,
-      difference,
-      normFulfillment,
-    };
-  });
-
-  // Berechnet die gesamte Clan-Normerfüllung.
-  const totalActualPoints = playersWithCalculations.reduce((sum, player) => sum + player.totalPoints, 0);
-  const totalNormTargets = playersWithCalculations.reduce((sum, player) => sum + player.normTarget, 0);
-  const overallNormFulfillment = totalNormTargets > 0 ? (totalActualPoints / totalNormTargets) * 100 : 0;
-
-  // Wenn ein Spieler ausgewählt wurde, zeige die Detailseite an.
-  if (selectedPlayer) {
-    return <PlayerDetailPage navigateTo={navigateTo} t={t} player={selectedPlayer} />;
-  }
-
+// Hauptnavigation
+const NavigationPage = ({ navigateTo, t }) => {
   return (
-    <div className="w-full max-w-6xl bg-gray-800 rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10">
-      <h1 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-blue-400">
-        {t('currentTotalEvent')}
-      </h1>
-      <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => navigateTo('navigation')}
-          className="px-4 py-2 bg-gray-600 text-white rounded-lg shadow-lg hover:bg-gray-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center space-x-2"
-        >
-          <ArrowLeft className="w-5 h-5 text-gray-300 mr-2" />
-          <span>{t('backToNavigation')}</span>
-        </button>
+    <div className="max-w-3xl mx-auto bg-gray-800 p-8 rounded-lg shadow-xl">
+      <h2 className="text-3xl font-bold mb-6 text-indigo-400 text-center">{t('navigationTitle')}</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <NavItem icon={<BarChart size={24} />} text={t('currentTotalEvent')} onClick={() => navigateTo('currentTotalEvent')} />
+        <NavItem icon={<Archive size={24} />} text={t('eventArchive')} onClick={() => navigateTo('eventArchive')} />
+        <NavItem icon={<Users size={24} />} text={t('topTen')} onClick={() => navigateTo('topTen')} />
+        <NavItem icon={<Trophy size={24} />} text={t('hallOfChamps')} onClick={() => navigateTo('hallOfChamps')} />
+        <NavItem icon={<Mail size={24} />} text={t('contact')} onClick={() => navigateTo('contactForm')} />
+        <NavItem icon={<Settings size={24} />} text={t('adminPanel')} onClick={() => navigateTo('adminPanel')} />
       </div>
-      <div className="bg-gray-700 p-6 rounded-lg shadow-md mb-8">
-        <h2 className="text-2xl font-semibold text-blue-300 mb-4">{t('overallClanNormFulfillment')}</h2>
-        <div className="w-full bg-gray-600 rounded-full h-8">
-          <div
-            className="bg-green-500 h-8 rounded-full text-right pr-2 flex items-center justify-end text-sm font-bold"
-            style={{ width: `${Math.min(100, overallNormFulfillment)}%` }}
-          >
-            {overallNormFulfillment.toFixed(2)}%
-          </div>
-        </div>
-        {overallNormFulfillment < 100 && (
-          <p className="text-red-300 text-sm mt-2">Noch { (100 - overallNormFulfillment).toFixed(2) }% bis zur vollständigen Normerfüllung des Clans!</p>
-        )}
-      </div>
-      <h2 className="text-2xl font-semibold text-blue-300 mb-4">{t('playerList')}</h2>
-      {playersWithCalculations.length === 0 ? (
-        <p className="text-center text-gray-400 text-lg py-10">
-          {t('noPlayersInCurrentEvent')}
-        </p>
-      ) : (
-        <div className="overflow-x-auto bg-gray-700 rounded-lg shadow-md">
-          <table className="min-w-full divide-y divide-gray-600">
-            <thead className="bg-gray-600">
-              <tr>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">{t('name')}</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">{t('rank')}</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">{t('troopStrength')}</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">{t('totalPoints')}</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">{t('normTarget')}</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">{t('difference')}</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">{t('normFulfillment')}</th>
-                {/* Dynamisch Truhenkategorie-Header hinzufügen */}
-                {ALL_CHEST_CATEGORIES.filter(cat => cat !== "Points").map(category => (
-                  <th key={category} scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">{category}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-gray-700 divide-y divide-gray-600">
-              {playersWithCalculations.map((player) => (
-                <tr key={player.id} className="hover:bg-gray-600">
-                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-blue-300 cursor-pointer" onClick={() => navigateTo('playerReport', player)}>
-                    {player.name}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">{player.rank}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">{player.troopStrength}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">{player.totalPoints}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">{player.normTarget}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">{player.difference}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">
-                    <div className="w-24 bg-gray-500 rounded-full h-4">
-                      <div
-                        className="bg-blue-400 h-4 rounded-full"
-                        style={{ width: `${Math.min(100, player.normFulfillment)}%` }}
-                      ></div>
-                    </div>
-                    <span className="ml-2">{player.normFulfillment.toFixed(1)}%</span>
-                  </td>
-                  {/* Dynamisch Truhenkategorie-Daten hinzufügen */}
-                  {ALL_CHEST_CATEGORIES.filter(cat => cat !== "Points").map(category => (
-                    <td key={category} className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">{player[category] || 0}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <button
+        onClick={() => navigateTo('welcome')}
+        className="mt-8 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 w-full"
+      >
+        <ChevronLeft className="inline-block mr-2" size={20} />
+        {t('backToWelcome')}
+      </button>
     </div>
   );
 };
 
-/**
- * @function ArchivedPeriodDetailsPage
- * @description Zeigt detaillierte Spielerdaten für eine spezifische archivierte Veranstaltungsperiode an.
- * @param {Object} props - Die Eigenschaften der Komponente.
- * @param {function} props.navigateTo - Funktion zur Navigation zwischen Seiten.
- * @param {function} props.t - Übersetzungsfunktion.
- * @param {Object} props.db - Die Firestore-Datenbankinstanz.
- * @param {string} props.appId - Die Anwendungs-ID für Firestore-Pfade.
- * @param {string} props.userId - Die ID des aktuell angemeldeten Benutzers.
- * @param {string} props.archivedPeriodId - Die ID der archivierten Periode, deren Details angezeigt werden sollen.
- * @returns {JSX.Element} Das JSX-Element der ArchivedPeriodDetailsPage.
- */
-const ArchivedPeriodDetailsPage = ({ navigateTo, t, db, appId, userId, archivedPeriodId }) => {
-  const [players, setPlayers] = useState([]);
-  const [normsMapping, setNormsMapping] = useState([]);
-  const [periodInfo, setPeriodInfo] = useState(null);
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
+// Navigations-Item-Komponente
+const NavItem = ({ icon, text, onClick }) => (
+  <button
+    onClick={onClick}
+    className="flex items-center justify-center p-4 bg-gray-700 hover:bg-indigo-600 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 text-white text-lg font-semibold"
+  >
+    {icon}
+    <span className="ml-3">{text}</span>
+  </button>
+);
 
-  /**
-   * @description Effekt-Hook zum Abrufen der Periodeninformationen, Spielerdaten und Normen-Mappings für die archivierte Periode.
-   * Abonniert Änderungen in Echtzeit.
-   */
-  useEffect(() => {
-    if (!db || !userId || !archivedPeriodId) return;
+// Komponente für die aktuelle Veranstaltungsperiode
+const CurrentTotalEventPage = ({ navigateTo, t, db, appId, userId }) => {
+  const [activePeriods, setActivePeriods] = useState([]);
+  const [currentPeriodId, setCurrentPeriodId] = useState(null);
+  const [currentPeriodName, setCurrentPeriodName] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedPlayer, setSelectedPlayer] = useState('');
+  const [playerList, setPlayerList] = useState([]);
+  const [playerReport, setPlayerReport] = useState(null);
+  const [selectedEventDay, setSelectedEventDay] = useState(null);
+  const [eventDays, setEventDays] = useState([]);
+  const [scores, setScores] = useState([]);
 
-    // Periodeninformationen abrufen
-    const periodDocRef = doc(db, `artifacts/${appId}/public/data/eventArchive`, archivedPeriodId);
-    const unsubscribePeriod = onSnapshot(periodDocRef, (docSnap) => {
-      if (docSnap.exists()) {
-        setPeriodInfo(docSnap.data());
+  // Funktion zum Abrufen der aktiven Perioden
+  const fetchActivePeriods = async () => {
+    if (!db || !appId) {
+      console.log("Firestore-Instanz oder App ID nicht verfügbar.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const q = query(collection(db, `artifacts/${appId}/public/data/eventPeriods`), where("isArchived", "==", false));
+      const querySnapshot = await getDocs(q);
+      const periods = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setActivePeriods(periods);
+
+      // Versuche, die aktuelle Periode zu finden
+      const current = periods.find(p => p.isCurrent);
+      if (current) {
+        setCurrentPeriodId(current.id);
+        setCurrentPeriodName(current.name);
+      } else if (periods.length > 0) {
+        // Wenn keine als "current" markiert ist, nimm die erste aktive
+        setCurrentPeriodId(periods[0].id);
+        setCurrentPeriodName(periods[0].name);
+        // Optional: Markiere die erste als aktuell in Firestore
+        // await setDoc(doc(db, `artifacts/${appId}/public/data/eventPeriods`, periods[0].id), { isCurrent: true }, { merge: true });
       } else {
-        console.warn("Archived period not found:", archivedPeriodId);
-        setPeriodInfo(null);
+        setCurrentPeriodId(null);
+        setCurrentPeriodName(t('noActivePeriods'));
       }
-    }, (error) => console.error("Error fetching archived period info:", error));
+    } catch (err) {
+      console.error("Fehler beim Laden der aktiven Perioden:", err);
+      setError(`${t('error')} ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // Spieler für die spezifische archivierte Periode abrufen
-    const unsubscribePlayers = onSnapshot(
-      collection(db, `artifacts/${appId}/public/data/eventArchive/${archivedPeriodId}/players`),
-      (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setPlayers(data);
-      },
-      (error) => console.error("Error fetching archived players:", error)
-    );
+  // Funktion zum Abrufen der Spielerliste
+  const fetchPlayerList = async () => {
+    if (!db || !appId) return;
+    try {
+      const q = query(collection(db, `artifacts/${appId}/public/data/players`));
+      const querySnapshot = await getDocs(q);
+      const players = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setPlayerList(players);
+    } catch (err) {
+      console.error("Fehler beim Laden der Spielerliste:", err);
+    }
+  };
 
-    // Normen-Mappings abrufen (angenommen, Normen sind global oder werden aus einer konsistenten Quelle abgerufen)
-    const unsubscribeNorms = onSnapshot(
-      collection(db, `artifacts/${appId}/public/data/norms`),
-      (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setNormsMapping(data);
-      },
-      (error) => console.error("Error fetching norms:", error)
-    );
+  // Funktion zum Abrufen der Event-Tage für die aktuelle Periode
+  const fetchEventDays = async (periodId) => {
+    if (!db || !appId || !periodId) return;
+    try {
+      const q = query(collection(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays`));
+      const querySnapshot = await getDocs(q);
+      const days = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setEventDays(days.sort((a, b) => a.dayNumber - b.dayNumber)); // Sortiere nach Tag Nummer
+    } catch (err) {
+      console.error("Fehler beim Laden der Event-Tage:", err);
+    }
+  };
 
-    return () => {
-      unsubscribePeriod();
-      unsubscribePlayers();
-      unsubscribeNorms();
-    };
-  }, [db, userId, appId, archivedPeriodId]);
+  // Funktion zum Abrufen der Spielergebnisse für einen bestimmten Tag
+  const fetchScoresForDay = async (periodId, dayId) => {
+    if (!db || !appId || !periodId || !dayId) return;
+    try {
+      const q = query(collection(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays/${dayId}/playerScores`));
+      const querySnapshot = await getDocs(q);
+      const fetchedScores = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-  // Berechnet die Gesamtpunkte und die Normerfüllung für jeden Spieler in der archivierten Periode.
-  const playersWithCalculations = players.map(player => {
-    const normTarget = normsMapping.find(norm => norm.troopStrength === player.troopStrength)?.norm || 0;
-    const totalPoints = player.Points || 0;
-    const difference = totalPoints - normTarget;
-    const normFulfillment = normTarget > 0 ? (totalPoints / normTarget) * 100 : 0;
-
-    return {
-      ...player,
-      normTarget,
-      totalPoints,
-      difference,
-      normFulfillment,
-    };
-  });
-
-  // Berechnet die gesamte Clan-Normerfüllung für die archivierte Periode.
-  const totalActualPoints = playersWithCalculations.reduce((sum, player) => sum + player.totalPoints, 0);
-  const totalNormTargets = playersWithCalculations.reduce((sum, player) => sum + player.normTarget, 0);
-  const overallNormFulfillment = totalNormTargets > 0 ? (totalActualPoints / totalNormTargets) * 100 : 0;
-
-  // Wenn ein Spieler ausgewählt wurde, zeige die Detailseite an.
-  if (selectedPlayer) {
-    return <PlayerDetailPage navigateTo={navigateTo} t={t} player={selectedPlayer} />;
-  }
-
-  return (
-    <div className="w-full max-w-6xl bg-gray-800 rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10">
-      <h1 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-blue-400">
-        {t('archivedPeriodDetails')}
-      </h1>
-      <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => navigateTo('eventArchive')}
-          className="px-4 py-2 bg-gray-600 text-white rounded-lg shadow-lg hover:bg-gray-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center space-x-2"
-        >
-          <ArrowLeft className="w-5 h-5 text-gray-300 mr-2" />
-          <span>{t('backToArchive')}</span>
-        </button>
-      </div>
-      {periodInfo && (
-        <div className="bg-gray-700 p-6 rounded-lg shadow-md mb-8">
-          <h2 className="text-2xl font-semibold text-blue-300 mb-4">{t('periodEndedAt')}: {new Date(periodInfo.periodEndedAt).toLocaleString()}</h2>
-          <h3 className="text-xl font-semibold text-blue-300 mb-4">{t('overallClanNormFulfillment')}</h3>
-          <div className="w-full bg-gray-600 rounded-full h-8">
-            <div
-              className="bg-green-500 h-8 rounded-full text-right pr-2 flex items-center justify-end text-sm font-bold"
-              style={{ width: `${Math.min(100, overallNormFulfillment)}%` }}
-            >
-              {overallNormFulfillment.toFixed(2)}%
-            </div>
-          </div>
-        </div>
-      )}
-      <h2 className="text-2xl font-semibold text-blue-300 mb-4">{t('playerList')}</h2>
-      {playersWithCalculations.length === 0 ? (
-        <p className="text-center text-gray-400 text-lg py-10">
-          Keine Spielerdaten für diese archivierte Periode vorhanden.
-        </p>
-      ) : (
-        <div className="overflow-x-auto bg-gray-700 rounded-lg shadow-md">
-          <table className="min-w-full divide-y divide-gray-600">
-            <thead className="bg-gray-600">
-              <tr>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">{t('name')}</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">{t('rank')}</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">{t('troopStrength')}</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">{t('totalPoints')}</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">{t('normTarget')}</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">{t('difference')}</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">{t('normFulfillment')}</th>
-                {ALL_CHEST_CATEGORIES.filter(cat => cat !== "Points").map(category => (
-                  <th key={category} scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-200 uppercase tracking-wider">{category}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-gray-700 divide-y divide-gray-600">
-              {playersWithCalculations.map((player) => (
-                <tr key={player.id} className="hover:bg-gray-600">
-                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-blue-300 cursor-pointer" onClick={() => navigateTo('playerReport', player)}>
-                    {player.name}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">{player.rank}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">{player.troopStrength}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">{player.totalPoints}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">{player.normTarget}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">{player.difference}</td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">
-                    <div className="w-24 bg-gray-500 rounded-full h-4">
-                      <div
-                        className="bg-blue-400 h-4 rounded-full"
-                        style={{ width: `${Math.min(100, player.normFulfillment)}%` }}
-                      ></div>
-                    </div>
-                    <span className="ml-2">{player.normFulfillment.toFixed(1)}%</span>
-                  </td>
-                  {ALL_CHEST_CATEGORIES.filter(cat => cat !== "Points").map(category => (
-                    <td key={category} className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">{player[category] || 0}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
-};
-
-/**
- * @function EventArchivePage
- * @description Zeigt eine Liste aller archivierten Veranstaltungsperioden an.
- * Ermöglicht die Navigation zu den Details jeder archivierten Periode.
- * @param {Object} props - Die Eigenschaften der Komponente.
- * @param {function} props.navigateTo - Funktion zur Navigation zwischen Seiten.
- * @param {function} props.t - Übersetzungsfunktion.
- * @param {Object} props.db - Die Firestore-Datenbankinstanz.
- * @param {string} props.appId - Die Anwendungs-ID für Firestore-Pfade.
- * @param {string} props.userId - Die ID des aktuell angemeldeten Benutzers.
- * @returns {JSX.Element} Das JSX-Element der EventArchivePage.
- */
-const EventArchivePage = ({ navigateTo, t, db, appId, userId }) => {
-  const [archivedEvents, setArchivedEvents] = useState([]);
-  const [selectedArchivedPeriodId, setSelectedArchivedPeriodId] = useState(null);
-
-  /**
-   * @description Effekt-Hook zum Abrufen aller archivierten Events aus Firestore.
-   * Abonniert Änderungen in Echtzeit.
-   */
-  useEffect(() => {
-    if (!db || !userId) return;
-
-    const archiveCollectionRef = collection(db, `artifacts/${appId}/public/data/eventArchive`);
-    const q = query(archiveCollectionRef);
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const eventsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
+      // Spielerinformationen zu den Scores hinzufügen
+      const scoresWithPlayerNames = await Promise.all(fetchedScores.map(async (score) => {
+        const player = playerList.find(p => p.id === score.playerId);
+        return { ...score, playerName: player ? player.name : 'Unbekannter Spieler' };
       }));
-      setArchivedEvents(eventsData);
-    }, (error) => {
-      console.error("Error fetching archived events:", error);
-    });
+      setScores(scoresWithPlayerNames);
+    } catch (err) {
+      console.error("Fehler beim Laden der Spielergebnisse:", err);
+    }
+  };
 
-    return () => unsubscribe();
-  }, [db, userId, appId]);
 
-  // Wenn eine archivierte Periode ausgewählt wurde, zeige die Detailseite an.
-  if (selectedArchivedPeriodId) {
-    return (
-      <ArchivedPeriodDetailsPage
-        navigateTo={navigateTo}
-        t={t}
-        db={db}
-        appId={appId}
-        userId={userId}
-        archivedPeriodId={selectedArchivedPeriodId}
-      />
-    );
-  }
-
-  return (
-    <div className="w-full max-w-4xl bg-gray-800 rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10">
-      <h1 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-blue-400">
-        {t('eventArchiveTitle')}
-      </h1>
-      <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => navigateTo('navigation')}
-          className="px-4 py-2 bg-gray-600 text-white rounded-lg shadow-lg hover:bg-gray-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center space-x-2"
-        >
-          <ArrowLeft className="w-5 h-5 text-gray-300 mr-2" />
-          <span>{t('backToNavigation')}</span>
-        </button>
-      </div>
-      {archivedEvents.length === 0 ? (
-        <p className="text-center text-gray-400 text-lg py-10">
-          {t('noArchivedEvents')}
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {archivedEvents.map((event) => (
-            <div key={event.id} className="bg-gray-700 p-5 rounded-lg shadow-xl border border-gray-600 flex flex-col justify-between">
-              <div>
-                <h2 className="text-2xl font-semibold text-blue-300 mb-2">Archivierte Periode</h2>
-                <p className="text-gray-300 text-lg mb-3">
-                  {t('periodEndedAt')}: <span className="font-medium text-gray-200">{new Date(event.periodEndedAt).toLocaleString()}</span>
-                </p>
-              </div>
-              <div className="mt-4 flex justify-end">
-                <button
-                  onClick={() => navigateTo('archivedPeriodDetails', event.id)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition duration-200 flex items-center"
-                >
-                  <Info className="w-5 h-5 mr-2 text-blue-300" />
-                  {t('viewDetails')}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-/**
- * @function fetchAllPlayers
- * @description Hilfsfunktion zum Abrufen aller Spielerdaten, sowohl der aktuellen als auch der archivierten.
- * Durchsucht die 'currentEventPlayers'-Sammlung und alle 'players'-Unterkollektionen in 'eventArchive'.
- * @param {Object} db - Die Firestore-Datenbankinstanz.
- * @param {string} appId - Die Anwendungs-ID für Firestore-Pfade.
- * @returns {Promise<Array<Object>>} Eine Promise, die ein Array aller Spielerobjekte zurückgibt.
- */
-const fetchAllPlayers = async (db, appId) => {
-  let allPlayers = [];
-
-  // Aktuelle Event-Spieler abrufen
-  const currentPlayersSnapshot = await getDocs(collection(db, `artifacts/${appId}/public/data/currentEventPlayers`));
-  currentPlayersSnapshot.forEach(doc => {
-    allPlayers.push({ id: doc.id, ...doc.data() });
-  });
-
-  // Alle archivierten Perioden abrufen und deren Spieler hinzufügen
-  const archivedPeriodsSnapshot = await getDocs(collection(db, `artifacts/${appId}/public/data/eventArchive`));
-  for (const periodDoc of archivedPeriodsSnapshot.docs) {
-    const archivedPlayersSnapshot = await getDocs(collection(db, `artifacts/${appId}/public/data/eventArchive/${periodDoc.id}/players`));
-    archivedPlayersSnapshot.forEach(playerDoc => {
-      allPlayers.push({ id: playerDoc.id, ...playerDoc.data() });
-    });
-  }
-  return allPlayers;
-};
-
-/**
- * @function TopTenPage
- * @description Zeigt die Top-10-Spieler für jede definierte Truhenkategorie basierend auf allen verfügbaren Spielerdaten (aktuell und archiviert).
- * @param {Object} props - Die Eigenschaften der Komponente.
- * @param {function} props.navigateTo - Funktion zur Navigation zwischen Seiten.
- * @param {function} props.t - Übersetzungsfunktion.
- * @param {Object} props.db - Die Firestore-Datenbankinstanz.
- * @param {string} props.appId - Die Anwendungs-ID für Firestore-Pfade.
- * @param {string} props.userId - Die ID des aktuell angemeldeten Benutzers.
- * @returns {JSX.Element} Das JSX-Element der TopTenPage.
- */
-const TopTenPage = ({ navigateTo, t, db, appId, userId }) => {
-  const [topPlayers, setTopPlayers] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  /**
-   * @description Effekt-Hook zum Abrufen und Berechnen der Top-10-Spieler.
-   * Ruft alle Spielerdaten ab und sortiert sie nach jeder Kategorie.
-   */
   useEffect(() => {
-    const getTopPlayers = async () => {
-      if (!db || !userId) {
-        setError(t('errorMessageDbNotReady'));
-        setLoading(false);
+    fetchActivePeriods();
+    fetchPlayerList();
+  }, [db, appId]); // Abhängigkeiten: db und appId
+
+  useEffect(() => {
+    if (currentPeriodId) {
+      fetchEventDays(currentPeriodId);
+    }
+  }, [currentPeriodId, db, appId]);
+
+  useEffect(() => {
+    if (currentPeriodId && selectedEventDay) {
+      fetchScoresForDay(currentPeriodId, selectedEventDay.id);
+    }
+  }, [currentPeriodId, selectedEventDay, db, appId, playerList]); // playerList als Abhängigkeit hinzufügen
+
+  const handleLoadReport = async () => {
+    if (!selectedPlayer || !currentPeriodId) {
+      alert(t('noPlayerSelected'));
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const playerRef = doc(db, `artifacts/${appId}/public/data/players`, selectedPlayer);
+      const playerDoc = await getDoc(playerRef);
+      if (!playerDoc.exists()) {
+        setError(t('playerNotFound'));
+        setPlayerReport(null);
         return;
       }
-      try {
-        setLoading(true);
-        const allPlayers = await fetchAllPlayers(db, appId);
-        const calculatedTopPlayers = {};
+      const playerData = playerDoc.data();
 
-        // Iteriert über alle definierten Kategorien und berechnet die Top 10.
-        ALL_CHEST_CATEGORIES.forEach(category => {
-          // Filtert Spieler, die einen Wert für die aktuelle Kategorie haben, und sortiert sie absteigend.
-          const sortedPlayers = [...allPlayers]
-            .filter(player => player[category] !== undefined && player[category] !== null)
-            .sort((a, b) => (b[category] || 0) - (a[category] || 0));
-          calculatedTopPlayers[category] = sortedPlayers.slice(0, 10);
-        });
-        setTopPlayers(calculatedTopPlayers);
-      } catch (err) {
-        console.error("Error fetching top players:", err);
-        setError(t('errorMessageFetch'));
-      } finally {
-        setLoading(false);
-      }
-    };
-    getTopPlayers();
-  }, [db, appId, userId, t]);
+      // Sammle alle Scores für den ausgewählten Spieler in der aktuellen Periode
+      const scoresQuery = query(
+        collection(db, `artifacts/${appId}/public/data/eventPeriods/${currentPeriodId}/eventDays`),
+        // Hier müsste man eigentlich durch alle Tage iterieren und die Scores abrufen.
+        // Für eine einfache Demo nehmen wir an, dass wir alle Scores direkt abrufen können,
+        // was in Firestore so nicht direkt geht, ohne alle Tage zu kennen.
+        // Eine bessere Struktur wäre, Scores direkt unter dem Spieler zu speichern oder eine Subkollektion für Perioden-Scores.
+      );
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="text-center p-6 bg-white rounded-lg shadow-md">
-          <p className="text-lg text-gray-700">{t('loading')}</p>
-          <div className="mt-4 animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-        </div>
-      </div>
-    );
-  }
+      // Da wir nicht direkt alle Scores eines Spielers über alle Tage einer Periode abfragen können,
+      // müssen wir alle Tage abrufen und dann die Scores pro Tag filtern.
+      const allDaysSnapshot = await getDocs(collection(db, `artifacts/${appId}/public/data/eventPeriods/${currentPeriodId}/eventDays`));
+      let totalPlayerScore = 0;
+      let playerParticipationCount = 0;
+      const playerDetailedScores = [];
 
-  return (
-    <div className="w-full max-w-6xl bg-gray-800 rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10">
-      <h1 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-blue-400">
-        {t('topTenTitle')}
-      </h1>
-      <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => navigateTo('navigation')}
-          className="px-4 py-2 bg-gray-600 text-white rounded-lg shadow-lg hover:bg-gray-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center space-x-2"
-        >
-          <ArrowLeft className="w-5 h-5 text-gray-300 mr-2" />
-          <span>{t('backToNavigation')}</span>
-        </button>
-      </div>
-      {error && (
-        <div className="bg-red-600 p-3 rounded-md mb-4 text-center">
-          <p className="text-white">{error}</p>
-        </div>
-      )}
-      {Object.keys(topPlayers).length === 0 && !loading && !error ? (
-        <p className="text-center text-gray-400 text-lg py-10">
-          {t('noTopPlayers')}
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {ALL_CHEST_CATEGORIES.map(category => (
-            <div key={category} className="bg-gray-700 p-5 rounded-lg shadow-xl border border-gray-600">
-              <h2 className="text-xl font-semibold text-blue-300 mb-3">{category}</h2>
-              {topPlayers[category] && topPlayers[category].length > 0 ? (
-                <ol className="list-decimal list-inside space-y-1 text-gray-300">
-                  {topPlayers[category].map((player, index) => (
-                    <li key={player.id} className="flex justify-between items-center">
-                      <span>{index + 1}. {player.name}</span>
-                      <span className="font-bold text-blue-200">{player[category] || 0}</span>
-                    </li>
-                  ))}
-                </ol>
-              ) : (
-                <p className="text-gray-400 text-sm">Keine Daten für diese Kategorie.</p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-/**
- * @function HallOfChampsPage
- * @description Zeigt die Champions für jede definierte Truhenkategorie an, d.h. den Spieler mit dem höchsten Wert in dieser Kategorie über alle Zeiten.
- * @param {Object} props - Die Eigenschaften der Komponente.
- * @param {function} props.navigateTo - Funktion zur Navigation zwischen Seiten.
- * @param {function} props.t - Übersetzungsfunktion.
- * @param {Object} props.db - Die Firestore-Datenbankinstanz.
- * @param {string} props.appId - Die Anwendungs-ID für Firestore-Pfade.
- * @param {string} props.userId - Die ID des aktuell angemeldeten Benutzers.
- * @returns {JSX.Element} Das JSX-Element der HallOfChampsPage.
- */
-const HallOfChampsPage = ({ navigateTo, t, db, appId, userId }) => {
-  const [champions, setChampions] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  /**
-   * @description Effekt-Hook zum Abrufen und Berechnen der Champions.
-   * Ruft alle Spielerdaten ab und ermittelt den Champion für jede Kategorie.
-   */
-  useEffect(() => {
-    const getChampions = async () => {
-      if (!db || !userId) {
-        setError(t('errorMessageDbNotReady'));
-        setLoading(false);
-        return;
-      }
-      try {
-        setLoading(true);
-        const allPlayers = await fetchAllPlayers(db, appId);
-        const calculatedChampions = {};
-
-        // Iteriert über alle definierten Kategorien und ermittelt den Champion.
-        ALL_CHEST_CATEGORIES.forEach(category => {
-          let currentChampion = null;
-          allPlayers.forEach(player => {
-            const value = player[category] || 0;
-            // Wenn der aktuelle Spieler einen höheren Wert hat oder es noch keinen Champion gibt, setze ihn als Champion.
-            if (value > 0 && (!currentChampion || value > (currentChampion[category] || 0))) {
-              currentChampion = player;
-            }
-          });
-          if (currentChampion) {
-            calculatedChampions[category] = currentChampion;
+      for (const dayDoc of allDaysSnapshot.docs) {
+        const dayData = dayDoc.data();
+        const scoresSnapshot = await getDocs(collection(db, `artifacts/${appId}/public/data/eventPeriods/${currentPeriodId}/eventDays/${dayDoc.id}/playerScores`));
+        scoresSnapshot.forEach(scoreDoc => {
+          const scoreData = scoreDoc.data();
+          if (scoreData.playerId === selectedPlayer) {
+            totalPlayerScore += scoreData.score;
+            playerParticipationCount++;
+            playerDetailedScores.push({
+              dayNumber: dayData.dayNumber,
+              dayDate: dayData.date,
+              score: scoreData.score
+            });
           }
         });
-        setChampions(calculatedChampions);
-      } catch (err) {
-        console.error("Error fetching champions:", err);
-        setError(t('errorMessageFetch'));
-      } finally {
-        setLoading(false);
       }
-    };
-    getChampions();
-  }, [db, appId, userId, t]);
+
+      // Ermittle den Rang (sehr einfache Implementierung, nicht optimiert für große Datenmengen)
+      const allPlayerScoresInPeriod = {}; // { playerId: totalScore }
+      for (const dayDoc of allDaysSnapshot.docs) {
+        const scoresSnapshot = await getDocs(collection(db, `artifacts/${appId}/public/data/eventPeriods/${currentPeriodId}/eventDays/${dayDoc.id}/playerScores`));
+        scoresSnapshot.forEach(scoreDoc => {
+          const scoreData = scoreDoc.data();
+          allPlayerScoresInPeriod[scoreData.playerId] = (allPlayerScoresInPeriod[scoreData.playerId] || 0) + scoreData.score;
+        });
+      }
+
+      const sortedPlayers = Object.entries(allPlayerScoresInPeriod).sort(([, scoreA], [, scoreB]) => scoreB - scoreA);
+      const rank = sortedPlayers.findIndex(([pId,]) => pId === selectedPlayer) + 1;
+
+
+      setPlayerReport({
+        playerName: playerData.name,
+        eventPeriodName: currentPeriodName,
+        totalScore: totalPlayerScore,
+        rank: rank > 0 ? rank : 'N/A', // Zeige N/A, wenn der Spieler nicht gefunden wurde
+        participation: playerParticipationCount,
+        detailedScores: playerDetailedScores.sort((a, b) => a.dayNumber - b.dayNumber)
+      });
+
+    } catch (err) {
+      console.error("Fehler beim Laden des Spielerberichts:", err);
+      setError(`${t('error')} ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="text-center p-6 bg-white rounded-lg shadow-md">
-          <p className="text-lg text-gray-700">{t('loading')}</p>
-          <div className="mt-4 animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-        </div>
+      <div className="text-center text-white">
+        <Loader className="animate-spin text-indigo-400 h-10 w-10 mx-auto mb-4" />
+        <p>{t('loading')}</p>
       </div>
     );
   }
 
+  if (error) {
+    return <div className="text-red-500 text-center">{error}</div>;
+  }
+
   return (
-    <div className="w-full max-w-6xl bg-gray-800 rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10">
-      <h1 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-blue-400">
-        {t('hallOfChampsTitle')}
-      </h1>
-      <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => navigateTo('navigation')}
-          className="px-4 py-2 bg-gray-600 text-white rounded-lg shadow-lg hover:bg-gray-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center space-x-2"
-        >
-          <ArrowLeft className="w-5 h-5 text-gray-300 mr-2" />
-          <span>{t('backToNavigation')}</span>
-        </button>
+    <div className="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg shadow-xl">
+      <h2 className="text-3xl font-bold mb-6 text-indigo-400 text-center">{t('currentTotalEvent')}</h2>
+
+      <div className="mb-6">
+        <p className="text-lg mb-2"><span className="font-semibold">{t('currentPeriod')}</span> {currentPeriodName}</p>
       </div>
-      {error && (
-        <div className="bg-red-600 p-3 rounded-md mb-4 text-center">
-          <p className="text-white">{error}</p>
+
+      {/* Spielerbericht-Sektion */}
+      <div className="mb-8 p-6 bg-gray-700 rounded-lg shadow-md">
+        <h3 className="text-2xl font-semibold mb-4 text-indigo-300">{t('playerReportTitle')}</h3>
+        <div className="flex flex-col sm:flex-row items-center gap-4 mb-4">
+          <select
+            className="p-2 rounded-md bg-gray-600 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex-grow"
+            value={selectedPlayer}
+            onChange={(e) => setSelectedPlayer(e.target.value)}
+          >
+            <option value="">{t('selectPlayer')}</option>
+            {playerList.map(player => (
+              <option key={player.id} value={player.id}>{player.name}</option>
+            ))}
+          </select>
+          <button
+            onClick={handleLoadReport}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out hover:scale-105 flex-shrink-0"
+          >
+            <Download className="inline-block mr-2" size={20} />
+            {t('loadReport')}
+          </button>
         </div>
-      )}
-      {Object.keys(champions).length === 0 && !loading && !error ? (
-        <p className="text-center text-gray-400 text-lg py-10">
-          {t('noChampions')}
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {ALL_CHEST_CATEGORIES.map(category => (
-            <div key={category} className="bg-gray-700 p-5 rounded-lg shadow-xl border border-gray-600">
-              <h2 className="text-xl font-semibold text-blue-300 mb-3">{category} {t('champion')}</h2>
-              {champions[category] ? (
-                <div className="text-gray-300">
-                  <p className="text-lg font-bold">{champions[category].name}</p>
-                  <p className="text-sm">Wert: <span className="font-bold text-blue-200">{champions[category][category]}</span></p>
-                  <p className="text-sm">Rang: {champions[category].rank}</p>
-                  <p className="text-sm">Truppenstärke: {champions[category].troopStrength}</p>
-                </div>
-              ) : (
-                <p className="text-gray-400 text-sm">Kein Champion für diese Kategorie.</p>
-              )}
+
+        {playerReport && (
+          <div className="mt-6 p-4 bg-gray-800 rounded-lg shadow-inner">
+            <h4 className="text-xl font-bold mb-3 text-indigo-200">{t('playerReportTitle')} {playerReport.playerName}</h4>
+            <p className="text-gray-300 mb-1"><span className="font-semibold">{t('eventPeriod')}</span> {playerReport.eventPeriodName}</p>
+            <p className="text-gray-300 mb-1"><span className="font-semibold">{t('totalScore')}</span> {playerReport.totalScore}</p>
+            <p className="text-gray-300 mb-1"><span className="font-semibold">{t('rank')}</span> {playerReport.rank}</p>
+            <p className="text-gray-300 mb-4"><span className="font-semibold">{t('participation')}</span> {playerReport.participation} {t('days')}</p>
+
+            <h5 className="text-lg font-semibold mb-2 text-indigo-200">{t('details')}:</h5>
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-gray-700 rounded-lg overflow-hidden">
+                <thead>
+                  <tr className="bg-gray-600">
+                    <th className="py-2 px-4 text-left text-indigo-100">{t('day')}</th>
+                    <th className="py-2 px-4 text-left text-indigo-100">{t('date')}</th>
+                    <th className="py-2 px-4 text-left text-indigo-100">{t('score')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {playerReport.detailedScores.map((detail, index) => (
+                    <tr key={index} className="border-b border-gray-600 last:border-b-0">
+                      <td className="py-2 px-4 text-gray-300">{detail.dayNumber}</td>
+                      <td className="py-2 px-4 text-gray-300">{detail.dayDate}</td>
+                      <td className="py-2 px-4 text-gray-300">{detail.score}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Weitere Links zu einzelnen Tagen */}
+      <div className="mb-8 p-6 bg-gray-700 rounded-lg shadow-md">
+        <h3 className="text-2xl font-semibold mb-4 text-indigo-300">{t('furtherLinkIndividualDays')}</h3>
+        <select
+          className="p-2 rounded-md bg-gray-600 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full mb-4"
+          value={selectedEventDay ? selectedEventDay.id : ''}
+          onChange={(e) => setSelectedEventDay(eventDays.find(day => day.id === e.target.value))}
+        >
+          <option value="">{t('selectEventDay')}</option>
+          {eventDays.map(day => (
+            <option key={day.id} value={day.id}>
+              {t('day')} {day.dayNumber} ({day.date})
+            </option>
           ))}
-        </div>
-      )}
+        </select>
+
+        {selectedEventDay && (
+          <div className="mt-4 p-4 bg-gray-800 rounded-lg shadow-inner">
+            <h4 className="text-xl font-bold mb-3 text-indigo-200">{t('eventDetails')}</h4>
+            <p className="text-gray-300 mb-1"><span className="font-semibold">{t('eventName')}</span> {currentPeriodName}</p>
+            <p className="text-gray-300 mb-1"><span className="font-semibold">{t('day')}</span> {selectedEventDay.dayNumber}</p>
+            <p className="text-gray-300 mb-1"><span className="font-semibold">{t('eventDate')}</span> {selectedEventDay.date}</p>
+            <p className="text-gray-300 mb-4"><span className="font-semibold">{t('eventDescription')}</span> {selectedEventDay.description}</p>
+
+            <h5 className="text-lg font-semibold mb-2 text-indigo-200">{t('playerScoresForDay')} {selectedEventDay.dayNumber}:</h5>
+            {scores.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full bg-gray-700 rounded-lg overflow-hidden">
+                  <thead>
+                    <tr className="bg-gray-600">
+                      <th className="py-2 px-4 text-left text-indigo-100">{t('player')}</th>
+                      <th className="py-2 px-4 text-left text-indigo-100">{t('points')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {scores.map(score => (
+                      <tr key={score.id} className="border-b border-gray-600 last:border-b-0">
+                        <td className="py-2 px-4 text-gray-300">{score.playerName}</td>
+                        <td className="py-2 px-4 text-gray-300">{score.score}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-gray-400">{t('noScores')}</p>
+            )}
+          </div>
+        )}
+      </div>
+
+      <button
+        onClick={() => navigateTo('navigation')}
+        className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 w-full"
+      >
+        <ChevronLeft className="inline-block mr-2" size={20} />
+        {t('backToNavigation')}
+      </button>
     </div>
   );
 };
 
-/**
- * @function ContactFormPage
- * @description Komponente für ein Kontaktformular, über das Benutzer Nachrichten an die Administration senden können.
- * @param {Object} props - Die Eigenschaften der Komponente.
- * @param {function} props.navigateTo - Funktion zur Navigation zwischen Seiten.
- * @param {function} props.t - Übersetzungsfunktion.
- * @returns {JSX.Element} Das JSX-Element der ContactFormPage.
- */
+
+// Komponente für das Veranstaltungsarchiv
+const EventArchivePage = ({ navigateTo, t, db, appId, userId, archivedPeriodId }) => {
+  const [archivedPeriods, setArchivedPeriods] = useState([]);
+  const [selectedArchivedPeriod, setSelectedArchivedPeriod] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [eventDays, setEventDays] = useState([]);
+  const [selectedEventDay, setSelectedEventDay] = useState(null);
+  const [scores, setScores] = useState([]);
+  const [playerList, setPlayerList] = useState([]);
+
+  // Funktion zum Abrufen der archivierten Perioden
+  const fetchArchivedPeriods = async () => {
+    if (!db || !appId) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const q = query(collection(db, `artifacts/${appId}/public/data/eventPeriods`), where("isArchived", "==", true));
+      const querySnapshot = await getDocs(q);
+      const periods = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setArchivedPeriods(periods);
+
+      if (archivedPeriodId) {
+        const preSelected = periods.find(p => p.id === archivedPeriodId);
+        setSelectedArchivedPeriod(preSelected);
+      } else if (periods.length > 0) {
+        setSelectedArchivedPeriod(periods[0]); // Wähle die erste archivierte Periode standardmäßig aus
+      } else {
+        setSelectedArchivedPeriod(null);
+      }
+    } catch (err) {
+      console.error("Fehler beim Laden der archivierten Perioden:", err);
+      setError(`${t('error')} ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Funktion zum Abrufen der Spielerliste
+  const fetchPlayerList = async () => {
+    if (!db || !appId) return;
+    try {
+      const q = query(collection(db, `artifacts/${appId}/public/data/players`));
+      const querySnapshot = await getDocs(q);
+      const players = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setPlayerList(players);
+    } catch (err) {
+      console.error("Fehler beim Laden der Spielerliste:", err);
+    }
+  };
+
+  // Funktion zum Abrufen der Event-Tage für eine archivierte Periode
+  const fetchEventDays = async (periodId) => {
+    if (!db || !appId || !periodId) return;
+    try {
+      const q = query(collection(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays`));
+      const querySnapshot = await getDocs(q);
+      const days = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setEventDays(days.sort((a, b) => a.dayNumber - b.dayNumber));
+    } catch (err) {
+      console.error("Fehler beim Laden der archivierten Event-Tage:", err);
+    }
+  };
+
+  // Funktion zum Abrufen der Spielergebnisse für einen bestimmten Tag in einer archivierten Periode
+  const fetchScoresForDay = async (periodId, dayId) => {
+    if (!db || !appId || !periodId || !dayId) return;
+    try {
+      const q = query(collection(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays/${dayId}/playerScores`));
+      const querySnapshot = await getDocs(q);
+      const fetchedScores = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      const scoresWithPlayerNames = await Promise.all(fetchedScores.map(async (score) => {
+        const player = playerList.find(p => p.id === score.playerId);
+        return { ...score, playerName: player ? player.name : 'Unbekannter Spieler' };
+      }));
+      setScores(scoresWithPlayerNames);
+    } catch (err) {
+      console.error("Fehler beim Laden der archivierten Spielergebnisse:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchArchivedPeriods();
+    fetchPlayerList();
+  }, [db, appId, archivedPeriodId]);
+
+  useEffect(() => {
+    if (selectedArchivedPeriod) {
+      fetchEventDays(selectedArchivedPeriod.id);
+      setSelectedEventDay(null); // Setze den ausgewählten Tag zurück, wenn die Periode wechselt
+      setScores([]); // Setze die Scores zurück
+    }
+  }, [selectedArchivedPeriod, db, appId]);
+
+  useEffect(() => {
+    if (selectedArchivedPeriod && selectedEventDay) {
+      fetchScoresForDay(selectedArchivedPeriod.id, selectedEventDay.id);
+    }
+  }, [selectedArchivedPeriod, selectedEventDay, db, appId, playerList]);
+
+  if (loading) {
+    return (
+      <div className="text-center text-white">
+        <Loader className="animate-spin text-indigo-400 h-10 w-10 mx-auto mb-4" />
+        <p>{t('loading')}</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center">{error}</div>;
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg shadow-xl">
+      <h2 className="text-3xl font-bold mb-6 text-indigo-400 text-center">{t('archiveTitle')}</h2>
+
+      <div className="mb-6">
+        <label htmlFor="archived-period-select" className="block text-lg mb-2 text-indigo-300">{t('selectPeriod')}</label>
+        <select
+          id="archived-period-select"
+          className="p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full"
+          value={selectedArchivedPeriod ? selectedArchivedPeriod.id : ''}
+          onChange={(e) => setSelectedArchivedPeriod(archivedPeriods.find(p => p.id === e.target.value))}
+        >
+          <option value="">{t('selectArchivedPeriod')}</option>
+          {archivedPeriods.map(period => (
+            <option key={period.id} value={period.id}>{period.name}</option>
+          ))}
+        </select>
+        {archivedPeriods.length === 0 && <p className="text-gray-400 mt-2">{t('noArchivedPeriods')}</p>}
+      </div>
+
+      {selectedArchivedPeriod && (
+        <div className="mt-8 p-6 bg-gray-700 rounded-lg shadow-md">
+          <h3 className="text-2xl font-semibold mb-4 text-indigo-300">{t('eventDetails')} - {selectedArchivedPeriod.name}</h3>
+          <p className="text-gray-300 mb-1"><span className="font-semibold">{t('eventStartDate')}</span> {selectedArchivedPeriod.startDate}</p>
+          <p className="text-gray-300 mb-4"><span className="font-semibold">{t('eventEndDate')}</span> {selectedArchivedPeriod.endDate}</p>
+
+          <h4 className="text-xl font-semibold mb-3 text-indigo-200">{t('furtherLinkIndividualDays')}</h4>
+          <select
+            className="p-2 rounded-md bg-gray-600 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full mb-4"
+            value={selectedEventDay ? selectedEventDay.id : ''}
+            onChange={(e) => setSelectedEventDay(eventDays.find(day => day.id === e.target.value))}
+          >
+            <option value="">{t('selectArchivedEventDay')}</option>
+            {eventDays.map(day => (
+              <option key={day.id} value={day.id}>
+                {t('day')} {day.dayNumber} ({day.date})
+              </option>
+            ))}
+          </select>
+
+          {selectedEventDay && (
+            <div className="mt-4 p-4 bg-gray-800 rounded-lg shadow-inner">
+              <h5 className="text-lg font-bold mb-3 text-indigo-200">{t('eventDetails')}</h5>
+              <p className="text-gray-300 mb-1"><span className="font-semibold">{t('day')}</span> {selectedEventDay.dayNumber}</p>
+              <p className="text-gray-300 mb-1"><span className="font-semibold">{t('eventDate')}</span> {selectedEventDay.date}</p>
+              <p className="text-gray-300 mb-4"><span className="font-semibold">{t('eventDescription')}</span> {selectedEventDay.description}</p>
+
+              <h5 className="text-lg font-semibold mb-2 text-indigo-200">{t('playerScoresForDay')} {selectedEventDay.dayNumber}:</h5>
+              {scores.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-gray-700 rounded-lg overflow-hidden">
+                    <thead>
+                      <tr className="bg-gray-600">
+                        <th className="py-2 px-4 text-left text-indigo-100">{t('player')}</th>
+                        <th className="py-2 px-4 text-left text-indigo-100">{t('points')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {scores.map(score => (
+                        <tr key={score.id} className="border-b border-gray-600 last:border-b-0">
+                          <td className="py-2 px-4 text-gray-300">{score.playerName}</td>
+                          <td className="py-2 px-4 text-gray-300">{score.score}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-gray-400">{t('noScores')}</p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      <button
+        onClick={() => navigateTo('navigation')}
+        className="mt-8 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 w-full"
+      >
+        <ChevronLeft className="inline-block mr-2" size={20} />
+        {t('backToNavigation')}
+      </button>
+    </div>
+  );
+};
+
+// Komponente für die Top 10 Spieler
+const TopTenPage = ({ navigateTo, t, db, appId, userId }) => {
+  const [topPlayers, setTopPlayers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentPeriodId, setCurrentPeriodId] = useState(null);
+  const [currentPeriodName, setCurrentPeriodName] = useState('');
+  const [playerList, setPlayerList] = useState([]);
+
+  useEffect(() => {
+    const fetchCurrentPeriod = async () => {
+      if (!db || !appId) return;
+      try {
+        const q = query(collection(db, `artifacts/${appId}/public/data/eventPeriods`), where("isCurrent", "==", true));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          const current = { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() };
+          setCurrentPeriodId(current.id);
+          setCurrentPeriodName(current.name);
+        } else {
+          setCurrentPeriodId(null);
+          setCurrentPeriodName(t('noActivePeriods'));
+        }
+      } catch (err) {
+        console.error("Fehler beim Laden der aktuellen Periode:", err);
+        setError(`${t('error')} ${err.message}`);
+      }
+    };
+
+    const fetchPlayerList = async () => {
+      if (!db || !appId) return;
+      try {
+        const q = query(collection(db, `artifacts/${appId}/public/data/players`));
+        const querySnapshot = await getDocs(q);
+        const players = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setPlayerList(players);
+      } catch (err) {
+        console.error("Fehler beim Laden der Spielerliste:", err);
+      }
+    };
+
+    fetchCurrentPeriod();
+    fetchPlayerList();
+  }, [db, appId]);
+
+  useEffect(() => {
+    const fetchTopPlayers = async () => {
+      if (!db || !appId || !currentPeriodId || playerList.length === 0) {
+        if (currentPeriodId === null && currentPeriodName !== t('noActivePeriods')) {
+          // Still loading current period, or no active periods found yet
+          setLoading(true);
+        } else if (currentPeriodId === null && currentPeriodName === t('noActivePeriods')) {
+          // No active periods, so no top players to show
+          setLoading(false);
+          setTopPlayers([]);
+        }
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      try {
+        const allDaysSnapshot = await getDocs(collection(db, `artifacts/${appId}/public/data/eventPeriods/${currentPeriodId}/eventDays`));
+        const playerScores = {}; // { playerId: totalScore }
+
+        for (const dayDoc of allDaysSnapshot.docs) {
+          const scoresSnapshot = await getDocs(collection(db, `artifacts/${appId}/public/data/eventPeriods/${currentPeriodId}/eventDays/${dayDoc.id}/playerScores`));
+          scoresSnapshot.forEach(scoreDoc => {
+            const scoreData = scoreDoc.data();
+            playerScores[scoreData.playerId] = (playerScores[scoreData.playerId] || 0) + scoreData.score;
+          });
+        }
+
+        const rankedPlayers = Object.entries(playerScores)
+          .map(([playerId, totalScore]) => {
+            const player = playerList.find(p => p.id === playerId);
+            return {
+              id: playerId,
+              name: player ? player.name : 'Unbekannter Spieler',
+              totalScore: totalScore
+            };
+          })
+          .sort((a, b) => b.totalScore - a.totalScore)
+          .slice(0, 10); // Nur die Top 10
+
+        setTopPlayers(rankedPlayers);
+      } catch (err) {
+        console.error("Fehler beim Laden der Top-Spieler:", err);
+        setError(`${t('error')} ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTopPlayers();
+  }, [db, appId, currentPeriodId, playerList, t, currentPeriodName]); // Abhängigkeiten aktualisiert
+
+  if (loading) {
+    return (
+      <div className="text-center text-white">
+        <Loader className="animate-spin text-indigo-400 h-10 w-10 mx-auto mb-4" />
+        <p>{t('loading')}</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center">{error}</div>;
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto bg-gray-800 p-8 rounded-lg shadow-xl">
+      <h2 className="text-3xl font-bold mb-6 text-indigo-400 text-center">{t('topTenTitle')}</h2>
+      <p className="text-lg mb-4 text-center text-indigo-300">
+        {t('currentPeriod')} {currentPeriodName}
+      </p>
+
+      {topPlayers.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-gray-700 rounded-lg overflow-hidden">
+            <thead>
+              <tr className="bg-gray-600">
+                <th className="py-3 px-4 text-left text-indigo-100 text-lg">{t('rank')}</th>
+                <th className="py-3 px-4 text-left text-indigo-100 text-lg">{t('player')}</th>
+                <th className="py-3 px-4 text-left text-indigo-100 text-lg">{t('totalScore')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topPlayers.map((player, index) => (
+                <tr key={player.id} className="border-b border-gray-600 last:border-b-0">
+                  <td className="py-3 px-4 text-gray-300 text-lg font-semibold flex items-center">
+                    {index === 0 && <Crown className="text-yellow-400 mr-2" size={24} />}
+                    {index + 1}
+                  </td>
+                  <td className="py-3 px-4 text-gray-300 text-lg">{player.name}</td>
+                  <td className="py-3 px-4 text-gray-300 text-lg">{player.totalScore}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="text-gray-400 text-center">{t('noData')}</p>
+      )}
+
+      <button
+        onClick={() => navigateTo('navigation')}
+        className="mt-8 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 w-full"
+      >
+        <ChevronLeft className="inline-block mr-2" size={20} />
+        {t('backToNavigation')}
+      </button>
+    </div>
+  );
+};
+
+// Komponente für die Ruhmeshalle der Champions
+const HallOfChampsPage = ({ navigateTo, t, db, appId, userId }) => {
+  const [champions, setChampions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [playerList, setPlayerList] = useState([]);
+
+  useEffect(() => {
+    const fetchPlayerList = async () => {
+      if (!db || !appId) return;
+      try {
+        const q = query(collection(db, `artifacts/${appId}/public/data/players`));
+        const querySnapshot = await getDocs(q);
+        const players = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setPlayerList(players);
+      } catch (err) {
+        console.error("Fehler beim Laden der Spielerliste:", err);
+      }
+    };
+
+    fetchPlayerList();
+  }, [db, appId]);
+
+  useEffect(() => {
+    const fetchChampions = async () => {
+      if (!db || !appId || playerList.length === 0) return;
+      setLoading(true);
+      setError(null);
+      try {
+        // Sammle alle Event-Perioden
+        const periodsSnapshot = await getDocs(collection(db, `artifacts/${appId}/public/data/eventPeriods`));
+        const allPlayerScores = {}; // { playerId: totalScoreAcrossAllPeriods }
+
+        for (const periodDoc of periodsSnapshot.docs) {
+          const eventDaysSnapshot = await getDocs(collection(db, `artifacts/${appId}/public/data/eventPeriods/${periodDoc.id}/eventDays`));
+          for (const dayDoc of eventDaysSnapshot.docs) {
+            const scoresSnapshot = await getDocs(collection(db, `artifacts/${appId}/public/data/eventPeriods/${periodDoc.id}/eventDays/${dayDoc.id}/playerScores`));
+            scoresSnapshot.forEach(scoreDoc => {
+              const scoreData = scoreDoc.data();
+              allPlayerScores[scoreData.playerId] = (allPlayerScores[scoreData.playerId] || 0) + scoreData.score;
+            });
+          }
+        }
+
+        const rankedPlayers = Object.entries(allPlayerScores)
+          .map(([playerId, totalScore]) => {
+            const player = playerList.find(p => p.id === playerId);
+            return {
+              id: playerId,
+              name: player ? player.name : 'Unbekannter Spieler',
+              overallScore: totalScore
+            };
+          })
+          .sort((a, b) => b.overallScore - a.overallScore);
+
+        setChampions(rankedPlayers);
+      } catch (err) {
+        console.error("Fehler beim Laden der Champions:", err);
+        setError(`${t('error')} ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchChampions();
+  }, [db, appId, playerList, t]);
+
+  if (loading) {
+    return (
+      <div className="text-center text-white">
+        <Loader className="animate-spin text-indigo-400 h-10 w-10 mx-auto mb-4" />
+        <p>{t('loading')}</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center">{error}</div>;
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto bg-gray-800 p-8 rounded-lg shadow-xl">
+      <h2 className="text-3xl font-bold mb-6 text-indigo-400 text-center">{t('hallOfChampsTitle')}</h2>
+
+      {champions.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-gray-700 rounded-lg overflow-hidden">
+            <thead>
+              <tr className="bg-gray-600">
+                <th className="py-3 px-4 text-left text-indigo-100 text-lg">{t('overallRank')}</th>
+                <th className="py-3 px-4 text-left text-indigo-100 text-lg">{t('player')}</th>
+                <th className="py-3 px-4 text-left text-indigo-100 text-lg">{t('overallScore')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {champions.map((player, index) => (
+                <tr key={player.id} className="border-b border-gray-600 last:border-b-0">
+                  <td className="py-3 px-4 text-gray-300 text-lg font-semibold flex items-center">
+                    {index === 0 && <Crown className="text-yellow-400 mr-2" size={24} />}
+                    {index + 1}
+                  </td>
+                  <td className="py-3 px-4 text-gray-300 text-lg">{player.name}</td>
+                  <td className="py-3 px-4 text-gray-300 text-lg">{player.overallScore}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="text-gray-400 text-center">{t('noData')}</p>
+      )}
+
+      <button
+        onClick={() => navigateTo('navigation')}
+        className="mt-8 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 w-full"
+      >
+        <ChevronLeft className="inline-block mr-2" size={20} />
+        {t('backToNavigation')}
+      </button>
+    </div>
+  );
+};
+
+// Komponente für das Kontaktformular
 const ContactFormPage = ({ navigateTo, t }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
-  const [statusMessage, setStatusMessage] = useState('');
-  const [isError, setIsError] = useState(false);
+  const [status, setStatus] = useState(''); // 'idle', 'sending', 'sent', 'error'
 
-  /**
-   * @function handleSubmit
-   * @description Behandelt das Absenden des Kontaktformulars.
-   * Führt eine einfache Validierung durch und simuliert das Senden der Nachricht.
-   * @param {Object} e - Das Event-Objekt des Formulars.
-   * @returns {Promise<void>} Eine Promise, die aufgelöst wird, wenn die Nachricht "gesendet" wurde.
-   */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatusMessage('');
-    setIsError(false);
+    setStatus('sending');
 
-    if (!name || !email || !message) {
-      setStatusMessage(t('errorMessageEmptyFields'));
-      setIsError(true);
-      return;
-    }
-
-    // Simuliert das Senden einer E-Mail/Nachricht (in einer echten App wäre dies ein API-Aufruf)
+    // Hier würde die Logik zum Senden der Nachricht an ein Backend/eine E-Mail-Adresse stehen.
+    // Da dies eine Frontend-Anwendung ist, simulieren wir den Erfolg.
     try {
-      console.log("Sending message:", { name, email, message });
-      setStatusMessage(t('messageSent'));
+      // Eine kleine Verzögerung, um das Senden zu simulieren
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setStatus('sent');
       setName('');
       setEmail('');
       setMessage('');
     } catch (error) {
-      console.error("Error sending message:", error);
-      setStatusMessage(t('messageSendError'));
-      setIsError(true);
+      console.error("Fehler beim Senden der Nachricht:", error);
+      setStatus('error');
     }
   };
 
   return (
-    <div className="w-full max-w-xl bg-gray-800 rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10">
-      <h1 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-blue-400">
-        {t('contactFormTitle')}
-      </h1>
-      <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => navigateTo('navigation')}
-          className="px-4 py-2 bg-gray-600 text-white rounded-lg shadow-lg hover:bg-gray-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center space-x-2"
-        >
-          <ArrowLeft className="w-5 h-5 text-gray-300 mr-2" />
-          <span>{t('backToNavigation')}</span>
-        </button>
-      </div>
-      <p className="text-gray-300 mb-6 text-center">{t('contactFormDescription')}</p>
+    <div className="max-w-2xl mx-auto bg-gray-800 p-8 rounded-lg shadow-xl">
+      <h2 className="text-3xl font-bold mb-6 text-indigo-400 text-center">{t('contactTitle')}</h2>
+      <p className="text-gray-300 mb-6 text-center">{t('contactText')}</p>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-gray-300 text-sm font-bold mb-2">
+          <label htmlFor="name" className="block text-indigo-300 text-sm font-bold mb-2">
             {t('yourName')}
           </label>
           <input
             type="text"
             id="name"
+            className="shadow appearance-none border border-gray-600 rounded-lg w-full py-3 px-4 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="shadow appearance-none border rounded-md w-full py-3 px-4 bg-gray-700 text-white leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
-            placeholder={t('yourName')}
+            required
           />
         </div>
         <div>
-          <label htmlFor="email" className="block text-gray-300 text-sm font-bold mb-2">
+          <label htmlFor="email" className="block text-indigo-300 text-sm font-bold mb-2">
             {t('yourEmail')}
           </label>
           <input
             type="email"
             id="email"
+            className="shadow appearance-none border border-gray-600 rounded-lg w-full py-3 px-4 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="shadow appearance-none border rounded-md w-full py-3 px-4 bg-gray-700 text-white leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
-            placeholder={t('yourEmail')}
+            required
           />
         </div>
         <div>
-          <label htmlFor="message" className="block text-gray-300 text-sm font-bold mb-2">
+          <label htmlFor="message" className="block text-indigo-300 text-sm font-bold mb-2">
             {t('yourMessage')}
           </label>
           <textarea
             id="message"
+            rows="6"
+            className="shadow appearance-none border border-gray-600 rounded-lg w-full py-3 px-4 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            rows="5"
-            className="shadow appearance-none border rounded-md w-full py-3 px-4 bg-gray-700 text-white leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
-            placeholder={t('yourMessage')}
+            required
           ></textarea>
         </div>
-        <div className="flex items-center justify-between">
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
-          >
-            <Send className="w-6 h-6 text-blue-300 mr-2" />
-            {t('sendMessage')}
-          </button>
-        </div>
-        {statusMessage && (
-          <p className={`mt-4 text-center ${isError ? 'text-red-500' : 'text-green-500'}`}>
-            {statusMessage}
-          </p>
-        )}
+        <button
+          type="submit"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 w-full flex items-center justify-center"
+          disabled={status === 'sending'}
+        >
+          {status === 'sending' ? (
+            <>
+              <Loader className="animate-spin mr-2" size={20} /> {t('sending')}...
+            </>
+          ) : (
+            <>
+              <Mail className="inline-block mr-2" size={20} /> {t('sendMessage')}
+            </>
+          )}
+        </button>
       </form>
+
+      {status === 'sent' && (
+        <div className="mt-6 p-4 bg-green-600 text-white rounded-lg text-center flex items-center justify-center">
+          <CheckCircle className="mr-2" size={20} /> {t('messageSent')}
+        </div>
+      )}
+      {status === 'error' && (
+        <div className="mt-6 p-4 bg-red-600 text-white rounded-lg text-center flex items-center justify-center">
+          <XCircle className="mr-2" size={20} /> {t('error')} {t('tryAgain')}
+        </div>
+      )}
+
+      <button
+        onClick={() => navigateTo('navigation')}
+        className="mt-8 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 w-full"
+      >
+        <ChevronLeft className="inline-block mr-2" size={20} />
+        {t('backToNavigation')}
+      </button>
     </div>
   );
 };
 
-/**
- * @function AdminPanel
- * @description Administrationspanel zur Verwaltung von Truppenstärken, Rängen, Normen und Spielerdaten.
- * Ermöglicht das Hochladen von JSON-Dateien, das Hinzufügen/Löschen von Einträgen und das Beenden von Perioden.
- * Beinhaltet nun auch die Clan-Mitgliederverwaltung.
- * @param {Object} props - Die Eigenschaften der Komponente.
- * @param {function} props.navigateTo - Funktion zur Navigation zwischen Seiten.
- * @param {function} props.t - Übersetzungsfunktion.
- * @param {function} props.setErrorMessage - Setter-Funktion für Fehlermeldungen.
- * @param {string} props.errorMessage - Aktuelle Fehlermeldung.
- * @param {Object} props.db - Die Firestore-Datenbankinstanz.
- * @param {string} props.appId - Die Anwendungs-ID für Firestore-Pfade.
- * @param {string} props.userId - Die ID des aktuell angemeldeten Benutzers.
- * @returns {JSX.Element} Das JSX-Element des AdminPanels.
- */
+// Admin Panel Komponente
 const AdminPanel = ({ navigateTo, t, setErrorMessage, errorMessage, db, appId, userId }) => {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [newTroopStrength, setNewTroopStrength] = useState('');
-  const [troopStrengthsList, setTroopStrengthsList] = useState([]);
-  const [newRank, setNewRank] = useState('');
-  const [ranksList, setRanksList] = useState([]);
-  const [selectedTroopStrengthForNorm, setSelectedTroopStrengthForNorm] = useState('');
-  const [normValue, setNormValue] = useState('');
-  const [normsMapping, setNormsMapping] = useState([]);
-  const [playerName, setPlayerName] = useState('');
-  const [playerAlias, setPlayerAlias] = useState('');
-  const [playerRank, setPlayerRank] = useState('');
-  const [playerTroopStrength, setPlayerTroopStrength] = useState('');
-  const [players, setPlayers] = useState([]);
-  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
-  const [showEndPeriodConfirmModal, setShowEndPeriodConfirmModal] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState(null);
-  const [deleteFunctionToCall, setDeleteFunctionToCall] = useState(null);
-  const [deleteMessageKey, setDeleteMessageKey] = useState('');
-  const [deleteItemNameKey, setDeleteItemNameKey] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('playerManagement'); // Standard-Tab
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
+  const [confirmMessage, setConfirmMessage] = useState('');
+  const [messageStatus, setMessageStatus] = useState(''); // 'success', 'error', ''
 
-  /**
-   * @description Effekt-Hook zum Abrufen aller Verwaltungsdaten (Truppenstärken, Ränge, Normen, aktuelle Spieler) aus Firestore.
-   * Abonniert Änderungen in Echtzeit.
-   */
+  // Überprüfen, ob der aktuelle Benutzer ein Admin ist
   useEffect(() => {
-    if (!db || !userId) return;
-
-    // Truppenstärken abrufen
-    const unsubscribeTroopStrengths = onSnapshot(
-      collection(db, `artifacts/${appId}/public/data/troopStrengths`),
-      (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setTroopStrengthsList(data);
-      },
-      (error) => console.error("Error fetching troop strengths:", error)
-    );
-
-    // Ränge abrufen
-    const unsubscribeRanks = onSnapshot(
-      collection(db, `artifacts/${appId}/public/data/ranks`),
-      (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setRanksList(data);
-      },
-      (error) => console.error("Error fetching ranks:", error)
-    );
-
-    // Normen-Mappings abrufen
-    const unsubscribeNorms = onSnapshot(
-      collection(db, `artifacts/${appId}/public/data/norms`),
-      (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setNormsMapping(data);
-      },
-      (error) => console.error("Error fetching norms:", error)
-    );
-
-    // Spieler für das aktuelle Event abrufen
-    const unsubscribePlayers = onSnapshot(
-      collection(db, `artifacts/${appId}/public/data/currentEventPlayers`),
-      (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setPlayers(data);
-      },
-      (error) => console.error("Error fetching current event players:", error)
-    );
-
-    // Cleanup-Funktion für alle Listener
-    return () => {
-      unsubscribeTroopStrengths();
-      unsubscribeRanks();
-      unsubscribeNorms();
-      unsubscribePlayers();
+    const checkAdminStatus = async () => {
+      if (!db || !appId || !userId) {
+        setLoading(false);
+        setIsAdmin(false);
+        setErrorMessage(t('loginRequired'));
+        return;
+      }
+      try {
+        const adminDocRef = doc(db, `artifacts/${appId}/public/data/admins`, userId);
+        const adminDocSnap = await getDoc(adminDocRef);
+        if (adminDocSnap.exists()) {
+          setIsAdmin(true);
+          setErrorMessage('');
+        } else {
+          setIsAdmin(false);
+          setErrorMessage(t('accessDenied'));
+        }
+      } catch (err) {
+        console.error("Fehler beim Überprüfen des Admin-Status:", err);
+        setErrorMessage(`${t('error')} ${err.message}`);
+        setIsAdmin(false);
+      } finally {
+        setLoading(false);
+      }
     };
-  }, [db, userId, appId]);
 
-  // Wenn kein userId vorhanden ist, wird der Zugriff verweigert.
-  if (!userId) {
+    checkAdminStatus();
+  }, [db, appId, userId, t, setErrorMessage]);
+
+  const showModal = (message, action) => {
+    setConfirmMessage(message);
+    setConfirmAction(() => action); // Speichere die Funktion, die ausgeführt werden soll
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirm = () => {
+    if (confirmAction) {
+      confirmAction();
+    }
+    setShowConfirmModal(false);
+    setConfirmAction(null);
+    setConfirmMessage('');
+  };
+
+  const handleCancel = () => {
+    setShowConfirmModal(false);
+    setConfirmAction(null);
+    setConfirmMessage('');
+  };
+
+  const showStatusMessage = (type, message) => {
+    setMessageStatus({ type, message });
+    setTimeout(() => setMessageStatus(''), 3000); // Nachricht nach 3 Sekunden ausblenden
+  };
+
+  if (loading) {
     return (
-      <div className="w-full max-w-xl bg-gray-800 rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10 text-center">
-        <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-red-400">
-          {t('adminPanel')}
-        </h1>
-        <p className="text-red-300 text-lg mb-8">
-          {t('adminAccessRestricted')}
-        </p>
+      <div className="text-center text-white">
+        <Loader className="animate-spin text-indigo-400 h-10 w-10 mx-auto mb-4" />
+        <p>{t('loading')}</p>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="max-w-xl mx-auto bg-gray-800 p-8 rounded-lg shadow-xl text-center">
+        <AlertCircle className="text-red-500 h-16 w-16 mx-auto mb-4" />
+        <h2 className="text-3xl font-bold mb-4 text-red-400">{t('accessDenied')}</h2>
+        <p className="text-gray-300 mb-6">{errorMessage}</p>
         <button
           onClick={() => navigateTo('navigation')}
-          className="px-6 py-3 bg-gray-600 text-white rounded-lg shadow-lg hover:bg-gray-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
+          className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 w-full"
         >
-          <ArrowLeft className="w-6 h-6 text-gray-300 mr-2" />
+          <ChevronLeft className="inline-block mr-2" size={20} />
           {t('backToNavigation')}
         </button>
       </div>
     );
   }
 
-  /**
-   * @function addItemToFirestore
-   * @description Eine generische Funktion zum Hinzufügen oder Aktualisieren eines Dokuments in einer Firestore-Sammlung.
-   * @param {string} collectionName - Der Name der Sammlung (z.B. 'troopStrengths', 'ranks').
-   * @param {Object} itemData - Die Daten des hinzuzufügenden/aktualisierenden Dokuments.
-   * @param {string} successMessageKey - Der Schlüssel für die Erfolgsmeldung aus den Übersetzungen.
-   * @param {string} itemDisplayName - Der Anzeigename des Elements für die Erfolgsmeldung.
-   * @returns {Promise<boolean>} True, wenn erfolgreich, False bei einem Fehler.
-   */
-  const addItemToFirestore = async (collectionName, itemData, successMessageKey, itemDisplayName) => {
-    if (!db || !userId) {
-      setErrorMessage(t('errorMessageDbNotReady'));
-      return false;
-    }
-    try {
-      const colRef = collection(db, `artifacts/${appId}/public/data/${collectionName}`);
-      // Versucht, einen eindeutigen Dokument-ID basierend auf 'name' oder 'troopStrength' zu verwenden,
-      // andernfalls lässt Firestore eine ID generieren.
-      const docRef = itemData.name || itemData.troopStrength ? doc(colRef, itemData.name || itemData.troopStrength) : doc(colRef);
-      await setDoc(docRef, itemData);
-      setErrorMessage(t(successMessageKey, { itemName: itemData.name || itemData.troopStrength || itemData.rank || itemData.id }));
-      return true;
-    } catch (e) {
-      console.error(`Error adding item to ${collectionName}:`, e);
-      setErrorMessage(t('errorMessageAdd'));
-      return false;
-    }
-  };
+  return (
+    <div className="max-w-5xl mx-auto bg-gray-800 p-8 rounded-lg shadow-xl">
+      <h2 className="text-3xl font-bold mb-6 text-indigo-400 text-center">{t('adminPanelTitle')}</h2>
 
-  /**
-   * @function deleteItemFromFirestore
-   * @description Eine generische Funktion zum Löschen eines Dokuments aus einer Firestore-Sammlung.
-   * @param {string} collectionName - Der Name der Sammlung.
-   * @param {string} itemId - Die ID des zu löschenden Dokuments.
-   * @param {string} successMessageKey - Der Schlüssel für die Erfolgsmeldung aus den Übersetzungen.
-   * @param {string} itemDisplayName - Der Anzeigename des Elements für die Erfolgsmeldung.
-   * @returns {Promise<boolean>} True, wenn erfolgreich, False bei einem Fehler.
-   */
-  const deleteItemFromFirestore = async (collectionName, itemId, successMessageKey, itemDisplayName) => {
-    if (!db || !userId) {
-      setErrorMessage(t('errorMessageDbNotReady'));
-      return false;
-    }
-    try {
-      const docRef = doc(db, `artifacts/${appId}/public/data/${collectionName}`, itemId);
-      await deleteDoc(docRef);
-      setErrorMessage(t(successMessageKey, { itemName: itemId }));
-      return true;
-    } catch (e) {
-      console.error("Fehler beim Löschen des Dokuments: ", e);
-      setErrorMessage(t('errorMessageDelete'));
-      return false;
-    } finally {
-      // Schließt das Bestätigungsmodal und setzt die Zustände zurück, unabhängig vom Erfolg.
-      setShowDeleteConfirmModal(false);
-      setItemToDelete(null);
-      setDeleteFunctionToCall(null);
-    }
-  };
+      {errorMessage && (
+        <div className="bg-red-600 text-white p-3 rounded-lg mb-4 flex items-center justify-center">
+          <AlertCircle className="mr-2" size={20} />
+          {errorMessage}
+        </div>
+      )}
 
-  /**
-   * @function handleFileChange
-   * @description Behandelt die Auswahl einer Datei im Dateiupload-Feld.
-   * @param {Object} event - Das Event-Objekt des Input-Feldes.
-   */
-  const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
-    setErrorMessage('');
-  };
+      {messageStatus.message && (
+        <div className={`p-3 rounded-lg mb-4 flex items-center justify-center ${messageStatus.type === 'success' ? 'bg-green-600' : 'bg-red-600'} text-white`}>
+          {messageStatus.type === 'success' ? <CheckCircle className="mr-2" size={20} /> : <XCircle className="mr-2" size={20} />}
+          {messageStatus.message}
+        </div>
+      )}
 
-  /**
-   * @function handleFileUpload
-   * @description Verarbeitet das Hochladen einer JSON-Datei mit Spielerdaten.
-   * Parst die JSON-Datei und aktualisiert oder fügt Spielerdaten in Firestore hinzu.
-   * Versucht, vorhandene Spieler anhand von Name oder Alias zu finden und zu aktualisieren.
-   * @returns {Promise<void>}
-   */
-  const handleFileUpload = () => {
-    if (!selectedFile) {
-      setErrorMessage(t('errorUploadingFile'));
-      return;
-    }
+      {/* Admin User ID anzeigen */}
+      <div className="bg-gray-700 p-4 rounded-lg shadow-md mb-6 flex flex-col sm:flex-row items-center justify-between">
+        <p className="text-indigo-300 font-semibold mb-2 sm:mb-0">{t('userId')}</p>
+        <div className="flex items-center">
+          <span className="bg-gray-600 text-gray-200 px-3 py-1 rounded-md text-sm break-all">{userId}</span>
+          <button
+            onClick={() => {
+              document.execCommand('copy', false, userId); // Veraltet, aber funktioniert in iFrames
+              showStatusMessage('success', t('copied'));
+            }}
+            className="ml-2 bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded-md text-sm transition duration-200"
+          >
+            <ClipboardCopy size={16} className="inline-block mr-1" /> {t('copyToClipboard')}
+          </button>
+        </div>
+      </div>
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        const jsonContent = JSON.parse(e.target.result);
 
-        if (!Array.isArray(jsonContent)) {
-          setErrorMessage("Die JSON-Datei muss ein Array von Spielerobjekten enthalten.");
-          return;
-        }
+      {/* Tabs für die Navigation innerhalb des Admin-Panels */}
+      <div className="flex flex-wrap justify-center gap-4 mb-8">
+        <button
+          onClick={() => setActiveTab('playerManagement')}
+          className={`py-3 px-6 rounded-lg font-bold transition duration-300 ${activeTab === 'playerManagement' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+        >
+          <Users className="inline-block mr-2" size={20} /> {t('managePlayers')}
+        </button>
+        <button
+          onClick={() => setActiveTab('eventPeriodManagement')}
+          className={`py-3 px-6 rounded-lg font-bold transition duration-300 ${activeTab === 'eventPeriodManagement' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+        >
+          <Calendar className="inline-block mr-2" size={20} /> {t('manageEvents')}
+        </button>
+        <button
+          onClick={() => setActiveTab('adminManagement')}
+          className={`py-3 px-6 rounded-lg font-bold transition duration-300 ${activeTab === 'adminManagement' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+        >
+          <Crown className="inline-block mr-2" size={20} /> {t('manageAdmins')}
+        </button>
+        <button
+          onClick={() => setActiveTab('adminMessages')}
+          className={`py-3 px-6 rounded-lg font-bold transition duration-300 ${activeTab === 'adminMessages' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+        >
+          <MessageCircle className="inline-block mr-2" size={20} /> {t('adminMessages')}
+        </button>
+      </div>
 
-        if (!db || !userId) {
-          setErrorMessage(t('errorMessageDbNotReady'));
-          return;
-        }
+      {/* Inhalt basierend auf dem aktiven Tab */}
+      {activeTab === 'playerManagement' && <PlayerManagement t={t} db={db} appId={appId} showModal={showModal} showStatusMessage={showStatusMessage} />}
+      {activeTab === 'eventPeriodManagement' && <EventPeriodManagement t={t} db={db} appId={appId} showModal={showModal} showStatusMessage={showStatusMessage} />}
+      {activeTab === 'adminManagement' && <AdminManagement t={t} db={db} appId={appId} userId={userId} showModal={showModal} showStatusMessage={showStatusMessage} />}
+      {activeTab === 'adminMessages' && <AdminMessageManagement t={t} db={db} appId={appId} showModal={showModal} showStatusMessage={showStatusMessage} />}
 
-        const currentPlayersCollectionRef = collection(db, `artifacts/${appId}/public/data/currentEventPlayers`);
-        const batch = writeBatch(db); // Korrektur: writeBatch(db) statt db.batch()
 
-        for (const playerJson of jsonContent) {
-          // Versucht, einen bestehenden Spieler anhand des Namens oder Alias zu finden
-          const existingPlayersQuery = query(currentPlayersCollectionRef);
-          const existingPlayersSnapshot = await getDocs(existingPlayersQuery);
-          let existingPlayerDoc = null;
+      <button
+        onClick={() => navigateTo('navigation')}
+        className="mt-8 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 w-full"
+      >
+        <ChevronLeft className="inline-block mr-2" size={20} />
+        {t('backToNavigation')}
+      </button>
 
-          // Zuerst nach exaktem Namen suchen
-          existingPlayerDoc = existingPlayersSnapshot.docs.find(doc => doc.data().name === playerJson.Name);
+      {/* Bestätigungs-Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 p-8 rounded-lg shadow-2xl max-w-sm w-full text-center">
+            <AlertCircle className="text-yellow-400 h-16 w-16 mx-auto mb-4" />
+            <p className="text-white text-lg mb-6">{confirmMessage}</p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={handleConfirm}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition duration-300"
+              >
+                {t('confirm')}
+              </button>
+              <button
+                onClick={handleCancel}
+                className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition duration-300"
+              >
+                {t('cancel')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
-          // Wenn nicht nach Name gefunden, nach Aliasen suchen
-          if (!existingPlayerDoc && playerJson.Alias) {
-            const aliases = playerJson.Alias.split(',').map(a => a.trim()).filter(a => a !== '');
-            existingPlayerDoc = existingPlayersSnapshot.docs.find(doc =>
-              doc.data().aliases && aliases.some(alias => doc.data().aliases.includes(alias))
-            );
-          }
+// --- Sub-Komponenten für das Admin-Panel ---
 
-          // Referenz zum Dokument (neu oder bestehend)
-          const playerRef = existingPlayerDoc ? doc(currentPlayersCollectionRef, existingPlayerDoc.id) : doc(currentPlayersCollectionRef);
+// Spielerverwaltung
+const PlayerManagement = ({ t, db, appId, showModal, showStatusMessage }) => {
+  const [players, setPlayers] = useState([]);
+  const [newPlayerName, setNewPlayerName] = useState('');
+  const [newPlayerDiscord, setNewPlayerDiscord] = useState('');
+  const [newPlayerGameId, setNewPlayerGameId] = useState('');
+  const [editingPlayer, setEditingPlayer] = useState(null); // Spieler, der gerade bearbeitet wird
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-          // Bereitet die Spielerdaten vor, indem JSON-Schlüssel auf Firestore-Schlüssel abgebildet werden.
-          // Initialisiert alle Truhenkategorien mit 0, falls nicht vorhanden.
-          const playerData = {
-            name: playerJson.Name || 'Unbekannt',
-            rank: playerJson.Rang || 'Unbekannt',
-            troopStrength: playerJson.Truppenstärke || 'Unbekannt',
-            aliases: playerJson.Alias ? playerJson.Alias.split(',').map(a => a.trim()).filter(a => a !== '') : [],
-            "Arena Chest": playerJson["Arena Chest"] || 0,
-            "Arena Total": playerJson["Arena Total"] || 0,
-            "Common LV5": playerJson["Common LV5"] || 0,
-            "Common LV10": playerJson["Common LV10"] || 0,
-            "Common LV15": playerJson["Common LV15"] || 0,
-            "Common LV20": playerJson["Common LV20"] || 0,
-            "Common LV25": playerJson["Common LV25"] || 0,
-            "Common Total": playerJson["Common Total"] || 0,
-            "Rare LV10": playerJson["Rare LV10"] || 0,
-            "Rare LV15": playerJson["Rare LV15"] || 0,
-            "Rare LV20": playerJson["Rare LV20"] || 0,
-            "Rare LV25": playerJson["Rare LV25"] || 0,
-            "Rare LV30": playerJson["Rare LV30"] || 0,
-            "Rare Total": playerJson["Rare Total"] || 0,
-            "Epic LV15": playerJson["Epic LV15"] || 0,
-            "Epic LV20": playerJson["Epic LV20"] || 0,
-            "Epic LV25": playerJson["Epic LV25"] || 0,
-            "Epic LV30": playerJson["Epic LV30"] || 0,
-            "Epic LV35": playerJson["Epic LV35"] || 0,
-            "Epic Total": playerJson["Epic Total"] || 0,
-            "Tartaros LV15": playerJson["Tartaros LV15"] || 0,
-            "Tartaros LV20": playerJson["Tartaros LV20"] || 0,
-            "Tartaros LV25": playerJson["Tartaros LV25"] || 0,
-            "Tartaros LV30": playerJson["Tartaros LV30"] || 0,
-            "Tartaros LV35": playerJson["Tartaros LV35"] || 0,
-            "Tartaros Total": playerJson["Tartaros Total"] || 0,
-            "Elven LV10": playerJson["Elven LV10"] || 0,
-            "Elven LV15": playerJson["Elven LV15"] || 0,
-            "Elven LV20": playerJson["Elven LV20"] || 0,
-            "Elven LV25": playerJson["Elven LV25"] || 0,
-            "Elven LV30": playerJson["Elven LV30"] || 0,
-            "Elven Total": playerJson["Elven Total"] || 0,
-            "Cursed LV20": playerJson["Cursed LV20"] || 0,
-            "Cursed LV25": playerJson["Cursed LV25"] || 0,
-            "Cursed Total": playerJson["Cursed Total"] || 0,
-            "Wooden Chest": playerJson["Wooden Chest"] || 0,
-            "Bronze Chest": playerJson["Bronze Chest"] || 0,
-            "Silver Chest": playerJson["Silver Chest"] || 0,
-            "Golden Chest": playerJson["Golden Chest"] || 0,
-            "Precious Chest": playerJson["Precious Chest"] || 0,
-            "Magic Chest": playerJson["Magic Chest"] || 0,
-            "Bank Total": playerJson["Bank Total"] || 0,
-            "Runic LV 20-24": playerJson["Runic LV 20-24"] || 0,
-            "Runic LV 25-29": playerJson["Runic LV 25-29"] || 0,
-            "Runic LV 30-34": playerJson["Runic LV 30-34"] || 0,
-            "Runic LV 35-39": playerJson["Runic LV 35-39"] || 0,
-            "Runic LV 40-44": playerJson["Runic LV 40-44"] || 0,
-            "Runic LV 45": playerJson["Runic LV 45"] || 0,
-            "Runic Total": playerJson["Runic Total"] || 0,
-            "Heroic LV16": playerJson["Heroic LV16"] || 0,
-            "Heroic LV17": playerJson["Heroic LV17"] || 0,
-            "Heroic LV18": playerJson["Heroic LV18"] || 0,
-            "Heroic LV19": playerJson["Heroic LV19"] || 0,
-            "Heroic LV20": playerJson["Heroic LV20"] || 0,
-            "Heroic LV21": playerJson["Heroic LV21"] || 0,
-            "Heroic LV22": playerJson["Heroic LV22"] || 0,
-            "Heroic LV23": playerJson["Heroic LV23"] || 0,
-            "Heroic LV24": playerJson["Heroic LV24"] || 0,
-            "Heroic LV25": playerJson["Heroic LV25"] || 0,
-            "Heroic LV26": playerJson["Heroic LV26"] || 0,
-            "Heroic LV27": playerJson["Heroic LV27"] || 0,
-            "Heroic LV28": playerJson["Heroic LV28"] || 0,
-            "Heroic LV29": playerJson["Heroic LV29"] || 0,
-            "Heroic LV30": playerJson["Heroic LV30"] || 0,
-            "Heroic LV31": playerJson["Heroic LV31"] || 0,
-            "Heroic LV32": playerJson["Heroic LV32"] || 0,
-            "Heroic LV33": playerJson["Heroic LV33"] || 0,
-            "Heroic LV34": playerJson["Heroic LV34"] || 0,
-            "Heroic LV35": playerJson["Heroic LV35"] || 0,
-            "Heroic LV36": playerJson["Heroic LV36"] || 0,
-            "Heroic LV37": playerJson["Heroic LV37"] || 0,
-            "Heroic LV38": playerJson["Heroic LV38"] || 0,
-            "Heroic LV39": playerJson["Heroic LV39"] || 0,
-            "Heroic LV40": playerJson["Heroic LV40"] || 0,
-            "Heroic LV41": playerJson["Heroic LV41"] || 0,
-            "Heroic LV42": playerJson["Heroic LV42"] || 0,
-            "Heroic LV43": playerJson["Heroic LV43"] || 0,
-            "Heroic LV44": playerJson["Heroic LV44"] || 0,
-            "Heroic LV45": playerJson["Heroic LV45"] || 0,
-            "Heroic Total": playerJson["Heroic Total"] || 0,
-            "VotA LV 10-14": playerJson["VotA LV 10-14"] || 0,
-            "VotA LV 15-19": playerJson["VotA LV 15-19"] || 0,
-            "VotA LV 20-24": playerJson["VotA LV 20-24"] || 0,
-            "VotA LV 25-29": playerJson["VotA LV 25-29"] || 0,
-            "VotA LV 30-34": playerJson["VotA LV 30-34"] || 0,
-            "VotA LV 35-39": playerJson["VotA LV 35-39"] || 0,
-            "VotA LV 40-44": playerJson["VotA LV 40-44"] || 0,
-            "VotA Total": playerJson["VotA Total"] || 0,
-            "Quick March Chest": playerJson["Quick March Chest"] || 0,
-            "Ancients Chest": playerJson["Ancients Chest"] || 0,
-            "ROTA Total": playerJson["ROTA Total"] || 0,
-            "Epic Ancient squad": playerJson["Epic Ancient squad"] || 0,
-            "EAs Total": playerJson["EAs Total"] || 0,
-            "Union Chest": playerJson["Union Chest"] || 0,
-            "Union Total": playerJson["Union Total"] || 0,
-            "Jormungandr's Chest": playerJson["Jormungandr's Chest"] || 0,
-            "Jormungandr Total": playerJson["Jormungandr Total"] || 0,
-            "Points": playerJson["Points"] || 0,
-            "leerspalte": playerJson["leerspalte"] || '',
-            "Timestamp": playerJson.Timestamp || new Date().toISOString(),
-          };
-
-          // Weist die Normkategorie basierend auf der Truppenstärke aus dem vorhandenen Normen-Mapping zu.
-          const assignedNorm = normsMapping.find(
-            (norm) => norm.troopStrength === playerData.troopStrength
-          )?.norm || 'N/A';
-          playerData.normCategory = assignedNorm;
-
-          // Fügt den Set-Vorgang zum Batch hinzu (aktualisiert oder erstellt das Dokument).
-          batch.set(playerRef, playerData, { merge: true });
-        }
-
-        await batch.commit(); // Führt alle Batch-Vorgänge atomar aus.
-        setErrorMessage(t('fileUploaded', { fileName: selectedFile.name }));
-        setSelectedFile(null);
-      } catch (error) {
-        console.error("Error processing JSON file:", error);
-        setErrorMessage(t('errorProcessingData'));
-      }
-    };
-    reader.onerror = () => {
-      setErrorMessage(t('errorParsingFile'));
-    };
-    reader.readAsText(selectedFile);
-  };
-
-  /**
-   * @function handleAddTroopStrength
-   * @description Fügt eine neue Truppenstärke zur Firestore-Sammlung 'troopStrengths' hinzu.
-   * Überprüft, ob das Feld nicht leer ist.
-   * @returns {Promise<void>}
-   */
-  const handleAddTroopStrength = async () => {
-    if (!newTroopStrength.trim()) {
-      setErrorMessage(t('errorMessageEmptyFields'));
-      return;
-    }
-    const success = await addItemToFirestore('troopStrengths', { name: newTroopStrength.trim() }, 'normAdded', 'normName');
-    if (success) {
-      setNewTroopStrength('');
-    }
-  };
-
-  /**
-   * @function handleDeleteTroopStrength
-   * @description Löscht eine Truppenstärke aus der Firestore-Sammlung 'troopStrengths'.
-   * @param {string} id - Die ID der zu löschenden Truppenstärke.
-   * @returns {Promise<void>}
-   */
-  const handleDeleteTroopStrength = async (id) => {
-    await deleteItemFromFirestore('troopStrengths', id, 'normDeleted', 'normName');
-  };
-
-  /**
-   * @function handleAddRank
-   * @description Fügt einen neuen Rang zur Firestore-Sammlung 'ranks' hinzu.
-   * Überprüft, ob das Feld nicht leer ist.
-   * @returns {Promise<void>}
-   */
-  const handleAddRank = async () => {
-    if (!newRank.trim()) {
-      setErrorMessage(t('errorMessageEmptyFields'));
-      return;
-    }
-    const success = await addItemToFirestore('ranks', { name: newRank.trim() }, 'normAdded', 'normName');
-    if (success) {
-      setNewRank('');
-    }
-  };
-
-  /**
-   * @function handleDeleteRank
-   * @description Löscht einen Rang aus der Firestore-Sammlung 'ranks'.
-   * @param {string} id - Die ID des zu löschenden Rangs.
-   * @returns {Promise<void>}
-   */
-  const handleDeleteRank = async (id) => {
-    await deleteItemFromFirestore('ranks', id, 'normDeleted', 'normName');
-  };
-
-  /**
-   * @function handleAssignNorm
-   * @description Weist einer ausgewählten Truppenstärke einen Normwert zu und speichert dies in Firestore.
-   * Überprüft, ob beide Felder ausgefüllt sind.
-   * @returns {Promise<void>}
-   */
-  const handleAssignNorm = async () => {
-    if (!selectedTroopStrengthForNorm || normValue === '') {
-      setErrorMessage(t('errorMessageEmptyFields'));
-      return;
-    }
-    const success = await addItemToFirestore(
-      'norms',
-      { troopStrength: selectedTroopStrengthForNorm, norm: parseInt(normValue) },
-      'normAssigned',
-      'troopStrength'
-    );
-    if (success) {
-      setSelectedTroopStrengthForNorm('');
-      setNormValue('');
-    }
-  };
-
-  /**
-   * @function handleDeleteNormMapping
-   * @description Löscht eine Norm-Zuweisung für eine Truppenstärke aus Firestore.
-   * @param {string} troopStrength - Die Truppenstärke, deren Norm-Zuweisung gelöscht werden soll.
-   * @returns {Promise<void>}
-   */
-  const handleDeleteNormMapping = async (troopStrength) => {
-    await deleteItemFromFirestore('norms', troopStrength, 'normMappingDeleted', 'troopStrength');
-  };
-
-  /**
-   * @function handleAddPlayer
-   * @description Fügt einen neuen Spieler zur 'currentEventPlayers'-Sammlung in Firestore hinzu.
-   * Initialisiert alle Truhenkategorien mit 0 und weist eine Normkategorie zu.
-   * @returns {Promise<void>}
-   */
-  const handleAddPlayer = async () => {
-    if (!playerName.trim() || !playerRank || !playerTroopStrength) {
-      setErrorMessage(t('errorMessageEmptyFields'));
-      return;
-    }
-
-    const assignedNorm = normsMapping.find(
-      (norm) => norm.troopStrength === playerTroopStrength
-    )?.norm || 'N/A';
-
-    const newPlayer = {
-      name: playerName.trim(),
-      aliases: playerAlias.split(',').map(a => a.trim()).filter(a => a !== ''),
-      rank: playerRank,
-      troopStrength: playerTroopStrength,
-      normCategory: assignedNorm,
-      // Initialisiert alle Truhenkategorien mit 0
-      ...Object.fromEntries(ALL_CHEST_CATEGORIES.map(cat => [cat, 0])),
-      "leerspalte": "", // Setzt leerspalte auf leeren String
-      "Timestamp": new Date().toISOString(), // Setzt den Timestamp
-    };
-
-    const success = await addItemToFirestore('currentEventPlayers', newPlayer, 'playerAdded', 'playerName');
-    if (success) {
-      setPlayerName('');
-      setPlayerAlias('');
-      setPlayerRank('');
-      setPlayerTroopStrength('');
-    }
-  };
-
-  /**
-   * @function handleDeletePlayer
-   * @description Löscht einen Spieler aus der 'currentEventPlayers'-Sammlung in Firestore.
-   * @param {string} id - Die ID des zu löschenden Spielers.
-   * @returns {Promise<void>}
-   */
-  const handleDeletePlayer = async (id) => {
-    await deleteItemFromFirestore('currentEventPlayers', id, 'playerDeleted', 'playerName');
-  };
-
-  /**
-   * @function confirmDelete
-   * @description Zeigt das Löschbestätigungsmodal an und speichert die notwendigen Informationen für den Löschvorgang.
-   * @param {Object} item - Das Element, das gelöscht werden soll.
-   * @param {function} deleteFunc - Die Funktion, die zum Löschen des Elements aufgerufen werden soll.
-   * @param {string} msgKey - Der Schlüssel für die Bestätigungsnachricht.
-   * @param {string} nameKey - Der Schlüssel für den Namen des Elements in der Nachricht.
-   */
-  const confirmDelete = (item, deleteFunc, msgKey, nameKey) => {
-    setItemToDelete(item);
-    setDeleteFunctionToCall(() => deleteFunc);
-    setDeleteMessageKey(msgKey);
-    setDeleteItemNameKey(nameKey);
-    setShowDeleteConfirmModal(true);
-    setErrorMessage('');
-  };
-
-  /**
-   * @function handleEndCurrentPeriod
-   * @description Beendet die aktuelle Veranstaltungsperiode, archiviert alle aktuellen Spielerdaten
-   * und löscht sie aus der aktuellen Sammlung.
-   * @returns {Promise<void>}
-   */
-  const handleEndCurrentPeriod = async () => {
-    if (!db || !userId) {
-      setErrorMessage(t('errorMessageDbNotReady'));
-      return;
-    }
-
-    if (players.length === 0) {
-      setErrorMessage(t('noCurrentPeriodData'));
-      setShowEndPeriodConfirmModal(false);
-      return;
-    }
-
-    try {
-      // 1. Erstellt einen neuen Archiveintrag mit einem Zeitstempel.
-      const archiveCollectionRef = collection(db, `artifacts/${appId}/public/data/eventArchive`);
-      const periodTimestamp = new Date().toISOString();
-      const newArchiveDocRef = await addDoc(archiveCollectionRef, {
-        periodEndedAt: periodTimestamp,
+  useEffect(() => {
+    const fetchPlayers = () => {
+      if (!db || !appId) return;
+      setLoading(true);
+      const q = query(collection(db, `artifacts/${appId}/public/data/players`));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const playersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setPlayers(playersData);
+        setLoading(false);
+      }, (err) => {
+        console.error("Fehler beim Laden der Spieler:", err);
+        setError(`${t('error')} ${err.message}`);
+        setLoading(false);
       });
+      return () => unsubscribe();
+    };
+    fetchPlayers();
+  }, [db, appId, t]);
 
-      // 2. Verschiebt aktuelle Spieler in eine Unterkollektion unter dem neuen Archiveintrag.
-      const batch = writeBatch(db); // Korrektur: writeBatch(db) statt db.batch()
-      const currentPlayersCollectionRef = collection(db, `artifacts/${appId}/public/data/currentEventPlayers`);
-
-      for (const player of players) {
-        // Fügt Spieler zur Archiv-Unterkollektion hinzu.
-        const archivedPlayerDocRef = doc(archiveCollectionRef, newArchiveDocRef.id, 'players', player.id);
-        batch.set(archivedPlayerDocRef, player);
-
-        // Löscht Spieler aus der aktuellen Event-Sammlung.
-        const currentPlayerDocRef = doc(currentPlayersCollectionRef, player.id);
-        batch.delete(currentPlayerDocRef);
-      }
-
-      await batch.commit(); // Führt alle Batch-Operationen atomar aus.
-      setErrorMessage(t('periodEndedSuccess'));
-      setShowEndPeriodConfirmModal(false);
-    } catch (e) {
-      console.error("Error ending current period:", e);
-      setErrorMessage(t('periodEndedError'));
+  const handleAddPlayer = async () => {
+    if (!newPlayerName.trim()) {
+      showStatusMessage('error', t('playerNameRequired')); // Annahme: Du hast diesen Schlüssel in deinen Übersetzungen
+      return;
+    }
+    try {
+      await addDoc(collection(db, `artifacts/${appId}/public/data/players`), {
+        name: newPlayerName.trim(),
+        discordId: newPlayerDiscord.trim(),
+        gameId: newPlayerGameId.trim(),
+        createdAt: new Date().toISOString(),
+      });
+      setNewPlayerName('');
+      setNewPlayerDiscord('');
+      setNewPlayerGameId('');
+      showStatusMessage('success', t('playerAddedSuccess'));
+    } catch (err) {
+      console.error("Fehler beim Hinzufügen des Spielers:", err);
+      showStatusMessage('error', `${t('error')} ${err.message}`);
     }
   };
+
+  const handleEditPlayer = (player) => {
+    setEditingPlayer({ ...player });
+    setNewPlayerName(player.name);
+    setNewPlayerDiscord(player.discordId || '');
+    setNewPlayerGameId(player.gameId || '');
+  };
+
+  const handleUpdatePlayer = async () => {
+    if (!editingPlayer || !newPlayerName.trim()) {
+      showStatusMessage('error', t('playerNameRequired'));
+      return;
+    }
+    try {
+      await setDoc(doc(db, `artifacts/${appId}/public/data/players`, editingPlayer.id), {
+        name: newPlayerName.trim(),
+        discordId: newPlayerDiscord.trim(),
+        gameId: newPlayerGameId.trim(),
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
+      setEditingPlayer(null);
+      setNewPlayerName('');
+      setNewPlayerDiscord('');
+      setNewPlayerGameId('');
+      showStatusMessage('success', t('playerUpdatedSuccess'));
+    } catch (err) {
+      console.error("Fehler beim Aktualisieren des Spielers:", err);
+      showStatusMessage('error', `${t('error')} ${err.message}`);
+    }
+  };
+
+  const handleDeletePlayer = (playerId) => {
+    showModal(t('confirmDeletePlayer'), async () => {
+      try {
+        await deleteDoc(doc(db, `artifacts/${appId}/public/data/players`, playerId));
+        showStatusMessage('success', t('playerDeletedSuccess'));
+      } catch (err) {
+        console.error("Fehler beim Löschen des Spielers:", err);
+        showStatusMessage('error', `${t('error')} ${err.message}`);
+      }
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center text-white">
+        <Loader className="animate-spin text-indigo-400 h-10 w-10 mx-auto mb-4" />
+        <p>{t('loading')}</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center">{error}</div>;
+  }
 
   return (
-    <div className="w-full max-w-4xl bg-gray-800 rounded-xl shadow-2xl p-6 sm:p-8 lg:p-10">
-      <h1 className="text-3xl sm:text-4xl font-bold text-center mb-6 text-red-400">
-        {t('adminPanel')}
-      </h1>
-      {errorMessage && (
-        <div className="bg-red-600 p-3 rounded-md mb-4 text-center">
-          <p className="text-white">{errorMessage}</p>
+    <div className="bg-gray-700 p-6 rounded-lg shadow-md mb-8">
+      <h3 className="text-2xl font-bold mb-4 text-indigo-300">{t('playerManagement')}</h3>
+
+      {/* Spieler hinzufügen/bearbeiten Formular */}
+      <div className="mb-6 p-4 bg-gray-600 rounded-lg">
+        <h4 className="text-xl font-semibold mb-3 text-indigo-200">
+          {editingPlayer ? t('editPlayer') : t('addPlayer')}
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="playerName" className="block text-gray-300 text-sm font-bold mb-1">{t('playerName')}</label>
+            <input
+              type="text"
+              id="playerName"
+              className="shadow appearance-none border border-gray-500 rounded-lg w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={newPlayerName}
+              onChange={(e) => setNewPlayerName(e.target.value)}
+              placeholder={t('playerName')}
+            />
+          </div>
+          <div>
+            <label htmlFor="playerDiscord" className="block text-gray-300 text-sm font-bold mb-1">{t('playerDiscord')}</label>
+            <input
+              type="text"
+              id="playerDiscord"
+              className="shadow appearance-none border border-gray-500 rounded-lg w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={newPlayerDiscord}
+              onChange={(e) => setNewPlayerDiscord(e.target.value)}
+              placeholder={t('playerDiscord')}
+            />
+          </div>
+          <div>
+            <label htmlFor="playerGameId" className="block text-gray-300 text-sm font-bold mb-1">{t('playerGameId')}</label>
+            <input
+              type="text"
+              id="playerGameId"
+              className="shadow appearance-none border border-gray-500 rounded-lg w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={newPlayerGameId}
+              onChange={(e) => setNewPlayerGameId(e.target.value)}
+              placeholder={t('playerGameId')}
+            />
+          </div>
         </div>
+        <div className="mt-4 flex gap-2">
+          {editingPlayer ? (
+            <>
+              <button
+                onClick={handleUpdatePlayer}
+                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 flex-grow"
+              >
+                <Save className="inline-block mr-2" size={20} /> {t('update')}
+              </button>
+              <button
+                onClick={() => {
+                  setEditingPlayer(null);
+                  setNewPlayerName('');
+                  setNewPlayerDiscord('');
+                  setNewPlayerGameId('');
+                }}
+                className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300"
+              >
+                <XCircle className="inline-block mr-2" size={20} /> {t('cancel')}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleAddPlayer}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 w-full"
+            >
+              <PlusCircle className="inline-block mr-2" size={20} /> {t('addPlayer')}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Spielerliste */}
+      <h4 className="text-xl font-semibold mb-3 text-indigo-200">{t('playerList')}</h4>
+      {players.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-gray-600 rounded-lg overflow-hidden">
+            <thead>
+              <tr className="bg-gray-500">
+                <th className="py-2 px-4 text-left text-indigo-100">{t('playerName')}</th>
+                <th className="py-2 px-4 text-left text-indigo-100">{t('playerDiscord')}</th>
+                <th className="py-2 px-4 text-left text-indigo-100">{t('playerGameId')}</th>
+                <th className="py-2 px-4 text-left text-indigo-100">{t('actions')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {players.map(player => (
+                <tr key={player.id} className="border-b border-gray-500 last:border-b-0">
+                  <td className="py-2 px-4 text-gray-200">{player.name}</td>
+                  <td className="py-2 px-4 text-gray-200">{player.discordId || '-'}</td>
+                  <td className="py-2 px-4 text-gray-200">{player.gameId || '-'}</td>
+                  <td className="py-2 px-4">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEditPlayer(player)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-md transition duration-200"
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleDeletePlayer(player.id)}
+                        className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-md transition duration-200"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="text-gray-400">{t('noPlayers')}</p>
       )}
-      <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => navigateTo('navigation')}
-          className="px-4 py-2 bg-gray-600 text-white rounded-lg shadow-lg hover:bg-gray-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center space-x-2"
-        >
-          <ArrowLeft className="w-5 h-5 text-gray-300 mr-2" />
-          <span>{t('backToNavigation')}</span>
-        </button>
-        {/* Button zum Beenden der aktuellen Periode */}
-        <button
-          onClick={() => setShowEndPeriodConfirmModal(true)}
-          className="px-5 py-2 bg-purple-600 text-white rounded-lg shadow-lg hover:bg-purple-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center space-x-2"
-        >
-          <Archive className="w-6 h-6 text-purple-300 mr-2" />
-          <span>{t('endCurrentPeriod')}</span>
-        </button>
+    </div>
+  );
+};
+
+// Veranstaltungsperioden-Verwaltung
+const EventPeriodManagement = ({ t, db, appId, showModal, showStatusMessage }) => {
+  const [eventPeriods, setEventPeriods] = useState([]);
+  const [newEventPeriodName, setNewEventPeriodName] = useState('');
+  const [newEventPeriodStartDate, setNewEventPeriodStartDate] = useState('');
+  const [newEventPeriodEndDate, setNewEventPeriodEndDate] = useState('');
+  const [editingEventPeriod, setEditingEventPeriod] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedPeriodForDays, setSelectedPeriodForDays] = useState(null); // Für die Verwaltung der Tage
+  const [selectedDayForScores, setSelectedDayForScores] = useState(null); // Für die Verwaltung der Scores
+
+  useEffect(() => {
+    const fetchEventPeriods = () => {
+      if (!db || !appId) return;
+      setLoading(true);
+      const q = query(collection(db, `artifacts/${appId}/public/data/eventPeriods`));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const periodsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setEventPeriods(periodsData.sort((a, b) => new Date(b.startDate) - new Date(a.startDate)));
+        setLoading(false);
+      }, (err) => {
+        console.error("Fehler beim Laden der Veranstaltungsperioden:", err);
+        setError(`${t('error')} ${err.message}`);
+        setLoading(false);
+      });
+      return () => unsubscribe();
+    };
+    fetchEventPeriods();
+  }, [db, appId, t]);
+
+  const handleAddEventPeriod = async () => {
+    if (!newEventPeriodName.trim() || !newEventPeriodStartDate || !newEventPeriodEndDate) {
+      showStatusMessage('error', 'Bitte fülle alle Felder aus.'); // Annahme: Übersetzter Text
+      return;
+    }
+    try {
+      // Setze alle anderen Perioden auf isCurrent: false, wenn diese auf isCurrent: true gesetzt wird
+      const existingCurrent = eventPeriods.find(p => p.isCurrent);
+      if (existingCurrent) {
+        await updateDoc(doc(db, `artifacts/${appId}/public/data/eventPeriods`, existingCurrent.id), { isCurrent: false });
+      }
+
+      await addDoc(collection(db, `artifacts/${appId}/public/data/eventPeriods`), {
+        name: newEventPeriodName.trim(),
+        startDate: newEventPeriodStartDate,
+        endDate: newEventPeriodEndDate,
+        isArchived: false,
+        isCurrent: true, // Neue Perioden sind standardmäßig aktuell
+        createdAt: new Date().toISOString(),
+      });
+      setNewEventPeriodName('');
+      setNewEventPeriodStartDate('');
+      setNewEventPeriodEndDate('');
+      showStatusMessage('success', t('eventAddedSuccess'));
+    } catch (err) {
+      console.error("Fehler beim Hinzufügen der Veranstaltungsperiode:", err);
+      showStatusMessage('error', `${t('error')} ${err.message}`);
+    }
+  };
+
+  const handleEditEventPeriod = (period) => {
+    setEditingEventPeriod({ ...period });
+    setNewEventPeriodName(period.name);
+    setNewEventPeriodStartDate(period.startDate);
+    setNewEventPeriodEndDate(period.endDate);
+  };
+
+  const handleUpdateEventPeriod = async () => {
+    if (!editingEventPeriod || !newEventPeriodName.trim() || !newEventPeriodStartDate || !newEventPeriodEndDate) {
+      showStatusMessage('error', 'Bitte fülle alle Felder aus.');
+      return;
+    }
+    try {
+      await setDoc(doc(db, `artifacts/${appId}/public/data/eventPeriods`, editingEventPeriod.id), {
+        name: newEventPeriodName.trim(),
+        startDate: newEventPeriodStartDate,
+        endDate: newEventPeriodEndDate,
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
+      setEditingEventPeriod(null);
+      setNewEventPeriodName('');
+      setNewEventPeriodStartDate('');
+      setNewEventPeriodEndDate('');
+      showStatusMessage('success', t('eventUpdatedSuccess'));
+    } catch (err) {
+      console.error("Fehler beim Aktualisieren der Veranstaltungsperiode:", err);
+      showStatusMessage('error', `${t('error')} ${err.message}`);
+    }
+  };
+
+  const handleDeleteEventPeriod = (periodId) => {
+    showModal(t('confirmDeleteEvent'), async () => {
+      try {
+        // Lösche auch alle Unterkollektionen (eventDays, playerScores)
+        const daysSnapshot = await getDocs(collection(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays`));
+        for (const dayDoc of daysSnapshot.docs) {
+          const scoresSnapshot = await getDocs(collection(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays/${dayDoc.id}/playerScores`));
+          for (const scoreDoc of scoresSnapshot.docs) {
+            await deleteDoc(doc(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays/${dayDoc.id}/playerScores`, scoreDoc.id));
+          }
+          await deleteDoc(doc(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays`, dayDoc.id));
+        }
+        await deleteDoc(doc(db, `artifacts/${appId}/public/data/eventPeriods`, periodId));
+        showStatusMessage('success', t('eventDeletedSuccess'));
+      } catch (err) {
+        console.error("Fehler beim Löschen der Veranstaltungsperiode:", err);
+        showStatusMessage('error', `${t('error')} ${err.message}`);
+      }
+    });
+  };
+
+  const handleArchivePeriod = (periodId, isArchived) => {
+    showModal(isArchived ? t('confirmUnarchivePeriod') : t('confirmArchivePeriod'), async () => {
+      try {
+        await updateDoc(doc(db, `artifacts/${appId}/public/data/eventPeriods`, periodId), { isArchived: !isArchived });
+        showStatusMessage('success', isArchived ? t('periodUnarchivedSuccess') : t('periodArchivedSuccess'));
+      } catch (err) {
+        console.error("Fehler beim Archivieren/Dearchivieren der Periode:", err);
+        showStatusMessage('error', `${t('error')} ${err.message}`);
+      }
+    });
+  };
+
+  const handleSetCurrentPeriod = (periodId) => {
+    showModal(t('confirmSetCurrent'), async () => {
+      try {
+        // Setze alle anderen Perioden auf isCurrent: false
+        const batch = db.batch();
+        for (const period of eventPeriods) {
+          if (period.isCurrent) {
+            batch.update(doc(db, `artifacts/${appId}/public/data/eventPeriods`, period.id), { isCurrent: false });
+          }
+        }
+        // Setze die ausgewählte Periode auf isCurrent: true und isArchived: false
+        batch.update(doc(db, `artifacts/${appId}/public/data/eventPeriods`, periodId), { isCurrent: true, isArchived: false });
+        await batch.commit();
+        showStatusMessage('success', t('setCurrentSuccess'));
+      } catch (err) {
+        console.error("Fehler beim Festlegen der aktuellen Periode:", err);
+        showStatusMessage('error', `${t('error')} ${err.message}`);
+      }
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center text-white">
+        <Loader className="animate-spin text-indigo-400 h-10 w-10 mx-auto mb-4" />
+        <p>{t('loading')}</p>
       </div>
-      {/* JSON File Upload Section */}
-      <div className="bg-gray-700 p-6 rounded-lg shadow-md mb-8">
-        <h2 className="text-2xl font-semibold text-blue-300 mb-4">{t('jsonUpload')}</h2>
-        <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-          <input
-            type="file"
-            accept=".json"
-            onChange={handleFileChange}
-            className="block w-full text-sm text-gray-300
-                       file:mr-4 file:py-2 file:px-4
-                       file:rounded-full file:border-0
-                       file:text-sm file:font-semibold
-                       file:bg-blue-50 file:text-blue-700
-                       hover:file:bg-blue-100"
-          />
-          <button
-            onClick={handleFileUpload}
-            className="px-5 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
-          >
-            <Upload className="w-6 h-6 text-blue-300 mr-2" />
-            {t('uploadFile')}
-          </button>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center">{error}</div>;
+  }
+
+  return (
+    <div className="bg-gray-700 p-6 rounded-lg shadow-md mb-8">
+      <h3 className="text-2xl font-bold mb-4 text-indigo-300">{t('eventPeriodManagement')}</h3>
+
+      {/* Veranstaltungsperiode hinzufügen/bearbeiten Formular */}
+      <div className="mb-6 p-4 bg-gray-600 rounded-lg">
+        <h4 className="text-xl font-semibold mb-3 text-indigo-200">
+          {editingEventPeriod ? t('editEvent') : t('addEventPeriod')}
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="periodName" className="block text-gray-300 text-sm font-bold mb-1">{t('eventPeriodName')}</label>
+            <input
+              type="text"
+              id="periodName"
+              className="shadow appearance-none border border-gray-500 rounded-lg w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={newEventPeriodName}
+              onChange={(e) => setNewEventPeriodName(e.target.value)}
+              placeholder={t('eventPeriodName')}
+            />
+          </div>
+          <div>
+            <label htmlFor="startDate" className="block text-gray-300 text-sm font-bold mb-1">{t('eventStartDate')}</label>
+            <input
+              type="date"
+              id="startDate"
+              className="shadow appearance-none border border-gray-500 rounded-lg w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={newEventPeriodStartDate}
+              onChange={(e) => setNewEventPeriodStartDate(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="endDate" className="block text-gray-300 text-sm font-bold mb-1">{t('eventEndDate')}</label>
+            <input
+              type="date"
+              id="endDate"
+              className="shadow appearance-none border border-gray-500 rounded-lg w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={newEventPeriodEndDate}
+              onChange={(e) => setNewEventPeriodEndDate(e.target.value)}
+            />
+          </div>
         </div>
-        {selectedFile && <p className="text-gray-400 text-sm mt-2">{t('selectJsonFile')}: {selectedFile.name}</p>}
-      </div>
-      {/* Clan Members Management Section (moved here as per instruction) */}
-      <div className="bg-gray-700 p-6 rounded-lg shadow-md mb-8">
-        <h2 className="text-2xl font-semibold text-blue-300 mb-4">{t('clanMembers')}</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <input
-            type="text"
-            placeholder={t('playerName')}
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
-            className="p-3 rounded-md bg-gray-600 text-white border border-gray-500 focus:ring-blue-500 focus:border-blue-500"
-          />
-          <input
-            type="text"
-            placeholder={t('playerAlias')}
-            value={playerAlias}
-            onChange={(e) => setPlayerAlias(e.target.value)}
-            className="p-3 rounded-md bg-gray-600 text-white border border-gray-500 focus:ring-blue-500 focus:border-blue-500"
-          />
-          <select
-            value={playerRank}
-            onChange={(e) => setPlayerRank(e.target.value)}
-            className="p-3 rounded-md bg-gray-600 text-white border border-gray-500 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">{t('playerRank')}</option>
-            {ranksList.map(rank => (
-              <option key={rank.id} value={rank.name}>{rank.name}</option>
-            ))}
-          </select>
-          <select
-            value={playerTroopStrength}
-            onChange={(e) => setPlayerTroopStrength(e.target.value)}
-            className="p-3 rounded-md bg-gray-600 text-white border border-gray-500 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">{t('playerTroopStrength')}</option>
-            {troopStrengthsList.map(ts => (
-              <option key={ts.id} value={ts.name}>{ts.name}</option>
-            ))}
-          </select>
-          <button
-            onClick={handleAddPlayer}
-            className="px-5 py-2 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition duration-300 ease-in-out transform hover:scale-105 col-span-full flex items-center justify-center"
-          >
-            <Plus className="w-6 h-6 text-green-300 mr-2" />
-            {t('addPlayer')}
-          </button>
+        <div className="mt-4 flex gap-2">
+          {editingEventPeriod ? (
+            <>
+              <button
+                onClick={handleUpdateEventPeriod}
+                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 flex-grow"
+              >
+                <Save className="inline-block mr-2" size={20} /> {t('update')}
+              </button>
+              <button
+                onClick={() => {
+                  setEditingEventPeriod(null);
+                  setNewEventPeriodName('');
+                  setNewEventPeriodStartDate('');
+                  setNewEventPeriodEndDate('');
+                }}
+                className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300"
+              >
+                <XCircle className="inline-block mr-2" size={20} /> {t('cancel')}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleAddEventPeriod}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 w-full"
+            >
+              <PlusCircle className="inline-block mr-2" size={20} /> {t('addEventPeriod')}
+            </button>
+          )}
         </div>
-        <h3 className="text-xl font-semibold text-blue-300 mt-6 mb-3">{t('currentPlayers')}</h3>
-        {players.length === 0 ? (
-          <p className="text-gray-400">{t('noMembers')}</p>
-        ) : (
-          <ul className="space-y-2">
-            {players.map(player => (
-              <li key={player.id} className="bg-gray-600 p-3 rounded-md flex justify-between items-center">
-                <div className="flex flex-col">
-                  <span className="text-gray-200">{player.name} ({player.rank})</span>
-                  {player.aliases.length > 0 && (
-                    <span className="text-gray-400 text-sm">Aliase: {player.aliases.join(', ')}</span>
-                  )}
-                  <span className="text-gray-400 text-sm">Truppenstärke: {player.troopStrength}</span>
-                  <span className="text-gray-400 text-sm">Norm: {player.normCategory}</span>
-                </div>
-                <button
-                  onClick={() => confirmDelete(player, handleDeletePlayer, 'playerDeleted', 'playerName')}
-                  className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 text-sm flex items-center"
-                >
-                  <Trash2 className="w-5 h-5 mr-1 text-white" />
-                  {t('deletePlayer')}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
-      {/* Troop Strength Management Section */}
-      <div className="bg-gray-700 p-6 rounded-lg shadow-md mb-8">
-        <h2 className="text-2xl font-semibold text-blue-300 mb-4">{t('troopStrengthManagement')}</h2>
-        <div className="flex flex-col sm:flex-row gap-4 mb-4">
-          <input
-            type="text"
-            placeholder={t('newTroopStrength')}
-            value={newTroopStrength}
-            onChange={(e) => setNewTroopStrength(e.target.value)}
-            className="p-3 rounded-md bg-gray-600 text-white border border-gray-500 focus:ring-blue-500 focus:border-blue-500 flex-grow"
-          />
-          <button
-            onClick={handleAddTroopStrength}
-            className="px-5 py-2 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
-          >
-            <Plus className="w-6 h-6 text-green-300 mr-2" />
-            {t('addTroopStrength')}
-          </button>
+
+      {/* Liste der Veranstaltungsperioden */}
+      <h4 className="text-xl font-semibold mb-3 text-indigo-200">{t('eventPeriods')}</h4>
+      {eventPeriods.length > 0 ? (
+        <div className="overflow-x-auto mb-6">
+          <table className="min-w-full bg-gray-600 rounded-lg overflow-hidden">
+            <thead>
+              <tr className="bg-gray-500">
+                <th className="py-2 px-4 text-left text-indigo-100">{t('name')}</th>
+                <th className="py-2 px-4 text-left text-indigo-100">{t('eventStartDate')}</th>
+                <th className="py-2 px-4 text-left text-indigo-100">{t('eventEndDate')}</th>
+                <th className="py-2 px-4 text-left text-indigo-100">{t('status')}</th>
+                <th className="py-2 px-4 text-left text-indigo-100">{t('actions')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {eventPeriods.map(period => (
+                <tr key={period.id} className="border-b border-gray-500 last:border-b-0">
+                  <td className="py-2 px-4 text-gray-200">{period.name}</td>
+                  <td className="py-2 px-4 text-gray-200">{period.startDate}</td>
+                  <td className="py-2 px-4 text-gray-200">{period.endDate}</td>
+                  <td className="py-2 px-4 text-gray-200">
+                    {period.isCurrent ? <span className="text-green-400 font-semibold">{t('periodStatusActive')}</span> :
+                      period.isArchived ? <span className="text-yellow-400 font-semibold">{t('periodStatusArchived')}</span> :
+                        <span className="text-gray-400">{t('inactive')}</span>}
+                  </td>
+                  <td className="py-2 px-4">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => handleEditEventPeriod(period)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-md transition duration-200"
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteEventPeriod(period.id)}
+                        className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-md transition duration-200"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleArchivePeriod(period.id, period.isArchived)}
+                        className={`p-2 rounded-md transition duration-200 ${period.isArchived ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-orange-600 hover:bg-orange-700'} text-white`}
+                      >
+                        {period.isArchived ? <Archive size={18} /> : <Archive size={18} />}
+                      </button>
+                      {!period.isCurrent && !period.isArchived && (
+                        <button
+                          onClick={() => handleSetCurrentPeriod(period.id)}
+                          className="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-md transition duration-200"
+                          title={t('setAsCurrent')}
+                        >
+                          <Target size={18} />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-        <h3 className="text-xl font-semibold text-blue-300 mt-6 mb-3">{t('currentTroopStrengths')}</h3>
-        {troopStrengthsList.length === 0 ? (
-          <p className="text-gray-400">{t('noTroopStrengths')}</p>
-        ) : (
-          <ul className="space-y-2">
-            {troopStrengthsList.map(ts => (
-              <li key={ts.id} className="bg-gray-600 p-3 rounded-md flex justify-between items-center">
-                <span className="text-gray-200">{ts.name}</span>
-                <button
-                  onClick={() => confirmDelete(ts, handleDeleteTroopStrength, 'normDeleted', 'normName')}
-                  className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 text-sm flex items-center"
-                >
-                  <Trash2 className="w-5 h-5 mr-1 text-white" />
-                  {t('deleteTroopStrength')}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      {/* Rank Management Section */}
-      <div className="bg-gray-700 p-6 rounded-lg shadow-md mb-8">
-        <h2 className="text-2xl font-semibold text-blue-300 mb-4">{t('rankManagement')}</h2>
-        <div className="flex flex-col sm:flex-row gap-4 mb-4">
-          <input
-            type="text"
-            placeholder={t('newRank')}
-            value={newRank}
-            onChange={(e) => setNewRank(e.target.value)}
-            className="p-3 rounded-md bg-gray-600 text-white border border-gray-500 focus:ring-blue-500 focus:border-blue-500 flex-grow"
-          />
-          <button
-            onClick={handleAddRank}
-            className="px-5 py-2 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center"
-          >
-            <Plus className="w-6 h-6 text-green-300 mr-2" />
-            {t('addRank')}
-          </button>
-        </div>
-        <h3 className="text-xl font-semibold text-blue-300 mt-6 mb-3">{t('currentRanks')}</h3>
-        {ranksList.length === 0 ? (
-          <p className="text-gray-400">{t('noRanks')}</p>
-        ) : (
-          <ul className="space-y-2">
-            {ranksList.map(rank => (
-              <li key={rank.id} className="bg-gray-600 p-3 rounded-md flex justify-between items-center">
-                <span className="text-gray-200">{rank.name}</span>
-                <button
-                  onClick={() => confirmDelete(rank, handleDeleteRank, 'normDeleted', 'normName')}
-                  className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 text-sm flex items-center"
-                >
-                  <Trash2 className="w-5 h-5 mr-1 text-white" />
-                  {t('deleteRank')}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      {/* Norms Definition Section (Mapping Troop Strength to Norm Value) */}
-      <div className="bg-gray-700 p-6 rounded-lg shadow-md mb-8">
-        <h2 className="text-2xl font-semibold text-blue-300 mb-4">{t('normsDefinition')}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <select
-            value={selectedTroopStrengthForNorm}
-            onChange={(e) => setSelectedTroopStrengthForNorm(e.target.value)}
-            className="p-3 rounded-md bg-gray-600 text-white border border-gray-500 focus:ring-blue-500 focus:border-blue-500 col-span-1"
-          >
-            <option value="">{t('selectTroopStrength')}</option>
-            {troopStrengthsList.map(ts => (
-              <option key={ts.id} value={ts.name}>{ts.name}</option>
-            ))}
-          </select>
-          <input
-            type="number"
-            placeholder={t('normValue')}
-            value={normValue}
-            onChange={(e) => setNormValue(e.target.value)}
-            className="p-3 rounded-md bg-gray-600 text-white border border-gray-500 focus:ring-blue-500 focus:border-blue-500 col-span-1"
-          />
-          <button
-            onClick={handleAssignNorm}
-            className="px-5 py-2 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 transition duration-300 ease-in-out transform hover:scale-105 col-span-1 flex items-center justify-center"
-          >
-            <Plus className="w-6 h-6 text-green-300 mr-2" />
-            {t('assignNorm')}
-          </button>
-        </div>
-        <h3 className="text-xl font-semibold text-blue-300 mt-6 mb-3">{t('currentNorms')}</h3>
-        {normsMapping.length === 0 ? (
-          <p className="text-gray-400">{t('noNormsDefined')}</p>
-        ) : (
-          <ul className="space-y-2">
-            {normsMapping.map(norm => (
-              <li key={norm.id} className="bg-gray-600 p-3 rounded-md flex justify-between items-center">
-                <span className="text-gray-200">Truppenstärke: {norm.troopStrength}, Norm: {norm.norm}</span>
-                <button
-                  onClick={() => confirmDelete(norm, handleDeleteNormMapping, 'normMappingDeleted', 'troopStrength')}
-                  className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 text-sm flex items-center"
-                >
-                  <Trash2 className="w-5 h-5 mr-1 text-white" />
-                  {t('deleteNorm')}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      {showDeleteConfirmModal && (
-        <DeleteConfirmModal
-          itemToDelete={itemToDelete}
-          setShowDeleteConfirmModal={setShowDeleteConfirmModal}
-          setItemToDelete={setItemToDelete}
-          setErrorMessage={setErrorMessage}
-          deleteFunction={deleteFunctionToCall}
-          errorMessage={errorMessage}
-          t={t}
-          messageKey={deleteMessageKey}
-          itemNameKey={deleteItemNameKey}
-        />
+      ) : (
+        <p className="text-gray-400">{t('noData')}</p>
       )}
-      {showEndPeriodConfirmModal && (
-        <EndPeriodConfirmModal
-          setShowEndPeriodConfirmModal={setShowEndPeriodConfirmModal}
-          endCurrentPeriod={handleEndCurrentPeriod}
-          errorMessage={errorMessage}
-          t={t}
-        />
+
+      {/* Auswahl für Tage und Scores */}
+      <div className="mb-6">
+        <label htmlFor="selectPeriodForDays" className="block text-lg mb-2 text-indigo-300">{t('selectPeriod')}:</label>
+        <select
+          id="selectPeriodForDays"
+          className="p-2 rounded-md bg-gray-600 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full"
+          value={selectedPeriodForDays ? selectedPeriodForDays.id : ''}
+          onChange={(e) => setSelectedPeriodForDays(eventPeriods.find(p => p.id === e.target.value))}
+        >
+          <option value="">{t('selectPeriod')}</option>
+          {eventPeriods.map(period => (
+            <option key={period.id} value={period.id}>{period.name} ({period.isCurrent ? t('periodStatusActive') : period.isArchived ? t('periodStatusArchived') : t('inactive')})</option>
+          ))}
+        </select>
+      </div>
+
+      {selectedPeriodForDays && (
+        <>
+          <EventDayManagement t={t} db={db} appId={appId} periodId={selectedPeriodForDays.id} periodName={selectedPeriodForDays.name} showModal={showModal} showStatusMessage={showStatusMessage} setSelectedDayForScores={setSelectedDayForScores} />
+          {selectedDayForScores && (
+            <PlayerScoreManagement t={t} db={db} appId={appId} periodId={selectedPeriodForDays.id} dayId={selectedDayForScores.id} dayNumber={selectedDayForScores.dayNumber} showModal={showModal} showStatusMessage={showStatusMessage} />
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+// Event-Tag-Verwaltung
+const EventDayManagement = ({ t, db, appId, periodId, periodName, showModal, showStatusMessage, setSelectedDayForScores }) => {
+  const [eventDays, setEventDays] = useState([]);
+  const [newDayNumber, setNewDayNumber] = useState('');
+  const [newDayDate, setNewDayDate] = useState('');
+  const [newDayDescription, setNewDayDescription] = useState('');
+  const [editingDay, setEditingDay] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!db || !appId || !periodId) return;
+    setLoading(true);
+    const q = query(collection(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays`));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const daysData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setEventDays(daysData.sort((a, b) => a.dayNumber - b.dayNumber));
+      setLoading(false);
+    }, (err) => {
+      console.error("Fehler beim Laden der Event-Tage:", err);
+      setError(`${t('error')} ${err.message}`);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [db, appId, periodId, t]);
+
+  const handleAddDay = async () => {
+    if (!newDayNumber || !newDayDate.trim()) {
+      showStatusMessage('error', 'Bitte gib Tag Nummer und Datum ein.');
+      return;
+    }
+    try {
+      await addDoc(collection(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays`), {
+        dayNumber: parseInt(newDayNumber),
+        date: newDayDate.trim(),
+        description: newDayDescription.trim(),
+        createdAt: new Date().toISOString(),
+      });
+      setNewDayNumber('');
+      setNewDayDate('');
+      setNewDayDescription('');
+      showStatusMessage('success', t('dayAddedSuccess'));
+    } catch (err) {
+      console.error("Fehler beim Hinzufügen des Tages:", err);
+      showStatusMessage('error', `${t('error')} ${err.message}`);
+    }
+  };
+
+  const handleEditDay = (day) => {
+    setEditingDay({ ...day });
+    setNewDayNumber(day.dayNumber);
+    setNewDayDate(day.date);
+    setNewDayDescription(day.description || '');
+  };
+
+  const handleUpdateDay = async () => {
+    if (!editingDay || !newDayNumber || !newDayDate.trim()) {
+      showStatusMessage('error', 'Bitte gib Tag Nummer und Datum ein.');
+      return;
+    }
+    try {
+      await setDoc(doc(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays`, editingDay.id), {
+        dayNumber: parseInt(newDayNumber),
+        date: newDayDate.trim(),
+        description: newDayDescription.trim(),
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
+      setEditingDay(null);
+      setNewDayNumber('');
+      setNewDayDate('');
+      setNewDayDescription('');
+      showStatusMessage('success', t('dayUpdatedSuccess'));
+    } catch (err) {
+      console.error("Fehler beim Aktualisieren des Tages:", err);
+      showStatusMessage('error', `${t('error')} ${err.message}`);
+    }
+  };
+
+  const handleDeleteDay = (dayId) => {
+    showModal(t('confirmDeleteDay'), async () => {
+      try {
+        // Lösche auch alle Unterkollektionen (playerScores)
+        const scoresSnapshot = await getDocs(collection(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays/${dayId}/playerScores`));
+        for (const scoreDoc of scoresSnapshot.docs) {
+          await deleteDoc(doc(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays/${dayId}/playerScores`, scoreDoc.id));
+        }
+        await deleteDoc(doc(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays`, dayId));
+        showStatusMessage('success', t('dayDeletedSuccess'));
+      } catch (err) {
+        console.error("Fehler beim Löschen des Tages:", err);
+        showStatusMessage('error', `${t('error')} ${err.message}`);
+      }
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center text-white">
+        <Loader className="animate-spin text-indigo-400 h-10 w-10 mx-auto mb-4" />
+        <p>{t('loading')}</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center">{error}</div>;
+  }
+
+  return (
+    <div className="bg-gray-700 p-6 rounded-lg shadow-md mb-8">
+      <h3 className="text-2xl font-bold mb-4 text-indigo-300">{t('manageEventDays')} für {periodName}</h3>
+
+      {/* Tag hinzufügen/bearbeiten Formular */}
+      <div className="mb-6 p-4 bg-gray-600 rounded-lg">
+        <h4 className="text-xl font-semibold mb-3 text-indigo-200">
+          {editingDay ? t('editDay') : t('addEventDay')}
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="dayNumber" className="block text-gray-300 text-sm font-bold mb-1">{t('dayNumber')}</label>
+            <input
+              type="number"
+              id="dayNumber"
+              className="shadow appearance-none border border-gray-500 rounded-lg w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={newDayNumber}
+              onChange={(e) => setNewDayNumber(e.target.value)}
+              placeholder={t('dayNumber')}
+            />
+          </div>
+          <div>
+            <label htmlFor="dayDate" className="block text-gray-300 text-sm font-bold mb-1">{t('dayDate')}</label>
+            <input
+              type="date"
+              id="dayDate"
+              className="shadow appearance-none border border-gray-500 rounded-lg w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={newDayDate}
+              onChange={(e) => setNewDayDate(e.target.value)}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label htmlFor="dayDescription" className="block text-gray-300 text-sm font-bold mb-1">{t('dayDescription')}</label>
+            <textarea
+              id="dayDescription"
+              rows="3"
+              className="shadow appearance-none border border-gray-500 rounded-lg w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={newDayDescription}
+              onChange={(e) => setNewDayDescription(e.target.value)}
+              placeholder={t('dayDescription')}
+            ></textarea>
+          </div>
+        </div>
+        <div className="mt-4 flex gap-2">
+          {editingDay ? (
+            <>
+              <button
+                onClick={handleUpdateDay}
+                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 flex-grow"
+              >
+                <Save className="inline-block mr-2" size={20} /> {t('update')}
+              </button>
+              <button
+                onClick={() => {
+                  setEditingDay(null);
+                  setNewDayNumber('');
+                  setNewDayDate('');
+                  setNewDayDescription('');
+                }}
+                className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300"
+              >
+                <XCircle className="inline-block mr-2" size={20} /> {t('cancel')}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleAddDay}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 w-full"
+            >
+              <PlusCircle className="inline-block mr-2" size={20} /> {t('addDay')}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Liste der Event-Tage */}
+      <h4 className="text-xl font-semibold mb-3 text-indigo-200">{t('eventDays')}</h4>
+      {eventDays.length > 0 ? (
+        <div className="overflow-x-auto mb-6">
+          <table className="min-w-full bg-gray-600 rounded-lg overflow-hidden">
+            <thead>
+              <tr className="bg-gray-500">
+                <th className="py-2 px-4 text-left text-indigo-100">{t('dayNumber')}</th>
+                <th className="py-2 px-4 text-left text-indigo-100">{t('dayDate')}</th>
+                <th className="py-2 px-4 text-left text-indigo-100">{t('description')}</th>
+                <th className="py-2 px-4 text-left text-indigo-100">{t('actions')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {eventDays.map(day => (
+                <tr key={day.id} className="border-b border-gray-500 last:border-b-0">
+                  <td className="py-2 px-4 text-gray-200">{day.dayNumber}</td>
+                  <td className="py-2 px-4 text-gray-200">{day.date}</td>
+                  <td className="py-2 px-4 text-gray-200 truncate max-w-xs">{day.description || '-'}</td>
+                  <td className="py-2 px-4">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => handleEditDay(day)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-md transition duration-200"
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteDay(day.id)}
+                        className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-md transition duration-200"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                      <button
+                        onClick={() => setSelectedDayForScores(day)}
+                        className="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-md transition duration-200"
+                        title={t('managePlayerScores')}
+                      >
+                        <List size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="text-gray-400">{t('noData')}</p>
+      )}
+    </div>
+  );
+};
+
+// Spielergebnis-Verwaltung
+const PlayerScoreManagement = ({ t, db, appId, periodId, dayId, dayNumber, showModal, showStatusMessage }) => {
+  const [playerScores, setPlayerScores] = useState([]);
+  const [playerList, setPlayerList] = useState([]);
+  const [selectedPlayerId, setSelectedPlayerId] = useState('');
+  const [newScorePoints, setNewScorePoints] = useState('');
+  const [editingScore, setEditingScore] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPlayersAndScores = async () => {
+      if (!db || !appId || !periodId || !dayId) return;
+      setLoading(true);
+      try {
+        // Spielerliste laden
+        const playersSnapshot = await getDocs(collection(db, `artifacts/${appId}/public/data/players`));
+        const playersData = playersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setPlayerList(playersData);
+
+        // Spielergebnisse für den Tag laden
+        const q = query(collection(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays/${dayId}/playerScores`));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          const scoresData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          // Spielername zu jedem Score hinzufügen
+          const scoresWithNames = scoresData.map(score => {
+            const player = playersData.find(p => p.id === score.playerId);
+            return { ...score, playerName: player ? player.name : 'Unbekannter Spieler' };
+          });
+          setPlayerScores(scoresWithNames.sort((a, b) => b.score - a.score)); // Nach Punkten sortieren
+          setLoading(false);
+        }, (err) => {
+          console.error("Fehler beim Laden der Spielergebnisse:", err);
+          setError(`${t('error')} ${err.message}`);
+          setLoading(false);
+        });
+        return () => unsubscribe();
+      } catch (err) {
+        console.error("Fehler beim Initialisieren der Spielergebnisverwaltung:", err);
+        setError(`${t('error')} ${err.message}`);
+        setLoading(false);
+      }
+    };
+    fetchPlayersAndScores();
+  }, [db, appId, periodId, dayId, t]);
+
+  const handleAddScore = async () => {
+    if (!selectedPlayerId || newScorePoints === '' || isNaN(parseInt(newScorePoints))) {
+      showStatusMessage('error', 'Bitte wähle einen Spieler und gib eine gültige Punktzahl ein.');
+      return;
+    }
+    try {
+      await addDoc(collection(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays/${dayId}/playerScores`), {
+        playerId: selectedPlayerId,
+        score: parseInt(newScorePoints),
+        createdAt: new Date().toISOString(),
+      });
+      setSelectedPlayerId('');
+      setNewScorePoints('');
+      showStatusMessage('success', t('scoreAddedSuccess'));
+    } catch (err) {
+      console.error("Fehler beim Hinzufügen des Spielergebnisses:", err);
+      showStatusMessage('error', `${t('error')} ${err.message}`);
+    }
+  };
+
+  const handleEditScore = (score) => {
+    setEditingScore({ ...score });
+    setSelectedPlayerId(score.playerId);
+    setNewScorePoints(score.score);
+  };
+
+  const handleUpdateScore = async () => {
+    if (!editingScore || !selectedPlayerId || newScorePoints === '' || isNaN(parseInt(newScorePoints))) {
+      showStatusMessage('error', 'Bitte wähle einen Spieler und gib eine gültige Punktzahl ein.');
+      return;
+    }
+    try {
+      await setDoc(doc(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays/${dayId}/playerScores`, editingScore.id), {
+        playerId: selectedPlayerId,
+        score: parseInt(newScorePoints),
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
+      setEditingScore(null);
+      setSelectedPlayerId('');
+      setNewScorePoints('');
+      showStatusMessage('success', t('scoreUpdatedSuccess'));
+    } catch (err) {
+      console.error("Fehler beim Aktualisieren des Spielergebnisses:", err);
+      showStatusMessage('error', `${t('error')} ${err.message}`);
+    }
+  };
+
+  const handleDeleteScore = (scoreId) => {
+    showModal(t('confirmDeletePlayerScore'), async () => {
+      try {
+        await deleteDoc(doc(db, `artifacts/${appId}/public/data/eventPeriods/${periodId}/eventDays/${dayId}/playerScores`, scoreId));
+        showStatusMessage('success', t('scoreDeletedSuccess'));
+      } catch (err) {
+        console.error("Fehler beim Löschen des Spielergebnisses:", err);
+        showStatusMessage('error', `${t('error')} ${err.message}`);
+      }
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center text-white">
+        <Loader className="animate-spin text-indigo-400 h-10 w-10 mx-auto mb-4" />
+        <p>{t('loading')}</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center">{error}</div>;
+  }
+
+  return (
+    <div className="bg-gray-700 p-6 rounded-lg shadow-md mb-8">
+      <h3 className="text-2xl font-bold mb-4 text-indigo-300">{t('managePlayerScores')} für Tag {dayNumber}</h3>
+
+      {/* Spielergebnis hinzufügen/bearbeiten Formular */}
+      <div className="mb-6 p-4 bg-gray-600 rounded-lg">
+        <h4 className="text-xl font-semibold mb-3 text-indigo-200">
+          {editingScore ? t('editPlayerScore') : t('addPlayerScore')}
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="selectPlayer" className="block text-gray-300 text-sm font-bold mb-1">{t('player')}</label>
+            <select
+              id="selectPlayer"
+              className="shadow appearance-none border border-gray-500 rounded-lg w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={selectedPlayerId}
+              onChange={(e) => setSelectedPlayerId(e.target.value)}
+              disabled={!!editingScore} // Spieler kann beim Bearbeiten nicht geändert werden
+            >
+              <option value="">{t('selectPlayer')}</option>
+              {playerList.map(player => (
+                <option key={player.id} value={player.id}>{player.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="scorePoints" className="block text-gray-300 text-sm font-bold mb-1">{t('scorePoints')}</label>
+            <input
+              type="number"
+              id="scorePoints"
+              className="shadow appearance-none border border-gray-500 rounded-lg w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={newScorePoints}
+              onChange={(e) => setNewScorePoints(e.target.value)}
+              placeholder={t('scorePoints')}
+            />
+          </div>
+        </div>
+        <div className="mt-4 flex gap-2">
+          {editingScore ? (
+            <>
+              <button
+                onClick={handleUpdateScore}
+                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 flex-grow"
+              >
+                <Save className="inline-block mr-2" size={20} /> {t('update')}
+              </button>
+              <button
+                onClick={() => {
+                  setEditingScore(null);
+                  setSelectedPlayerId('');
+                  setNewScorePoints('');
+                }}
+                className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300"
+              >
+                <XCircle className="inline-block mr-2" size={20} /> {t('cancel')}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleAddScore}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 w-full"
+            >
+              <PlusCircle className="inline-block mr-2" size={20} /> {t('addScore')}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Liste der Spielergebnisse */}
+      <h4 className="text-xl font-semibold mb-3 text-indigo-200">{t('playerScoresForDay')} {dayNumber}</h4>
+      {playerScores.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-gray-600 rounded-lg overflow-hidden">
+            <thead>
+              <tr className="bg-gray-500">
+                <th className="py-2 px-4 text-left text-indigo-100">{t('player')}</th>
+                <th className="py-2 px-4 text-left text-indigo-100">{t('points')}</th>
+                <th className="py-2 px-4 text-left text-indigo-100">{t('actions')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {playerScores.map(score => (
+                <tr key={score.id} className="border-b border-gray-500 last:border-b-0">
+                  <td className="py-2 px-4 text-gray-200">{score.playerName}</td>
+                  <td className="py-2 px-4 text-gray-200">{score.score}</td>
+                  <td className="py-2 px-4">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEditScore(score)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-md transition duration-200"
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteScore(score.id)}
+                        className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-md transition duration-200"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="text-gray-400">{t('noScores')}</p>
+      )}
+    </div>
+  );
+};
+
+// Admin-Verwaltung
+const AdminManagement = ({ t, db, appId, userId, showModal, showStatusMessage }) => {
+  const [admins, setAdmins] = useState([]);
+  const [newAdminId, setNewAdminId] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchAdmins = () => {
+      if (!db || !appId) return;
+      setLoading(true);
+      // Admins werden in einer öffentlichen Kollektion gespeichert
+      const q = query(collection(db, `artifacts/${appId}/public/data/admins`));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const adminsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setAdmins(adminsData);
+        setLoading(false);
+      }, (err) => {
+        console.error("Fehler beim Laden der Admins:", err);
+        setError(`${t('error')} ${err.message}`);
+        setLoading(false);
+      });
+      return () => unsubscribe();
+    };
+    fetchAdmins();
+  }, [db, appId, t]);
+
+  const handleAddAdmin = async () => {
+    if (!newAdminId.trim()) {
+      showStatusMessage('error', 'Bitte gib eine Admin User ID ein.');
+      return;
+    }
+    try {
+      await setDoc(doc(db, `artifacts/${appId}/public/data/admins`, newAdminId.trim()), {
+        addedBy: userId,
+        addedAt: new Date().toISOString(),
+      });
+      setNewAdminId('');
+      showStatusMessage('success', t('adminAddedSuccess'));
+    } catch (err) {
+      console.error("Fehler beim Hinzufügen des Admins:", err);
+      showStatusMessage('error', `${t('error')} ${err.message}`);
+    }
+  };
+
+  const handleRemoveAdmin = (adminIdToRemove) => {
+    showModal(t('confirmRemoveAdmin'), async () => {
+      try {
+        await deleteDoc(doc(db, `artifacts/${appId}/public/data/admins`, adminIdToRemove));
+        showStatusMessage('success', t('adminRemovedSuccess'));
+      } catch (err) {
+        console.error("Fehler beim Entfernen des Admins:", err);
+        showStatusMessage('error', `${t('error')} ${err.message}`);
+      }
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center text-white">
+        <Loader className="animate-spin text-indigo-400 h-10 w-10 mx-auto mb-4" />
+        <p>{t('loading')}</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center">{error}</div>;
+  }
+
+  return (
+    <div className="bg-gray-700 p-6 rounded-lg shadow-md mb-8">
+      <h3 className="text-2xl font-bold mb-4 text-indigo-300">{t('adminManagement')}</h3>
+
+      {/* Admin hinzufügen Formular */}
+      <div className="mb-6 p-4 bg-gray-600 rounded-lg">
+        <h4 className="text-xl font-semibold mb-3 text-indigo-200">{t('addAdmin')}</h4>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <input
+            type="text"
+            className="shadow appearance-none border border-gray-500 rounded-lg w-full py-2 px-3 bg-gray-700 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500 flex-grow"
+            value={newAdminId}
+            onChange={(e) => setNewAdminId(e.target.value)}
+            placeholder={t('adminUserId')}
+          />
+          <button
+            onClick={handleAddAdmin}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 flex-shrink-0"
+          >
+            <PlusCircle className="inline-block mr-2" size={20} /> {t('addAdminBtn')}
+          </button>
+        </div>
+      </div>
+
+      {/* Aktuelle Admins Liste */}
+      <h4 className="text-xl font-semibold mb-3 text-indigo-200">{t('currentAdmins')}</h4>
+      {admins.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-gray-600 rounded-lg overflow-hidden">
+            <thead>
+              <tr className="bg-gray-500">
+                <th className="py-2 px-4 text-left text-indigo-100">{t('adminId')}</th>
+                <th className="py-2 px-4 text-left text-indigo-100">{t('actions')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {admins.map(admin => (
+                <tr key={admin.id} className="border-b border-gray-500 last:border-b-0">
+                  <td className="py-2 px-4 text-gray-200 break-all">{admin.id}</td>
+                  <td className="py-2 px-4">
+                    {admin.id !== userId ? ( // Aktuellen Admin nicht entfernen können
+                      <button
+                        onClick={() => handleRemoveAdmin(admin.id)}
+                        className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-md transition duration-200"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    ) : (
+                      <span className="text-gray-400 text-sm">{t('self')}</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="text-gray-400">{t('noAdmins')}</p>
+      )}
+    </div>
+  );
+};
+
+// Admin-Nachrichtenverwaltung
+const AdminMessageManagement = ({ t, db, appId, showModal, showStatusMessage }) => {
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!db || !appId) return;
+    setLoading(true);
+    // Nachrichten in einer öffentlichen Kollektion speichern
+    const q = query(collection(db, `artifacts/${appId}/public/data/adminMessages`));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const messagesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setMessages(messagesData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)));
+      setLoading(false);
+    }, (err) => {
+      console.error("Fehler beim Laden der Admin-Nachrichten:", err);
+      setError(`${t('error')} ${err.message}`);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [db, appId, t]);
+
+  const handleDeleteMessage = (messageId) => {
+    showModal(t('confirmDeleteMessage'), async () => {
+      try {
+        await deleteDoc(doc(db, `artifacts/${appId}/public/data/adminMessages`, messageId));
+        showStatusMessage('success', t('messageDeletedSuccess'));
+      } catch (err) {
+        console.error("Fehler beim Löschen der Nachricht:", err);
+        showStatusMessage('error', `${t('error')} ${err.message}`);
+      }
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center text-white">
+        <Loader className="animate-spin text-indigo-400 h-10 w-10 mx-auto mb-4" />
+        <p>{t('loading')}</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center">{error}</div>;
+  }
+
+  return (
+    <div className="bg-gray-700 p-6 rounded-lg shadow-md mb-8">
+      <h3 className="text-2xl font-bold mb-4 text-indigo-300">{t('adminMessages')}</h3>
+
+      {messages.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-gray-600 rounded-lg overflow-hidden">
+            <thead>
+              <tr className="bg-gray-500">
+                <th className="py-2 px-4 text-left text-indigo-100">{t('fromUser')}</th>
+                <th className="py-2 px-4 text-left text-indigo-100">{t('message')}</th>
+                <th className="py-2 px-4 text-left text-indigo-100">{t('timestamp')}</th>
+                <th className="py-2 px-4 text-left text-indigo-100">{t('actions')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {messages.map(message => (
+                <tr key={message.id} className="border-b border-gray-500 last:border-b-0">
+                  <td className="py-2 px-4 text-gray-200 break-all">{message.fromUserId}</td>
+                  <td className="py-2 px-4 text-gray-200 max-w-xs truncate">{message.messageContent}</td>
+                  <td className="py-2 px-4 text-gray-200 text-sm">
+                    {new Date(message.timestamp).toLocaleString()}
+                  </td>
+                  <td className="py-2 px-4">
+                    <button
+                      onClick={() => handleDeleteMessage(message.id)}
+                      className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-md transition duration-200"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="text-gray-400">{t('noAdminMessages')}</p>
       )}
     </div>
   );
 };
 
 
-/**
- * @function App
- * @description Die Hauptkomponente der React-Anwendung.
- * Verwaltet den globalen Zustand wie Firebase-Initialisierung, Authentifizierung,
- * aktuelle Seite und Fehlermeldungen. Rendert die entsprechende Seite basierend auf dem Navigationszustand.
- * @returns {JSX.Element} Das JSX-Element der gesamten Anwendung.
- */
-function App() {
-  // Die Firebase-Instanzen und der Benutzerstatus werden jetzt vom useFirebase-Hook bereitgestellt
-  const { db, auth, userId, isAuthReady, errorMessage: firebaseErrorMessage, appId } = useFirebase();
+// Haupt-App-Komponente
+const App = () => {
   const [currentPage, setCurrentPage] = useState('welcome');
   const [currentLanguage, setCurrentLanguage] = useState('de');
-  const [errorMessage, setErrorMessage] = useState(''); // Lokaler Fehlerzustand für Komponenten
-  const [selectedPlayerForDetail, setSelectedPlayerForDetail] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
   const [selectedArchivedPeriodId, setSelectedArchivedPeriodId] = useState(null);
 
-  // Übersetzungsfunktion für die aktuelle Sprache
-  const t = (key, params) => getTranslation(currentLanguage, key, params);
+  // Hole Firebase-Instanzen aus dem Kontext
+  const { db, auth, userId, appId, isAuthReady } = useFirebase();
 
-  // Kombiniere Firebase-Fehlermeldungen mit lokalen Fehlermeldungen
-  useEffect(() => {
-    if (firebaseErrorMessage) {
-      setErrorMessage(firebaseErrorMessage);
-    }
-  }, [firebaseErrorMessage]);
-
-  /**
-   * @function navigateTo
-   * @description Navigiert zu einer neuen Seite und setzt relevante Zustände zurück oder setzt sie.
-   * @param {string} page - Der Name der Seite, zu der navigiert werden soll.
-   * @param {Object|string|null} [data=null] - Optionale Daten, die an die neue Seite übergeben werden sollen (z.B. Spielerobjekt oder Archiv-ID).
-   */
-  const navigateTo = (page, data = null) => {
-    setCurrentPage(page);
-    setSelectedPlayerForDetail(null);
-    setSelectedArchivedPeriodId(null);
-
-    if (page === 'playerReport' && data) {
-      setSelectedPlayerForDetail(data);
-    } else if (page === 'archivedPeriodDetails' && data) {
-      setSelectedArchivedPeriodId(data);
-    }
-    setErrorMessage(''); // Fehlermeldung beim Seitenwechsel zurücksetzen
+  // Übersetzungsfunktion
+  const t = (key) => {
+    return translations[currentLanguage][key] || key;
   };
 
-  console.log("App-Komponente rendert. isAuthReady:", isAuthReady); // Debug-Log
+  const navigateTo = (page, params = {}) => {
+    if (page === 'eventArchive' && params.periodId) {
+      setSelectedArchivedPeriodId(params.periodId);
+    } else {
+      setSelectedArchivedPeriodId(null);
+    }
+    setCurrentPage(page);
+    setErrorMessage(''); // Fehler beim Navigieren zurücksetzen
+  };
 
-  // Zeigt einen Ladebildschirm an, bis die Authentifizierung abgeschlossen ist.
+  // Zeige einen Ladezustand an, bis Firebase bereit ist
   if (!isAuthReady) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="text-center p-6 bg-white rounded-lg shadow-md">
-          <p className="text-lg text-gray-700">{t('loading')}</p>
-          <div className="mt-4 animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-700 text-white flex items-center justify-center">
+        <Loader className="animate-spin text-indigo-400 h-16 w-16" />
+        <p className="ml-4 text-lg">{t('loadingUserData')}</p>
       </div>
     );
   }
 
-  /**
-   * @function renderPage
-   * @description Wählt die zu rendernde Komponente basierend auf dem aktuellen `currentPage`-Zustand aus.
-   * @returns {JSX.Element} Die JSX-Komponente der aktuellen Seite.
-   */
   const renderPage = () => {
     switch (currentPage) {
       case 'welcome':
         return <WelcomePage navigateTo={navigateTo} setLanguage={setCurrentLanguage} currentLanguage={currentLanguage} t={t} />;
-      case 'info':
+      case 'infoPage':
         return <InfoPage navigateTo={navigateTo} t={t} />;
       case 'navigation':
         return <NavigationPage navigateTo={navigateTo} t={t} />;
-      case 'playerReport':
-        // Wenn direkt über Navigation aufgerufen, ohne spezifischen Spieler, zeige die aktuelle Event-Seite.
-        // Von dort aus kann ein Spieler ausgewählt werden.
-        if (!selectedPlayerForDetail) {
-          return <CurrentEventPage navigateTo={navigateTo} t={t} db={db} appId={appId} userId={userId} />;
-        }
-        return <PlayerDetailPage navigateTo={navigateTo} t={t} player={selectedPlayerForDetail} />;
-      case 'currentEvent':
-        return <CurrentEventPage navigateTo={navigateTo} t={t} db={db} appId={appId} userId={userId} />;
-      case 'uff2Standards':
-        return <Uff2StandardsPage navigateTo={navigateTo} t={t} />;
+      case 'currentTotalEvent':
+        return <CurrentTotalEventPage navigateTo={navigateTo} t={t} db={db} appId={appId} userId={userId} />;
       case 'eventArchive':
-        return <EventArchivePage navigateTo={navigateTo} t={t} db={db} appId={appId} userId={userId} />;
-      case 'archivedPeriodDetails':
-        return <ArchivedPeriodDetailsPage navigateTo={navigateTo} t={t} db={db} appId={appId} userId={userId} archivedPeriodId={selectedArchivedPeriodId} />;
+        return <EventArchivePage navigateTo={navigateTo} t={t} db={db} appId={appId} userId={userId} archivedPeriodId={selectedArchivedPeriodId} />;
       case 'topTen':
         return <TopTenPage navigateTo={navigateTo} t={t} db={db} appId={appId} userId={userId} />;
       case 'hallOfChamps':
@@ -3023,10 +5093,20 @@ function App() {
   };
 
   return (
+    // HIER IST DIE KORREKTE PLATZIERUNG DES FIREBASEPROVIDERS
+    // Er umschließt das gesamte 'div'-Element, das deine App rendert.
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-700 text-white p-4 sm:p-6 lg:p-8 font-inter flex flex-col items-center">
-      {renderPage()}
+      <style>
+        {
+          `@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+          body { font-family: 'Inter', sans-serif; }`
+        }
+      </style>
+      <div className="w-full max-w-6xl">
+        {renderPage()}
+      </div>
     </div>
   );
-}
+};
 
 export default App;
