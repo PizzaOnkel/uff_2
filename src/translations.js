@@ -27,7 +27,9 @@ export const translations = {
     endDate: "Enddatum",
     playerNotFound: "Spieler nicht gefunden.",
     periodNotFound: "Periode nicht gefunden.",
-
+    noTopPlayersYet: "Noch keine Top-Spieler verfügbar.", // Für TopTenPage
+    rank: "Rang", // Für TopTenPage
+    playerName: "Spielername", // Für TopTenPage
 
     // === WelcomePage ===
     welcomeToClanDashboard: "Willkommen beim ClanDashboard!",
@@ -46,42 +48,69 @@ export const translations = {
     goBackToWelcome: "Zurück zur Startseite",
 
     // === InfoPage ===
-    infoPageTitle: "Informationen zum ClanDashboard",
-    infoPageText: "Dies ist eine Informationsseite über die Funktionen und den Zweck des ClanDashboards. Hier finden Sie Details zur Nutzung, den Regeln und wichtigen Hinweisen.",
-    // Füge hier weitere spezifische InfoPage Texte hinzu, wenn vorhanden
+    infoPageTitle: "Über unseren Clan und das Spiel",
+    clanName: "Unser Clan: Union For Friends 2",
+    clanDescription: "Wir sind eine Gemeinschaft leidenschaftlicher Spieler, die sich dem Abenteuer und dem gemeinsamen Erfolg verschrieben haben. Egal ob PvE oder PvP, wir unterstützen uns gegenseitig und haben Spaß dabei.",
+    gameName: "Das Spiel: Total Battle",
+    gameDescription: "ist ein taktisch, strategisches Kriegsspiel. Egal ob du überfallen wirst, oder selbst überfälle durchführst, wir halten uns stets an die Netikette. Wir befinden uns im Königreich Nr. 36 und folgen den Gesetzen des Königreichs ROE 36*",
+    gameNorms: "In diesem Spiel und in unserem Clan, musst du Normen erfüllen um selbst erfolgreich zu sein und den Clan zum Erfolg zu verhelfen.",
+    clanInfoLink: "Hier auf dieser Seite kannst du dich über Clan- und persönliche Statistiken informieren.",
+    contactFormHint: "Wenn du Fehler entdeckst oder Vorschläge/Anregungen zu dieser Seite hast, nutze das Kontaktformular",
+    goodLuckMessage: "Ich wünsche euch allen eine erfolgreiche Jagd. Los geht's - viel Glück und habt Spaß!",
+    thePizzaOnkel: "Der PizzaOnkel",
+    allRightsReserved: "Alle Rechte vorbehalten.",
+    goToNavigation: "Zur Navigation", // Dieser Schlüssel wird auch in InfoPage verwendet
 
     // === CurrentTotalEventPage ===
     currentEventsTitle: "Aktuelle und kommende Events",
     addEvent: "Event hinzufügen",
     totalEvents: "Gesamtzahl der Events",
-    // Füge hier weitere spezifische CurrentTotalEventPage Texte hinzu
 
     // === EventArchivePage ===
     eventArchiveTitle: "Archivierte Event-Perioden",
     viewArchivedDetails: "Details der archivierten Periode ansehen",
-    // Füge hier weitere spezifische EventArchivePage Texte hinzu
 
     // === TopTenPage ===
     topTenTitle: "Top 10 Spieler",
-    // Füge hier weitere spezifische TopTenPage Texte hinzu
 
     // === AdminPanelPage ===
     adminPanelTitle: "Admin-Panel",
     manageEvents: "Events verwalten",
     managePlayers: "Spieler verwalten",
     createPeriod: "Periode erstellen",
-    // Füge hier weitere spezifische AdminPanelPage Texte hinzu
 
     // === PlayerDetailsPage ===
     playerDetails: "Spielerdetails",
     playerEvents: "Events dieses Spielers",
-    // Füge hier weitere spezifische PlayerDetailsPage Texte hinzu
 
     // === ArchivedPeriodDetailsPage ===
     archivedPeriodDetails: "Details der archivierten Periode",
     eventsInPeriod: "Events in dieser Periode",
     playersInPeriod: "Spieler in dieser Periode",
-    // Füge hier weitere spezifische ArchivedPeriodDetailsPage Texte hinzu
+
+    // === AuthPage ===
+    loginTitle: "Anmelden",
+    registerTitle: "Registrieren",
+    emailPlaceholder: "E-Mail",
+    passwordPlaceholder: "Passwort",
+    confirmPasswordPlaceholder: "Passwort bestätigen",
+    loginButton: "Anmelden",
+    registerButton: "Registrieren",
+    switchToRegister: "Noch kein Konto? Jetzt registrieren",
+    switchToLogin: "Bereits ein Konto? Jetzt anmelden",
+    loginSuccess: "Erfolgreich angemeldet!",
+    registerSuccess: "Registrierung erfolgreich!",
+    loginFailed: "Anmeldung fehlgeschlagen",
+    registerFailed: "Registrierung fehlgeschlagen",
+    passwordsDoNotMatch: "Passwörter stimmen nicht überein.",
+    // Firebase Auth spezifische Fehlermeldungen (Beispiele, können erweitert werden)
+    'auth/invalid-email': "Ungültiges E-Mail-Format.",
+    'auth/user-disabled': "Dieser Benutzer wurde deaktiviert.",
+    'auth/user-not-found': "Kein Benutzer mit dieser E-Mail gefunden.",
+    'auth/wrong-password': "Falsches Passwort.",
+    'auth/email-already-in-use': "Diese E-Mail-Adresse wird bereits verwendet.",
+    'auth/weak-password': "Das Passwort ist zu schwach (mind. 6 Zeichen).",
+
   },
   en: {
     // === General Terms and UI Elements ===
@@ -109,7 +138,9 @@ export const translations = {
     endDate: "End Date",
     playerNotFound: "Player not found.",
     periodNotFound: "Period not found.",
-
+    noTopPlayersYet: "No top players available yet.",
+    rank: "Rank",
+    playerName: "Player Name",
 
     // === WelcomePage ===
     welcomeToClanDashboard: "Welcome to ClanDashboard!",
@@ -128,8 +159,18 @@ export const translations = {
     goBackToWelcome: "Back to Welcome Page",
 
     // === InfoPage ===
-    infoPageTitle: "About ClanDashboard",
-    infoPageText: "This is an information page about the features and purpose of the ClanDashboard. Here you will find details on usage, rules, and important notices.",
+    infoPageTitle: "About Our Clan and The Game",
+    clanName: "Our Clan: Union For Friends 2",
+    clanDescription: "We are a community of passionate players dedicated to adventure and shared success. Whether PvE or PvP, we support each other and have fun doing it.",
+    gameName: "The Game: Total Battle",
+    gameDescription: "is a tactical, strategic war game. Whether you are raided or carry out raids yourself, we always adhere to netiquette. We are located in Kingdom No. 36 and follow the laws of Kingdom ROE 36*",
+    gameNorms: "In this game and in our clan, you must fulfill norms to be successful yourself and to help the clan succeed.",
+    clanInfoLink: "Here on this page you can inform yourself about clan and personal statistics.",
+    contactFormHint: "If you discover errors or have suggestions/ideas for this page, use the contact form",
+    goodLuckMessage: "I wish you all a successful hunt. Let's go - good luck and have fun!",
+    thePizzaOnkel: "The PizzaOnkel",
+    allRightsReserved: "All rights reserved.",
+    goToNavigation: "Go to Navigation",
 
     // === CurrentTotalEventPage ===
     currentEventsTitle: "Current and Upcoming Events",
@@ -157,6 +198,30 @@ export const translations = {
     archivedPeriodDetails: "Archived Period Details",
     eventsInPeriod: "Events in this Period",
     playersInPeriod: "Players in this Period",
+
+    // === AuthPage ===
+    loginTitle: "Login",
+    registerTitle: "Register",
+    emailPlaceholder: "Email",
+    passwordPlaceholder: "Password",
+    confirmPasswordPlaceholder: "Confirm Password",
+    loginButton: "Login",
+    registerButton: "Register",
+    switchToRegister: "Don't have an account? Register now",
+    switchToLogin: "Already have an account? Login now",
+    loginSuccess: "Successfully logged in!",
+    registerSuccess: "Registration successful!",
+    loginFailed: "Login failed",
+    registerFailed: "Registration failed",
+    passwordsDoNotMatch: "Passwords do not match.",
+    // Firebase Auth specific error messages (examples, can be expanded)
+    'auth/invalid-email': "Invalid email format.",
+    'auth/user-disabled': "This user has been disabled.",
+    'auth/user-not-found': "No user found with this email.",
+    'auth/wrong-password': "Wrong password.",
+    'auth/email-already-in-use': "This email address is already in use.",
+    'auth/weak-password': "Password is too weak (min. 6 characters).",
+
   },
   fr: {
     // === Allgemeine Begriffe und UI-Elemente ===
@@ -184,6 +249,9 @@ export const translations = {
     endDate: "Date de fin",
     playerNotFound: "Joueur introuvable.",
     periodNotFound: "Période introuvable.",
+    noTopPlayersYet: "Aucun top joueur disponible pour le moment.",
+    rank: "Rang",
+    playerName: "Nom du joueur",
 
     // === WelcomePage ===
     welcomeToClanDashboard: "Bienvenue sur le ClanDashboard !",
@@ -202,8 +270,18 @@ export const translations = {
     goBackToWelcome: "Retour à la page d'accueil",
 
     // === InfoPage ===
-    infoPageTitle: "À propos de ClanDashboard",
-    infoPageText: "Ceci est une page d'information sur les fonctionnalités et le but du ClanDashboard. Vous y trouverez des détails sur l'utilisation, les règles et les avis importants.",
+    infoPageTitle: "À propos de notre Clan et du Jeu",
+    clanName: "Notre Clan : Union For Friends 2",
+    clanDescription: "Nous sommes une communauté de joueurs passionnés dédiés à l'aventure et au succès partagé. Que ce soit en PvE ou en PvP, nous nous soutenons mutuellement et nous nous amusons.",
+    gameName: "Le Jeu : Total Battle",
+    gameDescription: "est un jeu de guerre tactique et stratégique. Que vous soyez attaqué ou que vous meniez vous-même des attaques, nous respectons toujours la nétiquette. Nous sommes situés dans le Royaume n° 36 et suivons les lois du Royaume ROE 36*",
+    gameNorms: "Dans ce jeu et dans notre clan, vous devez respecter des normes pour réussir vous-même et aider le clan à réussir.",
+    clanInfoLink: "Ici, sur cette page, vous pouvez vous informer sur les statistiques du clan et personnelles.",
+    contactFormHint: "Si vous découvrez des erreurs ou avez des suggestions/idées pour cette page, utilisez le formulaire de contact",
+    goodLuckMessage: "Je vous souhaite à tous une chasse réussie. C'est parti - bonne chance et amusez-vous !",
+    thePizzaOnkel: "Le PizzaOnkel",
+    allRightsReserved: "Tous droits réservés.",
+    goToNavigation: "Aller à la Navigation",
 
     // === CurrentTotalEventPage ===
     currentEventsTitle: "Événements actuels et à venir",
@@ -231,6 +309,29 @@ export const translations = {
     archivedPeriodDetails: "Détails de la période archivée",
     eventsInPeriod: "Événements dans cette période",
     playersInPeriod: "Joueurs dans cette période",
+
+    // === AuthPage ===
+    loginTitle: "Connexion",
+    registerTitle: "S'inscrire",
+    emailPlaceholder: "E-mail",
+    passwordPlaceholder: "Mot de passe",
+    confirmPasswordPlaceholder: "Confirmer le mot de passe",
+    loginButton: "Se connecter",
+    registerButton: "S'inscrire",
+    switchToRegister: "Pas encore de compte ? Inscrivez-vous maintenant",
+    switchToLogin: "Déjà un compte ? Connectez-vous maintenant",
+    loginSuccess: "Connexion réussie !",
+    registerSuccess: "Inscription réussie !",
+    loginFailed: "Échec de la connexion",
+    registerFailed: "Échec de l'inscription",
+    passwordsDoNotMatch: "Les mots de passe ne correspondent pas.",
+    'auth/invalid-email': "Format d'e-mail invalide.",
+    'auth/user-disabled': "Cet utilisateur a été désactivé.",
+    'auth/user-not-found': "Aucun utilisateur trouvé avec cet e-mail.",
+    'auth/wrong-password': "Mot de passe incorrect.",
+    'auth/email-already-in-use': "Cette adresse e-mail est déjà utilisée.",
+    'auth/weak-password': "Le mot de passe est trop faible (min. 6 caractères).",
+
   },
   es: {
     // === Allgemeine Begriffe und UI-Elemente ===
@@ -258,6 +359,9 @@ export const translations = {
     endDate: "Fecha de fin",
     playerNotFound: "Jugador no encontrado.",
     periodNotFound: "Período no encontrado.",
+    noTopPlayersYet: "Aún no hay jugadores principales disponibles.",
+    rank: "Clasificación",
+    playerName: "Nombre del jugador",
 
     // === WelcomePage ===
     welcomeToClanDashboard: "¡Bienvenido al ClanDashboard!",
@@ -276,8 +380,18 @@ export const translations = {
     goBackToWelcome: "Volver a la página de bienvenida",
 
     // === InfoPage ===
-    infoPageTitle: "Acerca de ClanDashboard",
-    infoPageText: "Esta es una página de información sobre las características y el propósito de ClanDashboard. Aquí encontrará detalles sobre el uso, las reglas y los avisos importantes.",
+    infoPageTitle: "Sobre nuestro Clan y el Juego",
+    clanName: "Nuestro Clan: Union For Friends 2",
+    clanDescription: "Somos una comunidad de jugadores apasionados dedicados a la aventura y al éxito compartido. Ya sea PvE o PvP, nos apoyamos mutuamente y nos divertimos haciéndolo.",
+    gameName: "El Juego: Total Battle",
+    gameDescription: "es un juego de guerra táctico y estratégico. Ya sea que te ataquen o que realices ataques tú mismo, siempre nos adherimos a la netiqueta. Estamos ubicados en el Reino No. 36 y seguimos las leyes del Reino ROE 36*",
+    gameNorms: "En este juego y en nuestro clan, debes cumplir normas para tener éxito y ayudar al clan a tener éxito.",
+    clanInfoLink: "Aquí en esta página puedes informarte sobre las estadísticas del clan y personales.",
+    contactFormHint: "Si descubres errores o tienes sugerencias/ideas para esta página, utiliza el formulario de contacto",
+    goodLuckMessage: "¡Les deseo a todos una caza exitosa! ¡Vamos - buena suerte y diviértanse!",
+    thePizzaOnkel: "El PizzaOnkel",
+    allRightsReserved: "Todos los derechos reservados.",
+    goToNavigation: "Ir a Navegación",
 
     // === CurrentTotalEventPage ===
     currentEventsTitle: "Eventos actuales y próximos",
@@ -305,6 +419,29 @@ export const translations = {
     archivedPeriodDetails: "Detalles del período archivado",
     eventsInPeriod: "Eventos en este período",
     playersInPeriod: "Jugadores en este período",
+
+    // === AuthPage ===
+    loginTitle: "Accedi",
+    registerTitle: "Registrati",
+    emailPlaceholder: "Email",
+    passwordPlaceholder: "Password",
+    confirmPasswordPlaceholder: "Conferma password",
+    loginButton: "Accedi",
+    registerButton: "Registrati",
+    switchToRegister: "Non hai un account? Registrati ora",
+    switchToLogin: "Hai già un account? Accedi ora",
+    loginSuccess: "Accesso effettuato con successo!",
+    registerSuccess: "Registrazione avvenuta con successo!",
+    loginFailed: "Accesso fallito",
+    registerFailed: "Registrazione fallita",
+    passwordsDoNotMatch: "Le password non corrispondono.",
+    'auth/invalid-email': "Formato email non valido.",
+    'auth/user-disabled': "Questo utente è stato disabilitato.",
+    'auth/user-not-found': "Nessun utente trovato con questa email.",
+    'auth/wrong-password': "Password errata.",
+    'auth/email-already-in-use': "Questa email è già in uso.",
+    'auth/weak-password': "La password è troppo debole (min. 6 caratteri).",
+
   },
   it: {
     // === Allgemeine Begriffe und UI-Elemente ===
@@ -332,6 +469,9 @@ export const translations = {
     endDate: "Data fine",
     playerNotFound: "Giocatore non trovato.",
     periodNotFound: "Periodo non trovato.",
+    noTopPlayersYet: "Ancora nessun top player disponibile.",
+    rank: "Classifica",
+    playerName: "Nome giocatore",
 
     // === WelcomePage ===
     welcomeToClanDashboard: "Benvenuto nella ClanDashboard!",
@@ -350,8 +490,18 @@ export const translations = {
     goBackToWelcome: "Torna alla pagina di benvenuto",
 
     // === InfoPage ===
-    infoPageTitle: "Informazioni su ClanDashboard",
-    infoPageText: "Questa è una pagina informativa sulle funzionalità e lo scopo di ClanDashboard. Qui troverai dettagli sull'utilizzo, le regole e gli avvisi importanti.",
+    infoPageTitle: "Informazioni sul nostro Clan e il Gioco",
+    clanName: "Il nostro Clan: Union For Friends 2",
+    clanDescription: "Siamo una comunità di giocatori appassionati dediti all'avventura e al successo condiviso. Che si tratti di PvE o PvP, ci sosteniamo a vicenda e ci divertiamo.",
+    gameName: "Il Gioco: Total Battle",
+    gameDescription: "è un gioco di guerra tattico e strategico. Che tu venga attaccato o che tu stesso conduca attacchi, aderiamo sempre alla netiquette. Siamo situati nel Regno n. 36 e seguiamo le leggi del Regno ROE 36*",
+    gameNorms: "In questo gioco e nel nostro clan, devi rispettare le norme per avere successo e aiutare il clan ad avere successo.",
+    clanInfoLink: "Qui su questa pagina puoi informarti sulle statistiche del clan e personali.",
+    contactFormHint: "Se scopri errori o hai suggerimenti/idee per questa pagina, utilizza il modulo di contatto",
+    goodLuckMessage: "Auguro a tutti voi una caccia di successo! Andiamo - buona fortuna e divertitevi!",
+    thePizzaOnkel: "Il PizzaOnkel",
+    allRightsReserved: "Tutti i diritti riservati.",
+    goToNavigation: "Vai alla Navigazione",
 
     // === CurrentTotalEventPage ===
     currentEventsTitle: "Eventi attuali e futuri",
@@ -379,6 +529,29 @@ export const translations = {
     archivedPeriodDetails: "Dettagli periodo archiviato",
     eventsInPeriod: "Eventi in questo periodo",
     playersInPeriod: "Giocatori in questo periodo",
+
+    // === AuthPage ===
+    loginTitle: "Accedi",
+    registerTitle: "Registrati",
+    emailPlaceholder: "Email",
+    passwordPlaceholder: "Password",
+    confirmPasswordPlaceholder: "Conferma password",
+    loginButton: "Accedi",
+    registerButton: "Registrati",
+    switchToRegister: "Non hai un account? Registrati ora",
+    switchToLogin: "Hai già un account? Accedi ora",
+    loginSuccess: "Accesso effettuato con successo!",
+    registerSuccess: "Registrazione avvenuta con successo!",
+    loginFailed: "Accesso fallito",
+    registerFailed: "Registrazione fallita",
+    passwordsDoNotMatch: "Le password non corrispondono.",
+    'auth/invalid-email': "Formato email non valido.",
+    'auth/user-disabled': "Questo utente è stato disabilitato.",
+    'auth/user-not-found': "Nessun utente trovato con questa email.",
+    'auth/wrong-password': "Password errata.",
+    'auth/email-already-in-use': "Questa email è già in uso.",
+    'auth/weak-password': "La password è troppo debole (min. 6 caratteri).",
+
   },
   ru: {
     // === Allgemeine Begriffe und UI-Elemente ===
@@ -406,6 +579,9 @@ export const translations = {
     endDate: "Дата окончания",
     playerNotFound: "Игрок не найден.",
     periodNotFound: "Период не найден.",
+    noTopPlayersYet: "Топ-игроков пока нет.",
+    rank: "Ранг",
+    playerName: "Имя игрока",
 
     // === WelcomePage ===
     welcomeToClanDashboard: "Добро пожаловать в ClanDashboard!",
@@ -424,8 +600,18 @@ export const translations = {
     goBackToWelcome: "Вернуться на главную страницу",
 
     // === InfoPage ===
-    infoPageTitle: "О ClanDashboard",
-    infoPageText: "Это информационная страница о возможностях и назначении ClanDashboard. Здесь вы найдете подробности об использовании, правилах и важные уведомления.",
+    infoPageTitle: "О нашем Клане и Игре",
+    clanName: "Наш Клан: Union For Friends 2",
+    clanDescription: "Мы — сообщество увлеченных игроков, посвященных приключениям и общему успеху. Будь то PvE или PvP, мы поддерживаем друг друга и получаем от этого удовольствие.",
+    gameName: "Игра: Total Battle",
+    gameDescription: "— это тактическая, стратегическая военная игра. Независимо от того, подвергаетесь ли вы нападению или сами совершаете набеги, мы всегда придерживаемся сетевого этикета. Мы находимся в Королевстве № 36 и следуем законам Королевства ROE 36*",
+    gameNorms: "В этой игре и в нашем клане вы должны соблюдать нормы, чтобы быть успешными и помочь клану добиться успеха.",
+    clanInfoLink: "Здесь, на этой странице, вы можете узнать о статистике клана и личной статистике.",
+    contactFormHint: "Если вы обнаружите ошибки или у вас есть предложения/идеи для этой страницы, воспользуйтесь формой обратной связи",
+    goodLuckMessage: "Желаю всем удачной охоты! Вперед — удачи и веселья!",
+    thePizzaOnkel: "ПиццаОнгель",
+    allRightsReserved: "Все права защищены.",
+    goToNavigation: "Перейти к навигации",
 
     // === CurrentTotalEventPage ===
     currentEventsTitle: "Текущие и предстоящие события",
@@ -453,5 +639,28 @@ export const translations = {
     archivedPeriodDetails: "Детали архивированного периода",
     eventsInPeriod: "События в этом периоде",
     playersInPeriod: "Игроки в этом периоде",
+
+    // === AuthPage ===
+    loginTitle: "Войти",
+    registerTitle: "Зарегистрироваться",
+    emailPlaceholder: "Электронная почта",
+    passwordPlaceholder: "Пароль",
+    confirmPasswordPlaceholder: "Подтвердите пароль",
+    loginButton: "Войти",
+    registerButton: "Зарегистрироваться",
+    switchToRegister: "Нет аккаунта? Зарегистрируйтесь сейчас",
+    switchToLogin: "Уже есть аккаунт? Войдите сейчас",
+    loginSuccess: "Успешный вход!",
+    registerSuccess: "Регистрация успешна!",
+    loginFailed: "Ошибка входа",
+    registerFailed: "Ошибка регистрации",
+    passwordsDoNotMatch: "Пароли не совпадают.",
+    'auth/invalid-email': "Неверный формат электронной почты.",
+    'auth/user-disabled': "Этот пользователь был отключен.",
+    'auth/user-not-found': "Пользователь с такой электронной почтой не найден.",
+    'auth/wrong-password': "Неверный пароль.",
+    'auth/email-already-in-use': "Этот адрес электронной почты уже используется.",
+    'auth/weak-password': "Пароль слишком слабый (мин. 6 символов).",
+
   },
 };

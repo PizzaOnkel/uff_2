@@ -14,6 +14,7 @@ import TopTenPage from './pages/TopTenPage.js';
 import AdminPanelPage from './pages/AdminPanelPage.js';
 import PlayerDetailsPage from './pages/PlayerDetailsPage.js';
 import ArchivedPeriodDetailsPage from './pages/ArchivedPeriodDetailsPage.js';
+import AuthPage from './pages/AuthPage.js';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('welcome');
@@ -61,6 +62,8 @@ function App() {
         return <ArchivedPeriodDetailsPage navigateTo={navigateTo} t={t} db={db} appId={typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'} userId={userId} archivedPeriodId={pageParams.periodId} />;
       default:
         return <WelcomePage navigateTo={navigateTo} setLanguage={setCurrentLanguage} currentLanguage={currentLanguage} t={t} />;
+      case 'auth':
+      return <AuthPage navigateTo={navigateTo} t={t} />;
     }
   };
 
