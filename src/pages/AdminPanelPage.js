@@ -2,11 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { useFirebase } from '../FirebaseContext.js'; // Pfad anpassen, falls nötig
-import { getDoc } from 'firebase/firestore'; // 'getDoc' importiert, falls direkt verwendet wird
-import { Home, Settings, Plus, User, Archive, AlertCircle, LogOut } from 'lucide-react'; // Benötigte Icons, LogOut hinzugefügt
+// Importiere nur die Firestore-Funktionen, die du hier wirklich brauchst.
+// doc, getDoc, collection, addDoc, setDoc, updateDoc, serverTimestamp sind hier nicht direkt im useEffect verwendet
+// aber könnten für die Admin-Funktionen später relevant sein.
+import { doc, getDoc, collection, addDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { Home, Settings, Plus, User, Archive, AlertCircle, LogOut, Loader } from 'lucide-react'; // Benötigte Icons, LogOut hinzugefügt
 
-const AdminPanelPage = ({ navigateTo, t, db, appId }) => {
-  const { auth, userId, isAuthReady } = useFirebase(); // auth und isAuthReady aus dem Kontext holen
+// Die appId wird jetzt als Prop übergeben, wie in App.js definiert.
+// db und userId werden direkt aus useFirebase geholt, um Konsistenz zu gewährleisten.
+const AdminPanelPage = ({ navigateTo, t, appId }) => {
+  const { auth, db, userId, isAuthReady } = useFirebase(); // auth, db, userId, isAuthReady aus dem Kontext holen
   const [loading, setLoading] = useState(true); // Initial auf true
   const [error, setError] = useState(null);
 
@@ -19,55 +24,48 @@ const AdminPanelPage = ({ navigateTo, t, db, appId }) => {
   );
 
   useEffect(() => {
-    // Warten, bis Firebase Auth bereit ist
-    if (!isAuthReady) {
+    console.log("AdminPanelPage: useEffect gestartet.");
+    console.log("AdminPanelPage: isAuthReady:", isAuthReady);
+    console.log("AdminPanelPage: db:", db);
+    console.log("AdminPanelPage: userId:", userId);
+    console.log("AdminPanelPage: auth.currentUser:", auth?.currentUser);
+    console.log("AdminPanelPage: appId:", appId);
+
+    // Warten, bis Firebase Auth und Firestore bereit sind
+    if (!isAuthReady || !db) {
+      console.log("AdminPanelPage: Firebase Auth oder DB nicht bereit, warten...");
+      // Setze loading nicht auf false und error nicht, da wir noch warten
       return;
     }
 
     // Überprüfen, ob ein Benutzer angemeldet ist
     if (!auth.currentUser) {
+      console.log("AdminPanelPage: Kein Benutzer angemeldet. Setze Fehler.");
       setError(t('notAuthorizedAdmin')); // Neue Übersetzung für nicht autorisiert
       setLoading(false);
       return;
     }
 
-    // Wenn angemeldet, dann lade/prüfe Admin-Status
-    const checkAdminStatus = async () => {
-      if (!db || !appId || !userId) {
-        setError(t('errorLoadingData') + ". Firebase oder User-ID nicht verfügbar.");
-        setLoading(false);
-        return;
-      }
-      try {
-        // Beispiel: Überprüfung, ob der aktuelle Benutzer Admin-Rechte hat
-        // Dies ist nur ein Platzhalter. Du müsstest deine tatsächliche Admin-Logik hier implementieren.
-        // Z.B. eine Abfrage in Firestore, ob der userId in einer Admin-Rolle ist.
-        // const userDocRef = db.collection('adminRoles').doc(userId); // Beispielpfad
-        // const userSnap = await getDoc(userDocRef);
-        // if (!userSnap.exists() || !userSnap.data().isAdmin) {
-        //   setError(t('notAuthorizedAdmin'));
-        //   setLoading(false);
-        //   return;
-        // }
+    // Wenn hierher gekommen, ist der Benutzer angemeldet.
+    // Für jetzt autorisieren wir alle angemeldeten Benutzer.
+    // In einer echten Anwendung würde hier eine detailliertere Rollenprüfung stattfinden.
+    console.log("AdminPanelPage: Benutzer ist angemeldet. Zeige Admin-Panel an.");
+    setLoading(false); // Laden beendet, da Benutzer angemeldet und DB bereit
 
-        setLoading(false); // Fertig mit dem Laden/Prüfen
-      } catch (err) {
-        console.error("Fehler im Admin-Panel:", err);
-        setError(t('errorLoadingData'));
-        setLoading(false);
-      }
-    };
-
-    checkAdminStatus();
-  }, [auth, isAuthReady, db, appId, userId, t]); // Abhängigkeiten aktualisiert
+  }, [auth, isAuthReady, db, userId, appId, t]); // Abhängigkeiten aktualisiert
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
-      navigateTo('welcome'); // Nach dem Logout zur Willkommensseite navigieren
+      if (auth) { // Prüfen, ob auth-Objekt existiert
+        await auth.signOut();
+        navigateTo('welcome'); // Nach dem Logout zur Willkommensseite navigieren
+      } else {
+        console.error("AdminPanelPage: Auth-Objekt nicht verfügbar für Logout.");
+        setError(t('logoutFailed'));
+      }
     } catch (error) {
       console.error("Fehler beim Logout:", error);
-      setError(t('logoutFailed')); // Neue Übersetzung für Logout-Fehler
+      setError(t('logoutFailed') + `: ${error.message}`); // Detailliertere Fehlermeldung
     }
   };
 
@@ -81,7 +79,7 @@ const AdminPanelPage = ({ navigateTo, t, db, appId }) => {
         <div className="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md text-center">
           <AlertCircle className="text-red-500 text-6xl mx-auto mb-4" />
           <p className="text-xl text-red-400 mb-4">{error}</p>
-          {!auth.currentUser && ( // Nur Login-Button anzeigen, wenn nicht angemeldet
+          {!auth?.currentUser && ( // Nur Login-Button anzeigen, wenn nicht angemeldet
             <button
               onClick={() => navigateTo('auth')}
               className="mt-4 px-6 py-3 bg-purple-600 text-white rounded-lg shadow-md hover:bg-purple-700 transition-colors duration-200 text-lg flex items-center justify-center mx-auto"
