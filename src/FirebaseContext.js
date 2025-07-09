@@ -1,7 +1,8 @@
 // src/FirebaseContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+// NEU: signInWithEmailAndPassword und createUserWithEmailAndPassword importieren
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs } from 'firebase/firestore';
 
 // Erstelle den Firebase Context
@@ -151,7 +152,11 @@ export const FirebaseProvider = ({ children }) => {
     query,
     where,
     addDoc,
-    getDocs
+    getDocs,
+    // NEU: Authentifizierungsfunktionen direkt bereitstellen
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signOut, // signOut auch direkt bereitstellen
   };
 
   return (

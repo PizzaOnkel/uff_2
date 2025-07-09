@@ -5,7 +5,8 @@ import { useFirebase } from '../FirebaseContext.js'; // Pfad anpassen, falls nö
 import { LogIn, UserPlus, Home, AlertCircle, CheckCircle2, Loader } from 'lucide-react'; // Benötigte Icons
 
 const AuthPage = ({ navigateTo, t }) => {
-  const { auth, db, userId } = useFirebase(); // auth und db aus dem Kontext holen
+  // NEU: signInWithEmailAndPassword, createUserWithEmailAndPassword und signOut direkt aus useFirebase holen
+  const { auth, db, userId, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } = useFirebase();
   const [isLogin, setIsLogin] = useState(true); // true für Login, false für Registrierung
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,10 +19,16 @@ const AuthPage = ({ navigateTo, t }) => {
     setMessage('');
     setLoading(true);
 
+    if (!auth) { // Zusätzliche Prüfung, falls auth noch nicht bereit ist
+      setMessage({ type: 'error', text: t('firebaseNotReady') });
+      setLoading(false);
+      return;
+    }
+
     if (isLogin) {
       // Login-Logik
       try {
-        await auth.signInWithEmailAndPassword(email, password);
+        await signInWithEmailAndPassword(auth, email, password); // auth als erstes Argument übergeben
         setMessage({ type: 'success', text: t('loginSuccess') });
         navigateTo('navigation'); // Bei Erfolg zur Navigation
       } catch (error) {
@@ -36,10 +43,15 @@ const AuthPage = ({ navigateTo, t }) => {
         return;
       }
       try {
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password); // auth als erstes Argument übergeben
         // Optional: Benutzerdaten in Firestore speichern
-        if (db) {
-          await db.collection('applications').doc(appId).collection('users').doc(userCredential.user.uid).set({
+        // Hier musst du die appId korrekt übergeben, z.B. als Prop von App.js oder aus dem FirebaseContext
+        // Aktuell ist appId nicht direkt in AuthPage verfügbar, außer du holst es aus useFirebase
+        // Für den Moment nehmen wir an, dass appId im Kontext verfügbar ist oder direkt übergeben wird
+        const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; // Fallback wie in App.js
+        if (db && userCredential.user) {
+          // Pfad anpassen: users-Collection direkt unter der App-ID oder als Subcollection
+          await setDoc(doc(db, 'applications', currentAppId, 'users', userCredential.user.uid), {
             email: userCredential.user.email,
             createdAt: new Date().toISOString(),
             // Weitere initiale Benutzerdaten
