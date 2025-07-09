@@ -88,35 +88,10 @@ export const translations = {
     eventsInPeriod: "Events in dieser Periode",
     playersInPeriod: "Spieler in dieser Periode",
 
-    // === AuthPage ===
-    loginTitle: "Anmelden",
-    registerTitle: "Registrieren",
-    emailPlaceholder: "E-Mail",
-    passwordPlaceholder: "Passwort",
-    confirmPasswordPlaceholder: "Passwort bestätigen",
-    loginButton: "Anmelden",
-    registerButton: "Registrieren",
-    switchToRegister: "Noch kein Konto? Jetzt registrieren",
-    switchToLogin: "Bereits ein Konto? Jetzt anmelden",
-    loginSuccess: "Erfolgreich angemeldet!",
-    registerSuccess: "Registrierung erfolgreich!",
-    loginFailed: "Anmeldung fehlgeschlagen",
-    registerFailed: "Registrierung fehlgeschlagen",
-    passwordsDoNotMatch: "Passwörter stimmen nicht überein.",
-    // Firebase Auth spezifische Fehlermeldungen (Beispiele, können erweitert werden)
-    'auth/invalid-email': "Ungültiges E-Mail-Format.",
-    'auth/user-disabled': "Dieser Benutzer wurde deaktiviert.",
-    'auth/user-not-found': "Kein Benutzer mit dieser E-Mail gefunden.",
-    'auth/wrong-password': "Falsches Passwort.",
-    'auth/email-already-in-use': "Diese E-Mail-Adresse wird bereits verwendet.",
-    'auth/weak-password': "Das Passwort ist zu schwach (mind. 6 Zeichen).",
-
     // NEUE SCHLÜSSEL FÜR ADMIN-PANEL SCHUTZ
     notAuthorizedAdmin: "Nicht autorisiert. Bitte melde dich als Administrator an, um auf diesen Bereich zuzugreifen.",
     logout: "Abmelden",
     logoutFailed: "Fehler beim Abmelden.",
-  },
-
   },
   en: {
     // === General Terms and UI Elements ===
@@ -205,34 +180,10 @@ export const translations = {
     eventsInPeriod: "Events in this Period",
     playersInPeriod: "Players in this Period",
 
-    // === AuthPage ===
-    loginTitle: "Login",
-    registerTitle: "Register",
-    emailPlaceholder: "Email",
-    passwordPlaceholder: "Password",
-    confirmPasswordPlaceholder: "Confirm Password",
-    loginButton: "Login",
-    registerButton: "Register",
-    switchToRegister: "Don't have an account? Register now",
-    switchToLogin: "Already have an account? Login now",
-    loginSuccess: "Successfully logged in!",
-    registerSuccess: "Registration successful!",
-    loginFailed: "Login failed",
-    registerFailed: "Registration failed",
-    passwordsDoNotMatch: "Passwords do not match.",
-    // Firebase Auth specific error messages (examples, can be expanded)
-    'auth/invalid-email': "Invalid email format.",
-    'auth/user-disabled': "This user has been disabled.",
-    'auth/user-not-found': "No user found with this email.",
-    'auth/wrong-password': "Wrong password.",
-    'auth/email-already-in-use': "This email address is already in use.",
-    'auth/weak-password': "Password is too weak (min. 6 characters).",
-
     // NEW KEYS FOR ADMIN PANEL PROTECTION
     notAuthorizedAdmin: "Not authorized. Please log in as an administrator to access this area.",
     logout: "Logout",
     logoutFailed: "Error during logout.",
-
   },
   fr: {
     // === Allgemeine Begriffe und UI-Elemente ===
@@ -320,34 +271,6 @@ export const translations = {
     archivedPeriodDetails: "Détails de la période archivée",
     eventsInPeriod: "Événements dans cette période",
     playersInPeriod: "Joueurs dans cette période",
-
-    // === AuthPage ===
-    loginTitle: "Connexion",
-    registerTitle: "S'inscrire",
-    emailPlaceholder: "E-mail",
-    passwordPlaceholder: "Mot de passe",
-    confirmPasswordPlaceholder: "Confirmer le mot de passe",
-    loginButton: "Se connecter",
-    registerButton: "S'inscrire",
-    switchToRegister: "Pas encore de compte ? Inscrivez-vous maintenant",
-    switchToLogin: "Déjà un compte ? Connectez-vous maintenant",
-    loginSuccess: "Connexion réussie !",
-    registerSuccess: "Inscription réussie !",
-    loginFailed: "Échec de la connexion",
-    registerFailed: "Échec de l'inscription",
-    passwordsDoNotMatch: "Les mots de passe ne correspondent pas.",
-    'auth/invalid-email': "Format d'e-mail invalide.",
-    'auth/user-disabled': "Cet utilisateur a été désactivé.",
-    'auth/user-not-found': "Aucun utilisateur trouvé avec cet e-mail.",
-    'auth/wrong-password': "Mot de passe incorrect.",
-    'auth/email-already-in-use': "Cette adresse e-mail est déjà utilisée.",
-    'auth/weak-password': "Le mot de passe est trop faible (min. 6 caractères).",
-
-    // NOUVELLES CLÉS POUR LA PROTECTION DU PANNEAU D'ADMINISTRATION
-    notAuthorizedAdmin: "Non autorisé. Veuillez vous connecter en tant qu'administrateur pour accéder à cette zone.",
-    logout: "Se déconnecter",
-    logoutFailed: "Erreur lors de la déconnexion.",
-
   },
   es: {
     // === Allgemeine Begriffe und UI-Elemente ===
@@ -435,34 +358,6 @@ export const translations = {
     archivedPeriodDetails: "Detalles del período archivado",
     eventsInPeriod: "Eventos en este período",
     playersInPeriod: "Jugadores en este período",
-
-    // === AuthPage ===
-    loginTitle: "Accedi",
-    registerTitle: "Registrati",
-    emailPlaceholder: "Email",
-    passwordPlaceholder: "Password",
-    confirmPasswordPlaceholder: "Conferma password",
-    loginButton: "Accedi",
-    registerButton: "Registrati",
-    switchToRegister: "Non hai un account? Registrati ora",
-    switchToLogin: "Hai già un account? Accedi ora",
-    loginSuccess: "Accesso effettuato con successo!",
-    registerSuccess: "Registrazione avvenuta con successo!",
-    loginFailed: "Accesso fallito",
-    registerFailed: "Registrazione fallita",
-    passwordsDoNotMatch: "Le password non corrispondono.",
-    'auth/invalid-email': "Formato email non valido.",
-    'auth/user-disabled': "Questo utente è stato disabilitato.",
-    'auth/user-not-found': "Nessun utente trovato con questa email.",
-    'auth/wrong-password': "Password errata.",
-    'auth/email-already-in-use': "Questa email è già in uso.",
-    'auth/weak-password': "La password è troppo debole (min. 6 caratteri).",
-
-    // NUEVAS CLAVES PARA LA PROTECCIÓN DEL PANEL DE ADMINISTRACIÓN
-    notAuthorizedAdmin: "No autorizado. Por favor, inicie sesión como administrador para acceder a esta área.",
-    logout: "Cerrar sesión",
-    logoutFailed: "Error al cerrar sesión.",
-
   },
   it: {
     // === Allgemeine Begriffe und UI-Elemente ===
@@ -550,34 +445,6 @@ export const translations = {
     archivedPeriodDetails: "Dettagli periodo archiviato",
     eventsInPeriod: "Eventi in questo periodo",
     playersInPeriod: "Giocatori in questo periodo",
-
-    // === AuthPage ===
-    loginTitle: "Accedi",
-    registerTitle: "Registrati",
-    emailPlaceholder: "Email",
-    passwordPlaceholder: "Password",
-    confirmPasswordPlaceholder: "Conferma password",
-    loginButton: "Accedi",
-    registerButton: "Registrati",
-    switchToRegister: "Non hai un account? Registrati ora",
-    switchToLogin: "Hai già un account? Accedi ora",
-    loginSuccess: "Accesso effettuato con successo!",
-    registerSuccess: "Registrazione avvenuta con successo!",
-    loginFailed: "Accesso fallito",
-    registerFailed: "Registrazione fallita",
-    passwordsDoNotMatch: "Le password non corrispondono.",
-    'auth/invalid-email': "Formato email non valido.",
-    'auth/user-disabled': "Questo utente è stato disabilitato.",
-    'auth/user-not-found': "Nessun utente trovato con questa email.",
-    'auth/wrong-password': "Password errata.",
-    'auth/email-already-in-use': "Questa email è già in uso.",
-    'auth/weak-password': "La password è troppo debole (min. 6 caratteri).",
-
-    // NUOVE CHIAVI PER LA PROTEZIONE DEL PANNELLO DI AMMINISTRAZIONE
-    notAuthorizedAdmin: "Non autorizzato. Effettua l'accesso come amministratore per accedere a quest'area.",
-    logout: "Esci",
-    logoutFailed: "Errore durante il logout.",
-
   },
   ru: {
     // === Allgemeine Begriffe und UI-Elemente ===
@@ -665,33 +532,5 @@ export const translations = {
     archivedPeriodDetails: "Детали архивированного периода",
     eventsInPeriod: "События в этом периоде",
     playersInPeriod: "Игроки в этом периоде",
-
-    // === AuthPage ===
-    loginTitle: "Войти",
-    registerTitle: "Зарегистрироваться",
-    emailPlaceholder: "Электронная почта",
-    passwordPlaceholder: "Пароль",
-    confirmPasswordPlaceholder: "Подтвердите пароль",
-    loginButton: "Войти",
-    registerButton: "Зарегистрироваться",
-    switchToRegister: "Нет аккаунта? Зарегистрируйтесь сейчас",
-    switchToLogin: "Уже есть аккаунт? Войдите сейчас",
-    loginSuccess: "Успешный вход!",
-    registerSuccess: "Регистрация успешна!",
-    loginFailed: "Ошибка входа",
-    registerFailed: "Ошибка регистрации",
-    passwordsDoNotMatch: "Пароли не совпадают.",
-    'auth/invalid-email': "Неверный формат электронной почты.",
-    'auth/user-disabled': "Этот пользователь был отключен.",
-    'auth/user-not-found': "Пользователь с такой электронной почтой не найден.",
-    'auth/wrong-password': "Неверный пароль.",
-    'auth/email-already-in-use': "Этот адрес электронной почты уже используется.",
-    'auth/weak-password': "Пароль слишком слабый (мин. 6 символов).",
-
-    // НОВЫЕ КЛЮЧИ ДЛЯ ЗАЩИТЫ ПАНЕЛИ АДМИНИСТРАТОРА
-    notAuthorizedAdmin: "Не авторизован. Пожалуйста, войдите как администратор, чтобы получить доступ к этой области.",
-    logout: "Выйти",
-    logoutFailed: "Ошибка при выходе из системы.",
-
   },
 };
