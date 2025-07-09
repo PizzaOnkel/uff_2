@@ -1,20 +1,56 @@
 // src/pages/WelcomePage.js
 
-import React, { useState } from 'react'; // Stelle sicher, dass benötigte Hooks importiert werden
-import { Home, Users, Trophy, Mail, Settings, Target, Calendar, Clock, Download, Upload, Eye, EyeOff, User, Lock, LogIn, LogOut, Bell, MessageSquare, Shield, Key, Database, Server, Cloud, HardDrive, Activity, Zap, Sun, Moon, Star, Heart, Award, Gift, Camera, Image, Video, Play, Pause, Stop, SkipForward, SkipBack, Volume2, VolumeX, Mic, MicOff, Headphones, Speaker, Monitor, Laptop, Tablet, Smartphone, MonitorDot, Tv, Printer, Scan, QrCode, Barcode, Wifi, Bluetooth, Globe, Map, Compass, Navigation, Pin, MapPin, Anchor, Flag, Book, Bookmark, FileText, Folder, FolderOpen, Paperclip, Link, ExternalLink, Code, Terminal, Command, Hash, AtSign, Euro, PoundSterling, Yen, Bitcoin, CreditCard, Banknote, Receipt, ShoppingCart, ShoppingBag, Package, Box, Truck, Plane, Ship, Car, Bike, Train, Bus, Rocket, FlaskConical, LifeBuoy, Umbrella, Leaf, CloudRain, Wind, Droplet, Thermometer, CloudFog, CloudLightning, CloudSnow, SunMoon, Sunrise, Sunset, MoonStar, CloudDrizzle, CloudSun, CloudMoon, Tornado, Waves, CloudOff, CloudUpload, CloudDownload, CloudUploadCloud, CloudDownloadCloud } from 'lucide-react'; // KOPPIERE NUR DIE ICONS, DIE WELCOMEPAGE TATSÄCHLICH BENÖTIGT
-// ... weitere Imports, falls die WelcomePage welche hat (z.B. Context)
+import React from 'react';
+import { LogIn, User, Globe } from 'lucide-react'; // Imports für benötigte Icons
 
 const WelcomePage = ({ navigateTo, setLanguage, currentLanguage, t }) => {
-  // ... (Der gesamte Code deiner WelcomePage hier)
-
-  // Beispiel: Falls deine WelcomePage eine interne Funktion hat, die useState verwendet
-  const [showAbout, setShowAbout] = useState(false); // Beispiel für internen State
-
   return (
-    <div className="text-center">
-      {/* Dein JSX für die WelcomePage hier */}
-      <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-yellow-300">{t('welcome')}</h2>
-      {/* ... Rest deines WelcomePage JSX */}
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gradient-to-br from-gray-900 to-gray-700 text-white font-inter">
+      <div className="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md text-center">
+        <h1 className="text-4xl sm:text-5xl font-bold mb-6 text-green-400">
+          {t('welcomeToClanDashboard')}
+        </h1>
+
+        <p className="text-gray-300 text-lg mb-8">
+          {t('chooseYourLanguage')}
+        </p>
+
+        <div className="mb-8 relative">
+          <label htmlFor="language-select" className="sr-only">
+            {t('selectLanguage')}
+          </label>
+          <div className="relative">
+            <select
+              id="language-select"
+              value={currentLanguage}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="block w-full py-3 pl-10 pr-4 bg-gray-700 border border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg appearance-none cursor-pointer"
+            >
+              <option value="de">Deutsch</option>
+              <option value="en">English</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <Globe className="text-gray-400" size={20} />
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={() => navigateTo('navigation')}
+          className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition-colors duration-200 text-lg mb-4 flex items-center justify-center"
+        >
+          <User className="mr-2" size={24} /> {t('enterDashboard')}
+        </button>
+
+        {/* Dieser Button wird später zur Anmeldeseite führen */}
+        <button
+          onClick={() => navigateTo('auth')} // 'auth' wird unsere neue Authentifizierungsseite sein
+          className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg shadow-md hover:bg-purple-700 transition-colors duration-200 text-lg flex items-center justify-center"
+        >
+          <LogIn className="mr-2" size={24} /> {t('loginRegister')}
+        </button>
+
+      </div>
     </div>
   );
 };
