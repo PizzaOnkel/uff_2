@@ -24,13 +24,29 @@ const ManagePlayersPage = ({ navigateTo, t, appId }) => {
   );
 
   useEffect(() => {
-    if (!isAuthReady || !db || !auth.currentUser) {
-      console.log("ManagePlayersPage: Firebase Auth oder DB nicht bereit oder nicht angemeldet.");
-      setError(t('notAuthorizedAdmin')); // Oder eine spezifischere Meldung
+    console.log("ManagePlayersPage: useEffect gestartet.");
+    console.log("ManagePlayersPage: isAuthReady:", isAuthReady);
+    console.log("ManagePlayersPage: db:", db);
+    console.log("ManagePlayersPage: auth.currentUser:", auth?.currentUser);
+    console.log("ManagePlayersPage: appId:", appId);
+
+    // Warten, bis Firebase Auth und Firestore bereit sind
+    if (!isAuthReady || !db) {
+      console.log("ManagePlayersPage: Firebase Auth oder DB nicht bereit, warten...");
+      return;
+    }
+
+    // Überprüfen, ob ein Benutzer angemeldet ist
+    if (!auth.currentUser) {
+      console.log("ManagePlayersPage: Kein Benutzer angemeldet. Setze Fehler.");
+      setError(t('notAuthorizedAdmin')); // Neue Übersetzung für nicht autorisiert
       setLoading(false);
       return;
     }
 
+    // Wenn hierher gekommen, ist der Benutzer angemeldet und DB bereit.
+    // Lade jetzt die Spielerdaten.
+    console.log("ManagePlayersPage: Benutzer ist angemeldet und DB bereit. Lade Spielerdaten.");
     const playersCollectionRef = collection(db, 'applications', appId, 'players');
     const q = query(playersCollectionRef, orderBy('name', 'asc')); // Spieler nach Namen sortieren
 
