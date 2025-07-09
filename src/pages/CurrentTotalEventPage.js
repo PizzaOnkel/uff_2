@@ -2,15 +2,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { useFirebase } from '../FirebaseContext.js';
-import { Plus, Eye, Home } from 'lucide-react'; // Stelle sicher, dass alle benötigten Lucide Icons hier importiert sind
+// NEU: collection, query, orderBy, onSnapshot importieren
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { Plus, Eye, Home, AlertCircle, Loader } from 'lucide-react'; // Stelle sicher, dass alle benötigten Lucide Icons hier importiert sind
 
-const CurrentTotalEventPage = ({ navigateTo, t, db, appId, userId, periodId, playerId }) => {
+const CurrentTotalEventPage = ({ navigateTo, t, appId }) => { // userId, periodId, playerId werden hier nicht direkt verwendet
+  const { db, isAuthReady } = useFirebase(); // db und isAuthReady aus dem Kontext holen
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Definition einer einfachen Loader-Komponente direkt in dieser Datei
-  // Sie hat Zugriff auf 't' für die Übersetzung des Ladetextes
   const Loader = () => (
     <div className="flex justify-center items-center h-48">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
@@ -19,30 +21,53 @@ const CurrentTotalEventPage = ({ navigateTo, t, db, appId, userId, periodId, pla
   );
 
   useEffect(() => {
+    console.log("CurrentTotalEventPage: useEffect gestartet.");
+    console.log("CurrentTotalEventPage: isAuthReady:", isAuthReady);
+    console.log("CurrentTotalEventPage: db:", db);
+    console.log("CurrentTotalEventPage: appId:", appId);
+
+    if (!isAuthReady || !db) {
+      console.log("CurrentTotalEventPage: Firebase Auth oder DB nicht bereit, warten...");
+      // Fehler, falls Firebase-Abhängigkeiten fehlen
+      // setError(t('firebaseNotReady')); // Kommentar: Fehler hier nicht setzen, da wir noch warten
+      return;
+    }
+
     const fetchEvents = async () => {
-      if (!db || !appId || !userId) {
-        setLoading(false);
-        // Fehler, falls Firebase-Abhängigkeiten fehlen
-        setError(t('errorLoadingData')); 
-        return;
-      }
       setLoading(true);
       setError(null);
       try {
-        const eventsRef = db.collection('applications').doc(appId).collection('users').doc(userId).collection('events');
-        const snapshot = await eventsRef.get();
-        const fetchedEvents = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setEvents(fetchedEvents);
-      } catch (err) {
-        console.error("Error fetching events:", err);
-        setError(t('errorLoadingData'));
-      } finally {
+        // KORREKTUR: Verwende die modulare Syntax für collection
+        // Annahme: Events sind direkt unter der App-ID gespeichert
+        const eventsCollectionRef = collection(db, 'applications', appId, 'events');
+        // Beispiel-Query: Hole Events, die noch nicht abgeschlossen sind, sortiert nach Datum
+        // Du könntest hier auch where-Klauseln hinzufügen, z.B. where("status", "==", "active")
+        const q = query(eventsCollectionRef, orderBy("date", "desc"));
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          const eventsList = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          setEvents(eventsList);
+          setLoading(false);
+          console.log("CurrentTotalEventPage: Events erfolgreich geladen.");
+        }, (err) => {
+          console.error("CurrentTotalEventPage: Fehler beim Laden der Events:", err);
+          setError(t('errorLoadingData') + `: ${err.message}`);
+          setLoading(false);
+        });
+
+        return () => unsubscribe(); // Cleanup-Funktion für den Listener
+      } catch (e) {
+        console.error("CurrentTotalEventPage: Fehler beim Einrichten des Listeners:", e);
+        setError(t('errorLoadingData') + `: ${e.message}`);
         setLoading(false);
       }
     };
 
     fetchEvents();
-  }, [db, appId, userId, t]); // 't' in die Abhängigkeitsliste aufnehmen
+  }, [db, appId, isAuthReady, t]); // Abhängigkeiten aktualisiert
 
   if (loading) {
     return <Loader />; // Verwende die definierte Loader-Komponente
@@ -50,14 +75,17 @@ const CurrentTotalEventPage = ({ navigateTo, t, db, appId, userId, periodId, pla
 
   if (error) {
     return (
-      <div className="text-red-500 text-center p-4">
-        <p>{error}</p>
-        <button
-          onClick={() => navigateTo('navigation')}
-          className="mt-4 px-6 py-3 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition-colors duration-200 text-lg flex items-center justify-center mx-auto"
-        >
-          {t('goBack')}
-        </button>
+      <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gradient-to-br from-gray-900 to-gray-700 text-white font-inter">
+        <div className="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md text-center">
+          <AlertCircle className="text-red-500 text-6xl mx-auto mb-4" />
+          <p className="text-xl text-red-400 mb-4">{error}</p>
+          <button
+            onClick={() => navigateTo('navigation')}
+            className="mt-4 px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition-colors duration-200 text-lg flex items-center justify-center mx-auto"
+          >
+            <Home className="mr-2" size={24} /> {t('goBack')}
+          </button>
+        </div>
       </div>
     );
   }
