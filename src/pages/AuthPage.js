@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { useFirebase } from '../FirebaseContext.js'; // Pfad anpassen, falls nötig
 import { LogIn, UserPlus, Home, AlertCircle, CheckCircle2, Loader } from 'lucide-react'; // Benötigte Icons
+// NEU: setDoc zu den Firestore-Imports hinzufügen
+import { doc, setDoc } from 'firebase/firestore'; 
 
 const AuthPage = ({ navigateTo, t }) => {
   // NEU: signInWithEmailAndPassword, createUserWithEmailAndPassword und signOut direkt aus useFirebase holen
@@ -33,7 +35,7 @@ const AuthPage = ({ navigateTo, t }) => {
         navigateTo('navigation'); // Bei Erfolg zur Navigation
       } catch (error) {
         console.error("Login Fehler:", error.code, error.message);
-        setMessage({ type: 'error', text: t('loginFailed') + `: ${t(error.code) || error.message}` });
+        setMessage({ type: 'error', text: t(error.code) || t('loginFailed') + `: ${error.message}` });
       }
     } else {
       // Registrierungs-Logik
@@ -61,7 +63,7 @@ const AuthPage = ({ navigateTo, t }) => {
         navigateTo('navigation'); // Bei Erfolg zur Navigation
       } catch (error) {
         console.error("Registrierungsfehler:", error.code, error.message);
-        setMessage({ type: 'error', text: t('registerFailed') + `: ${t(error.code) || error.message}` });
+        setMessage({ type: 'error', text: t(error.code) || t('registerFailed') + `: ${error.message}` });
       }
     }
     setLoading(false);
