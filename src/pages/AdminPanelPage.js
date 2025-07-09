@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useFirebase } from '../FirebaseContext.js';
 import { doc, getDoc, collection, addDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { Home, Settings, Plus, User, Archive, AlertCircle, LogOut, Loader } from 'lucide-react';
+import { Home, Settings, Plus, User, Archive, AlertCircle, LogOut, Loader, Award } from 'lucide-react'; // Award Icon hinzugefügt
 
 const AdminPanelPage = ({ navigateTo, t, appId }) => {
   const { auth, db, userId, isAuthReady } = useFirebase();
@@ -18,27 +18,29 @@ const AdminPanelPage = ({ navigateTo, t, appId }) => {
     </div>
   );
 
-  // Dieser useEffect wird nun nur den potenziellen Datenabruf behandeln, *wenn* der Benutzer autorisiert ist.
-  // Die primäre Authentifizierungsprüfung erfolgt direkt in der Render-Logik.
   useEffect(() => {
-    // Wir versuchen nur Daten zu laden, wenn Firebase bereit UND ein Benutzer authentifiziert ist.
-    // Andernfalls zeigt die Render-Logik die 'nicht autorisiert'-Meldung an.
-    if (isAuthReady && auth.currentUser && db) {
-      // Hier würden Sie alle anfänglichen Datenabrufe für das Admin-Panel selbst einfügen
-      // Vorerst gehen wir davon aus, dass kein sofortiger Datenabruf erforderlich ist, um die Schaltflächen anzuzeigen.
-      // Wenn Sie hier Daten abrufen müssten, würden Sie setLoadingData(true) und dann false in finally setzen.
-      console.log("AdminPanelPage: Benutzer ist authentifiziert und Firebase ist bereit. Zeige Admin-Panel an.");
-      setError(null); // Vorherige Fehler löschen
-    } else if (isAuthReady && !auth.currentUser) {
-      // Wenn die Authentifizierung bereit ist, aber kein Benutzer angemeldet ist, setzen Sie die Fehlermeldung.
-      console.log("AdminPanelPage: Firebase Auth bereit, aber kein Benutzer angemeldet.");
-      setError(t('notAuthorizedAdmin'));
-    } else {
-      // Wenn Firebase noch nicht bereit ist, setzen wir keinen Fehler, sondern warten einfach.
-      console.log("AdminPanelPage: Firebase noch nicht bereit, warte auf Authentifizierungsstatus.");
-    }
-  }, [isAuthReady, auth, db, t]);
+    console.log("AdminPanelPage: useEffect gestartet.");
+    console.log("AdminPanelPage: isAuthReady:", isAuthReady);
+    console.log("AdminPanelPage: db:", db);
+    console.log("AdminPanelPage: auth.currentUser:", auth?.currentUser);
+    console.log("AdminPanelPage: appId:", appId);
 
+    if (!isAuthReady) { // Warten, bis Firebase Auth bereit ist
+      return;
+    }
+
+    if (!auth.currentUser) {
+      console.log("AdminPanelPage: Kein Benutzer angemeldet. Setze Fehler.");
+      setError(t('notAuthorizedAdmin'));
+      setLoadingData(false); // Nicht laden, wenn nicht authentifiziert
+      return;
+    }
+
+    // Wenn authentifiziert, setzen wir keinen Fehler und zeigen das Panel an
+    console.log("AdminPanelPage: Benutzer ist authentifiziert. Zeige Admin-Panel an.");
+    setError(null); // Vorherige Fehler löschen
+    setLoadingData(false); // Laden beendet, da Benutzer angemeldet
+  }, [isAuthReady, auth, db, t]); // db in Abhängigkeiten, falls es für initialen Ladezustand relevant wäre
 
   const handleLogout = async () => {
     try {
@@ -55,13 +57,11 @@ const AdminPanelPage = ({ navigateTo, t, appId }) => {
     }
   };
 
-  // Render-Logik basierend auf Authentifizierungsstatus und Ladezustand
   if (!isAuthReady) {
-    return <Loader />; // Loader anzeigen, während der Firebase Auth-Status ermittelt wird
+    return <Loader />;
   }
 
   if (!auth.currentUser) {
-    // Wenn nicht authentifiziert, Fehlermeldung und Login-Button anzeigen
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gradient-to-br from-gray-900 to-gray-700 text-white font-inter">
         <div className="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md text-center">
@@ -84,7 +84,6 @@ const AdminPanelPage = ({ navigateTo, t, appId }) => {
     );
   }
 
-  // Wenn authentifiziert und keine spezifischen Daten geladen werden, den Inhalt des Admin-Panels anzeigen
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gradient-to-br from-gray-900 to-gray-700 text-white font-inter">
       <div className="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-2xl">
@@ -94,6 +93,15 @@ const AdminPanelPage = ({ navigateTo, t, appId }) => {
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Button für Ränge verwalten */}
+          <button
+            onClick={() => navigateTo('manageRanks')} // Navigiert zu 'manageRanks'
+            className="flex flex-col items-center justify-center p-6 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition-colors duration-200 text-lg"
+          >
+            <Award className="mb-2" size={36} />
+            {t('manageRanks')}
+          </button>
+
           <button
             onClick={() => navigateTo('manageEvents')}
             className="flex flex-col items-center justify-center p-6 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition-colors duration-200 text-lg"

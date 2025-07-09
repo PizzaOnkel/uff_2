@@ -92,6 +92,23 @@ export const translations = {
     notAuthorizedAdmin: "Nicht autorisiert. Bitte melde dich als Administrator an, um auf diesen Bereich zuzugreifen.",
     logout: "Abmelden",
     logoutFailed: "Fehler beim Abmelden.",
+
+    // === ManageRanksPage ===
+    manageRanks: "Ränge verwalten", // Button-Text im AdminPanel
+    manageRanksTitle: "Ränge verwalten", // Titel der Seite
+    rankNamePlaceholder: "Rangname (z.B. General, Captain)",
+    addRankButton: "Rang hinzufügen",
+    updateRankButton: "Rang aktualisieren",
+    existingRanks: "Bestehende Ränge",
+    noRanksYet: "Noch keine Ränge angelegt.",
+    rankNameRequired: "Rangname ist erforderlich.",
+    rankAddSuccess: "Rang erfolgreich hinzugefügt!",
+    rankUpdateSuccess: "Rang erfolgreich aktualisiert!",
+    rankDeleteSuccess: "Rang erfolgreich gelöscht!",
+    rankActionFailed: "Aktion fehlgeschlagen",
+    confirmDeleteRank: "Bist du sicher, dass du diesen Rang löschen möchtest?",
+    editRank: "Rang bearbeiten",
+    deleteRank: "Rang löschen",
   },
   en: {
     // === General Terms and UI Elements ===
@@ -184,6 +201,23 @@ export const translations = {
     notAuthorizedAdmin: "Not authorized. Please log in as an administrator to access this area.",
     logout: "Logout",
     logoutFailed: "Error during logout.",
+
+    // === ManageRanksPage ===
+    manageRanks: "Manage Ranks",
+    manageRanksTitle: "Manage Ranks",
+    rankNamePlaceholder: "Rank Name (e.g., General, Captain)",
+    addRankButton: "Add Rank",
+    updateRankButton: "Update Rank",
+    existingRanks: "Existing Ranks",
+    noRanksYet: "No ranks added yet.",
+    rankNameRequired: "Rank name is required.",
+    rankAddSuccess: "Rank added successfully!",
+    rankUpdateSuccess: "Rank updated successfully!",
+    rankDeleteSuccess: "Rank deleted successfully!",
+    rankActionFailed: "Action failed",
+    confirmDeleteRank: "Are you sure you want to delete this rank?",
+    editRank: "Edit Rank",
+    deleteRank: "Delete Rank",
   },
   fr: {
     // === Allgemeine Begriffe und UI-Elemente ===
@@ -271,6 +305,23 @@ export const translations = {
     archivedPeriodDetails: "Détails de la période archivée",
     eventsInPeriod: "Événements dans cette période",
     playersInPeriod: "Joueurs dans cette période",
+
+    // === ManageRanksPage ===
+    manageRanks: "Gérer les rangs",
+    manageRanksTitle: "Gérer les rangs",
+    rankNamePlaceholder: "Nom du rang (ex: Général, Capitaine)",
+    addRankButton: "Ajouter un rang",
+    updateRankButton: "Mettre à jour le rang",
+    existingRanks: "Rangs existants",
+    noRanksYet: "Aucun rang ajouté pour le moment.",
+    rankNameRequired: "Le nom du rang est requis.",
+    rankAddSuccess: "Rang ajouté avec succès !",
+    rankUpdateSuccess: "Rang mis à jour avec succès !",
+    rankDeleteSuccess: "Rang supprimé avec succès !",
+    rankActionFailed: "Action échouée",
+    confirmDeleteRank: "Êtes-vous sûr de vouloir supprimer ce rang ?",
+    editRank: "Modifier le rang",
+    deleteRank: "Supprimer le rang",
   },
   es: {
     // === Allgemeine Begriffe und UI-Elemente ===
@@ -358,6 +409,23 @@ export const translations = {
     archivedPeriodDetails: "Detalles del período archivado",
     eventsInPeriod: "Eventos en este período",
     playersInPeriod: "Jugadores en este período",
+
+    // === ManageRanksPage ===
+    manageRanks: "Gestionar rangos",
+    manageRanksTitle: "Gestionar rangos",
+    rankNamePlaceholder: "Nombre del rango (ej: General, Capitán)",
+    addRankButton: "Añadir rango",
+    updateRankButton: "Actualizar rango",
+    existingRanks: "Rangos existentes",
+    noRanksYet: "Aún no se han añadido rangos.",
+    rankNameRequired: "El nombre del rango es obligatorio.",
+    rankAddSuccess: "¡Rango añadido con éxito!",
+    rankUpdateSuccess: "¡Rango actualizado con éxito!",
+    rankDeleteSuccess: "¡Rango eliminado con éxito!",
+    rankActionFailed: "Acción fallida",
+    confirmDeleteRank: "¿Estás seguro de que quieres eliminar este rango?",
+    editRank: "Editar rango",
+    deleteRank: "Eliminar rango",
   },
   it: {
     // === Allgemeine Begriffe und UI-Elemente ===
@@ -445,6 +513,23 @@ export const translations = {
     archivedPeriodDetails: "Dettagli periodo archiviato",
     eventsInPeriod: "Eventi in questo periodo",
     playersInPeriod: "Giocatori in questo periodo",
+
+    // === ManageRanksPage ===
+    manageRanks: "Gestisci ranghi",
+    manageRanksTitle: "Gestisci ranghi",
+    rankNamePlaceholder: "Nome del rango (es: Generale, Capitano)",
+    addRankButton: "Aggiungi rango",
+    updateRankButton: "Aggiorna rango",
+    existingRanks: "Ranghi esistenti",
+    noRanksYet: "Nessun rango aggiunto ancora.",
+    rankNameRequired: "Il nome del rango è obbligatorio.",
+    rankAddSuccess: "Rango aggiunto con successo!",
+    rankUpdateSuccess: "Rango aggiornato con successo!",
+    rankDeleteSuccess: "Rango eliminato con successo!",
+    rankActionFailed: "Azione fallita",
+    confirmDeleteRank: "Sei sicuro di voler eliminare questo rango?",
+    editRank: "Modifica rango",
+    deleteRank: "Elimina rango",
   },
   ru: {
     // === Allgemeine Begriffe und UI-Elemente ===
@@ -532,5 +617,22 @@ export const translations = {
     archivedPeriodDetails: "Детали архивированного периода",
     eventsInPeriod: "События в этом периоде",
     playersInPeriod: "Игроки в этом периоде",
+
+    // === ManageRanksPage ===
+    manageRanks: "Управление рангами",
+    manageRanksTitle: "Управление рангами",
+    rankNamePlaceholder: "Название ранга (например, Генерал, Капитан)",
+    addRankButton: "Добавить ранг",
+    updateRankButton: "Обновить ранг",
+    existingRanks: "Существующие ранги",
+    noRanksYet: "Ранги пока не добавлены.",
+    rankNameRequired: "Название ранга обязательно.",
+    rankAddSuccess: "Ранг успешно добавлен!",
+    rankUpdateSuccess: "Ранг успешно обновлен!",
+    rankDeleteSuccess: "Ранг успешно удален!",
+    rankActionFailed: "Действие не удалось",
+    confirmDeleteRank: "Вы уверены, что хотите удалить этот ранг?",
+    editRank: "Редактировать ранг",
+    deleteRank: "Удалить ранг",
   },
 };

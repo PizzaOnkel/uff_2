@@ -14,8 +14,9 @@ import TopTenPage from './pages/TopTenPage.js';
 import AdminPanelPage from './pages/AdminPanelPage.js';
 import PlayerDetailsPage from './pages/PlayerDetailsPage.js';
 import ArchivedPeriodDetailsPage from './pages/ArchivedPeriodDetailsPage.js';
-import AuthPage from './pages/AuthPage.js'; // Sicherstellen, dass AuthPage importiert ist
-import ManagePlayersPage from './pages/ManagePlayersPage.js'; // Sicherstellen, dass ManagePlayersPage importiert ist
+import AuthPage from './pages/AuthPage.js';
+import ManagePlayersPage from './pages/ManagePlayersPage.js';
+import ManageRanksPage from './pages/ManageRanksPage.js'; // NEU: Import der ManageRanksPage
 
 function App() {
   const [currentPage, setCurrentPage] = useState('welcome');
@@ -62,10 +63,11 @@ function App() {
       case 'archivedPeriodDetails':
         return <ArchivedPeriodDetailsPage navigateTo={navigateTo} t={t} db={db} appId={typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'} userId={userId} archivedPeriodId={pageParams.periodId} />;
       case 'auth':
-        // NEU: redirectPath an AuthPage weitergeben
         return <AuthPage navigateTo={navigateTo} t={t} redirectPath={pageParams.redirectPath} />;
       case 'managePlayers':
         return <ManagePlayersPage navigateTo={navigateTo} t={t} db={db} appId={typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'} userId={userId} />;
+      case 'manageRanks': // NEU: Case für Ränge verwalten
+        return <ManageRanksPage navigateTo={navigateTo} t={t} db={db} appId={typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'} userId={userId} />;
       default:
         return <WelcomePage navigateTo={navigateTo} setLanguage={setCurrentLanguage} currentLanguage={currentLanguage} t={t} />;
     }
