@@ -6,7 +6,7 @@ import { useFirebase } from '../FirebaseContext.js'; // Pfad anpassen, falls nö
 // doc, getDoc, collection, addDoc, setDoc, updateDoc, serverTimestamp sind hier nicht direkt im useEffect verwendet
 // aber könnten für die Admin-Funktionen später relevant sein.
 import { doc, getDoc, collection, addDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { Home, Settings, Plus, User, Archive, AlertCircle, LogOut, Loader } from 'lucide-react'; // Benötigte Icons, LogOut hinzugefügt
+import { Home, Settings, Plus, User, Archive, AlertCircle, LogOut, Loader } from 'lucide-react'; // Benötigte Icons
 
 // Die appId wird jetzt als Prop übergeben, wie in App.js definiert.
 // db und userId werden direkt aus useFirebase geholt, um Konsistenz zu gewährleisten.
@@ -115,8 +115,9 @@ const AdminPanelPage = ({ navigateTo, t, appId }) => {
             {t('manageEvents')}
           </button>
 
+          {/* Aktualisierter Button für Spielerverwaltung */}
           <button
-            onClick={() => navigateTo('managePlayers')}
+            onClick={() => navigateTo('managePlayers')} // Navigiert zu 'managePlayers'
             className="flex flex-col items-center justify-center p-6 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition-colors duration-200 text-lg"
           >
             <User className="mb-2" size={36} />
