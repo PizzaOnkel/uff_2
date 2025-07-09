@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useFirebase } from '../FirebaseContext.js';
-import { collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+// NEU: orderBy zu den Firestore-Imports hinzufügen
+import { collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, updateDoc } from 'firebase/firestore'; 
 import { Award, Plus, Trash2, Edit, Home, AlertCircle, Loader } from 'lucide-react'; // Benötigte Icons
 
 const ManageRanksPage = ({ navigateTo, t, appId }) => {
@@ -43,7 +44,8 @@ const ManageRanksPage = ({ navigateTo, t, appId }) => {
 
     console.log("ManageRanksPage: Benutzer ist angemeldet und DB bereit. Lade Ränge.");
     const ranksCollectionRef = collection(db, 'applications', appId, 'ranks');
-    const q = query(ranksCollectionRef, orderBy('name', 'asc')); // Ränge nach Namen sortieren
+    // KORREKTUR: orderBy nach 'createdAt' in aufsteigender Reihenfolge, um Erstellungsreihenfolge zu gewährleisten
+    const q = query(ranksCollectionRef, orderBy('createdAt', 'asc')); 
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const ranksList = snapshot.docs.map(doc => ({
@@ -84,7 +86,7 @@ const ManageRanksPage = ({ navigateTo, t, appId }) => {
         // Neuen Rang hinzufügen
         await addDoc(collection(db, 'applications', appId, 'ranks'), {
           name: newRankName.trim(),
-          createdAt: new Date().toISOString(),
+          createdAt: new Date().toISOString(), // Sicherstellen, dass createdAt gesetzt wird
         });
         setMessage({ type: 'success', text: t('rankAddSuccess') });
       }
