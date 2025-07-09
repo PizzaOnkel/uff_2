@@ -111,6 +111,12 @@ export const translations = {
     'auth/email-already-in-use': "Diese E-Mail-Adresse wird bereits verwendet.",
     'auth/weak-password': "Das Passwort ist zu schwach (mind. 6 Zeichen).",
 
+    // NEUE SCHLÜSSEL FÜR ADMIN-PANEL SCHUTZ
+    notAuthorizedAdmin: "Nicht autorisiert. Bitte melde dich als Administrator an, um auf diesen Bereich zuzugreifen.",
+    logout: "Abmelden",
+    logoutFailed: "Fehler beim Abmelden.",
+  },
+
   },
   en: {
     // === General Terms and UI Elements ===
@@ -222,6 +228,11 @@ export const translations = {
     'auth/email-already-in-use': "This email address is already in use.",
     'auth/weak-password': "Password is too weak (min. 6 characters).",
 
+    // NEW KEYS FOR ADMIN PANEL PROTECTION
+    notAuthorizedAdmin: "Not authorized. Please log in as an administrator to access this area.",
+    logout: "Logout",
+    logoutFailed: "Error during logout.",
+
   },
   fr: {
     // === Allgemeine Begriffe und UI-Elemente ===
@@ -331,6 +342,11 @@ export const translations = {
     'auth/wrong-password': "Mot de passe incorrect.",
     'auth/email-already-in-use': "Cette adresse e-mail est déjà utilisée.",
     'auth/weak-password': "Le mot de passe est trop faible (min. 6 caractères).",
+
+    // NOUVELLES CLÉS POUR LA PROTECTION DU PANNEAU D'ADMINISTRATION
+    notAuthorizedAdmin: "Non autorisé. Veuillez vous connecter en tant qu'administrateur pour accéder à cette zone.",
+    logout: "Se déconnecter",
+    logoutFailed: "Erreur lors de la déconnexion.",
 
   },
   es: {
@@ -442,6 +458,11 @@ export const translations = {
     'auth/email-already-in-use': "Questa email è già in uso.",
     'auth/weak-password': "La password è troppo debole (min. 6 caratteri).",
 
+    // NUEVAS CLAVES PARA LA PROTECCIÓN DEL PANEL DE ADMINISTRACIÓN
+    notAuthorizedAdmin: "No autorizado. Por favor, inicie sesión como administrador para acceder a esta área.",
+    logout: "Cerrar sesión",
+    logoutFailed: "Error al cerrar sesión.",
+
   },
   it: {
     // === Allgemeine Begriffe und UI-Elemente ===
@@ -552,6 +573,11 @@ export const translations = {
     'auth/email-already-in-use': "Questa email è già in uso.",
     'auth/weak-password': "La password è troppo debole (min. 6 caratteri).",
 
+    // NUOVE CHIAVI PER LA PROTEZIONE DEL PANNELLO DI AMMINISTRAZIONE
+    notAuthorizedAdmin: "Non autorizzato. Effettua l'accesso come amministratore per accedere a quest'area.",
+    logout: "Esci",
+    logoutFailed: "Errore durante il logout.",
+
   },
   ru: {
     // === Allgemeine Begriffe und UI-Elemente ===
@@ -661,6 +687,11 @@ export const translations = {
     'auth/wrong-password': "Неверный пароль.",
     'auth/email-already-in-use': "Этот адрес электронной почты уже используется.",
     'auth/weak-password': "Пароль слишком слабый (мин. 6 символов).",
+
+    // НОВЫЕ КЛЮЧИ ДЛЯ ЗАЩИТЫ ПАНЕЛИ АДМИНИСТРАТОРА
+    notAuthorizedAdmin: "Не авторизован. Пожалуйста, войдите как администратор, чтобы получить доступ к этой области.",
+    logout: "Выйти",
+    logoutFailed: "Ошибка при выходе из системы.",
 
   },
 };
