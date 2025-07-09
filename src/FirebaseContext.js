@@ -26,6 +26,7 @@ export const FirebaseProvider = ({ children }) => {
 
   useEffect(() => {
     console.log("FirebaseContext: Starte Initialisierung und Authentifizierung...");
+    console.log("REACT_APP_FIREBASE_PROJECT_ID:", process.env.REACT_APP_FIREBASE_PROJECT_ID);
     const initializeFirebase = async () => {
       // Überprüfe, ob die Firebase-Konfiguration verfügbar ist
       if (typeof __firebase_config === 'undefined' || !__firebase_config) {
