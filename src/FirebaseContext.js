@@ -26,23 +26,68 @@ export const FirebaseProvider = ({ children }) => {
 
   useEffect(() => {
     console.log("FirebaseContext: Starte Initialisierung und Authentifizierung...");
-    console.log("REACT_APP_FIREBASE_PROJECT_ID:", process.env.REACT_APP_FIREBASE_PROJECT_ID);
+
     const initializeFirebase = async () => {
-      // Überprüfe, ob die Firebase-Konfiguration verfügbar ist
-      if (typeof __firebase_config === 'undefined' || !__firebase_config) {
-        console.error('FirebaseContext: Firebase-Konfiguration nicht verfügbar. Bitte stelle sicher, dass __firebase_config gesetzt ist.');
-        setIsAuthReady(true); // Setze ready, auch wenn keine Konfig da ist, um Loop zu vermeiden
+      let firebaseConfig = {};
+      let initialAuthToken = '';
+      let appId = 'default-app-id'; // Fallback für lokale Entwicklung
+
+      // === Konfiguration aus Canvas-Umgebung oder .env laden ===
+      if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+        // Wenn im Canvas-System, nutze die globalen Variablen
+        try {
+          firebaseConfig = JSON.parse(__firebase_config);
+          appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+          initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : '';
+          console.log("FirebaseContext: Konfiguration aus Canvas geladen.");
+        } catch (e) {
+          console.error("FirebaseContext: Fehler beim Parsen der Canvas-Konfiguration:", e);
+          // Fallback auf .env, wenn Canvas-Konfig fehlerhaft
+          console.log("FirebaseContext: Fallback auf .env-Konfiguration.");
+          firebaseConfig = {
+            apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+            authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+            projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+            storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+            messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+            appId: process.env.REACT_APP_FIREBASE_APP_ID,
+            measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
+          };
+          appId = process.env.REACT_APP_FIREBASE_APP_ID || 'default-app-id';
+        }
+      } else {
+        // Wenn nicht im Canvas-System (also lokale Entwicklung), nutze .env
+        console.log("FirebaseContext: Konfiguration aus .env geladen (lokale Entwicklung).");
+        firebaseConfig = {
+          apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+          authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+          projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+          storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+          messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+          appId: process.env.REACT_APP_FIREBASE_APP_ID,
+          measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
+        };
+        appId = process.env.REACT_APP_FIREBASE_APP_ID || 'default-app-id';
+        // Für lokale Entwicklung gibt es kein initial_auth_token, daher leer lassen
+        initialAuthToken = '';
+      }
+
+      // Überprüfen, ob die Firebase-Konfiguration vollständig ist
+      const isConfigComplete = firebaseConfig.apiKey && firebaseConfig.authDomain && firebaseConfig.projectId && firebaseConfig.appId;
+
+      if (!isConfigComplete) {
+        console.error('FirebaseContext: Firebase-Konfiguration ist unvollständig oder nicht verfügbar. Bitte überprüfe deine .env-Datei.');
+        setIsAuthReady(true); // Setze ready, um Hängenbleiben zu vermeiden
         return;
       }
 
       let app;
       try {
-        const firebaseConfig = JSON.parse(__firebase_config);
         app = initializeApp(firebaseConfig);
         console.log("FirebaseContext: Firebase App initialisiert.");
       } catch (error) {
-        console.error("FirebaseContext: Fehler beim Parsen oder Initialisieren der Firebase-Konfiguration:", error);
-        setIsAuthReady(true); // Setze ready bei Fehler, um Loop zu vermeiden
+        console.error("FirebaseContext: Fehler beim Initialisieren der Firebase App:", error);
+        setIsAuthReady(true);
         return;
       }
 
@@ -53,20 +98,16 @@ export const FirebaseProvider = ({ children }) => {
       setAuth(firebaseAuth);
 
       console.log("FirebaseContext: Auth-State-Listener wird eingerichtet.");
-      // Authentifizierungs-Listener
       const unsubscribe = onAuthStateChanged(firebaseAuth, async (user) => {
         if (user) {
-          // Benutzer ist angemeldet
           console.log("FirebaseContext: Benutzer angemeldet. UID:", user.uid);
           setUserId(user.uid);
-          setIsAuthReady(true); // Authentifizierung ist bereit
         } else {
-          // Benutzer ist abgemeldet oder noch nicht angemeldet
           console.log("FirebaseContext: Kein Benutzer angemeldet. Versuche Anmeldung...");
-          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          if (initialAuthToken) {
             try {
               console.log("FirebaseContext: Versuche Anmeldung mit Custom Token...");
-              await signInWithCustomToken(firebaseAuth, __initial_auth_token);
+              await signInWithCustomToken(firebaseAuth, initialAuthToken);
               console.log("FirebaseContext: Erfolgreich mit Custom Token angemeldet.");
             } catch (error) {
               console.error("FirebaseContext: Fehler beim Anmelden mit Custom Token:", error);
@@ -81,8 +122,8 @@ export const FirebaseProvider = ({ children }) => {
           }
           // Setze die userId nach der Anmeldung (egal ob anonym oder mit Token)
           setUserId(firebaseAuth.currentUser?.uid || crypto.randomUUID());
-          setIsAuthReady(true); // Authentifizierung ist bereit, nachdem ein Versuch unternommen wurde
         }
+        setIsAuthReady(true); // Authentifizierung ist bereit, nachdem ein Versuch unternommen wurde
       });
 
       // Cleanup-Funktion für den Listener
