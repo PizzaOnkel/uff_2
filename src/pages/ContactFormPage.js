@@ -1,20 +1,71 @@
-import React from "react";
+import React, { useState } from "react";
 import { ROUTES } from "../routes";
 
 export default function ContactFormPage({ t, setCurrentPage }) {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    message: ""
+  });
+  const [success, setSuccess] = useState(false);
+
+  const handleChange = e => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    // Hier könntest du später eine E-Mail senden oder die Nachricht speichern
+    setSuccess(true);
+    setForm({ name: "", email: "", message: "" });
+  };
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-between bg-gray-900 text-white p-4 pb-8">
-      <h2 className="text-4xl font-bold mb-6 text-center text-blue-400">{t.manageRanksTitle}</h2>
-      <p className="text-xl text-gray-300 mb-8 text-center">{t.comingSoon}</p>
+    <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white p-4 pb-8">
+      <h2 className="text-4xl font-bold mb-6 text-center text-orange-400">{t.contactFormTitle}</h2>
+      <form onSubmit={handleSubmit} className="w-full max-w-xl bg-gray-800 rounded-lg p-6 mb-8 shadow-lg">
+        <label className="block mb-2 font-semibold">Name</label>
+        <input
+          type="text"
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          required
+          className="mb-4 px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 w-full"
+        />
+        <label className="block mb-2 font-semibold">E-Mail</label>
+        <input
+          type="email"
+          name="email"
+          value={form.email}
+          onChange={handleChange}
+          required
+          className="mb-4 px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 w-full"
+        />
+        <label className="block mb-2 font-semibold">Nachricht</label>
+        <textarea
+          name="message"
+          value={form.message}
+          onChange={handleChange}
+          required
+          rows={5}
+          className="mb-4 px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 w-full"
+        />
+        <button
+          type="submit"
+          className="px-6 py-2 bg-orange-600 rounded text-white font-semibold hover:bg-orange-700 transition w-full"
+        >
+          Absenden
+        </button>
+        {success && (
+          <p className="text-green-400 mt-4">Deine Nachricht wurde erfolgreich gesendet!</p>
+        )}
+      </form>
       <button
-        onClick={() => setCurrentPage(ROUTES.ADMIN_PANEL)}
-        className="flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white text-xl font-semibold rounded-full shadow-lg hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 mb-12"
+        onClick={() => setCurrentPage(ROUTES.NAVIGATION)}
+        className="mt-8 text-orange-300 underline"
       >
-        <svg className="mr-3 w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-          <line x1="19" y1="12" x2="5" y2="12" />
-          <polyline points="12 19 5 12 12 5" />
-        </svg>
-        {t.backToAdminPanel}
+        {t.backToNavigation}
       </button>
       <footer className="mt-auto text-gray-500 text-sm">{t.copyright}</footer>
     </div>
