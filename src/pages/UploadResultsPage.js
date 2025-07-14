@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
-import { collection, addDoc, onSnapshot } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, query, where, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
 
 export default function UploadResultsPage({ t, setCurrentPage }) {
+  console.log("🔄 UploadResultsPage component loaded");
+  
   const [jsonData, setJsonData] = useState(null);
   const [fullJsonData, setFullJsonData] = useState(null);
   const [availableDates, setAvailableDates] = useState([]);
@@ -25,37 +27,74 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
   }, []);
 
   const handleFileChange = (e) => {
+    console.log("🚀 handleFileChange called!");
     const file = e.target.files[0];
-    if (!file) return;
+    
+    if (!file) {
+      console.log("❌ No file selected");
+      return;
+    }
+    
+    console.log("📁 File selected:", file.name);
     const reader = new FileReader();
+    
     reader.onload = (event) => {
       try {
-        const data = JSON.parse(event.target.result);
-        // Prüfe, ob es ein Objekt mit Datumsschlüssel(n) ist
-        const dateKeys = Object.keys(data);
-        if (dateKeys.length > 0 && dateKeys.every(key => Array.isArray(data[key]))) {
-          // Speichere alle Daten für spätere Auswahl
-          setFullJsonData(data);
-          setAvailableDates(dateKeys);
-          
-          // Nimm das erste (neueste) Datum als Standard
-          const firstDate = dateKeys[0];
-          setJsonData(data[firstDate]);
-          setEventDate(firstDate);
-          setError("");
-          
-          // Zeige eine Info, wenn mehrere Daten verfügbar sind
-          if (dateKeys.length > 1) {
-            console.log(`Mehrere Daten in der Datei gefunden: ${dateKeys.join(', ')}. Verwende ${firstDate}.`);
-          }
-        } else {
-          setError("Die JSON-Datei hat nicht das erwartete Format. Erwartet: {\"datum\": [spielerErgebnisse]}");
-          setJsonData(null);
-          setFullJsonData(null);
-          setAvailableDates([]);
-          setEventDate("");
+        const jsonString = event.target.result;
+        console.log("� File content length:", jsonString.length);
+        
+        const data = JSON.parse(jsonString);
+        console.log("✅ JSON parsed successfully");
+        
+        // Einfache Validierung: Ist es ein Objekt?
+        if (!data || typeof data !== 'object' || Array.isArray(data)) {
+          console.log("❌ Data is not an object");
+          setError("Die JSON-Datei muss ein Objekt mit Datumsschlüsseln enthalten.");
+          return;
         }
+        
+        const dateKeys = Object.keys(data);
+        console.log("🔍 Found keys:", dateKeys);
+        
+        // Prüfe, ob mindestens ein Key vorhanden ist
+        if (dateKeys.length === 0) {
+          console.log("❌ No keys found");
+          setError("Die JSON-Datei enthält keine Daten.");
+          return;
+        }
+        
+        // Prüfe, ob alle Werte Arrays sind
+        let allValuesAreArrays = true;
+        for (const key of dateKeys) {
+          if (!Array.isArray(data[key])) {
+            console.log(`❌ Key "${key}" is not an array:`, typeof data[key]);
+            allValuesAreArrays = false;
+            break;
+          } else {
+            console.log(`✅ Key "${key}" is array with ${data[key].length} items`);
+          }
+        }
+        
+        if (!allValuesAreArrays) {
+          setError("Alle Werte in der JSON-Datei müssen Arrays von Spielerdaten sein.");
+          return;
+        }
+        
+        // Erfolgreiche Validierung
+        console.log("🎉 Validation successful!");
+        setFullJsonData(data);
+        setAvailableDates(dateKeys);
+        
+        // Nimm das erste Datum als Standard
+        const firstDate = dateKeys[0];
+        setJsonData(data[firstDate]);
+        setEventDate(firstDate);
+        setError("");
+        
+        console.log(`📊 Using date: ${firstDate} with ${data[firstDate].length} players`);
+        
       } catch (err) {
+        console.log("❌ JSON parse error:", err.message);
         setError("Fehler beim Einlesen der Datei: Ungültiges JSON-Format.");
         setJsonData(null);
         setFullJsonData(null);
@@ -63,6 +102,7 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
         setEventDate("");
       }
     };
+    
     reader.readAsText(file);
   };
 
@@ -142,26 +182,73 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
       setError("Die JSON-Datei muss ein Array von Spieler-Ergebnissen enthalten.");
       return;
     }
+    
     try {
+      // Prüfe zuerst, ob bereits Daten für diese Periode existieren
+      const existingResultsQuery = query(
+        collection(db, "results"),
+        where("periodId", "==", selectedPeriod),
+        where("eventDate", "==", eventDate)
+      );
+      
+      const existingResultsSnapshot = await getDocs(existingResultsQuery);
+      
+      // Lösche alle bestehenden Ergebnisse für diese Periode und dieses Datum
+      if (!existingResultsSnapshot.empty) {
+        console.log(`🗑️ Lösche ${existingResultsSnapshot.docs.length} bestehende Ergebnisse für ${eventDate}`);
+        
+        for (const docSnapshot of existingResultsSnapshot.docs) {
+          await deleteDoc(doc(db, "results", docSnapshot.id));
+        }
+      }
+      
+      // Gruppiere die Spieler nach Namen und summiere ihre Daten
+      const playerMap = new Map();
+      
       for (const playerResult of jsonData) {
+        const playerName = playerResult.Clanmate;
+        
+        if (playerMap.has(playerName)) {
+          // Spieler bereits vorhanden, summiere die Daten
+          const existingPlayer = playerMap.get(playerName);
+          existingPlayer.Points += (playerResult.Points || 0);
+          existingPlayer.chests = existingPlayer.chests.concat(playerResult.chests || []);
+        } else {
+          // Neuer Spieler
+          playerMap.set(playerName, {
+            Clanmate: playerName,
+            Points: playerResult.Points || 0,
+            chests: playerResult.chests || []
+          });
+        }
+      }
+      
+      console.log(`📊 Zusammengefasste Spieler: ${playerMap.size} einzigartige Spieler`);
+      
+      // Speichere die zusammengefassten Spieler
+      for (const [playerName, playerData] of playerMap) {
         // Konvertiere die Truhen ins richtige Format
-        const convertedChests = convertChests(playerResult.chests);
+        const convertedChests = convertChests(playerData.chests);
+        
+        console.log(`💾 Speichere ${playerName} mit ${playerData.Points} Punkten und ${playerData.chests.length} Truhen`);
         
         await addDoc(collection(db, "results"), {
           periodId: selectedPeriod,
           eventDate: eventDate,
-          Clanmate: playerResult.Clanmate,
-          Points: playerResult.Points || 0,
+          Clanmate: playerData.Clanmate,
+          Points: playerData.Points,
           chests: convertedChests,
           timestamp: new Date().toISOString()
         });
       }
+      
       setJsonData(null);
       setSelectedPeriod("");
       setEventDate("");
       setError("");
-      alert("Alle Spieler-Ergebnisse wurden erfolgreich hochgeladen und zugeordnet!");
+      alert(`Alle Spieler-Ergebnisse wurden erfolgreich hochgeladen! ${playerMap.size} einzigartige Spieler gespeichert.`);
     } catch (err) {
+      console.error("Upload error:", err);
       setError("Fehler beim Hochladen der Ergebnisse.");
     }
   };
