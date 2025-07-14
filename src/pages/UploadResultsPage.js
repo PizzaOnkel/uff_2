@@ -13,6 +13,7 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
   const [selectedPeriod, setSelectedPeriod] = useState("");
   const [periods, setPeriods] = useState([]);
   const [eventDate, setEventDate] = useState("");
+  const [chestMappings, setChestMappings] = useState([]);
 
   // Veranstaltungsperioden aus Firestore laden
   useEffect(() => {
@@ -22,6 +23,18 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
         ...doc.data()
       }));
       setPeriods(list);
+    });
+    return () => unsub();
+  }, []);
+
+  // Truhen-Zuordnungen aus Firestore laden
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "chestMappings"), (snapshot) => {
+      const list = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setChestMappings(list);
     });
     return () => unsub();
   }, []);
@@ -106,37 +119,51 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
     reader.readAsText(file);
   };
 
-  // Funktion zum Konvertieren der Truhen von deinem Format ins erwartete Format
+  // Funktion zum Konvertieren der Truhen basierend auf Firestore-Zuordnungen
   const convertChests = (rawChests) => {
     if (!rawChests || !Array.isArray(rawChests)) return [];
     
-    // Mapping von Truhen-Namen zu Kategorien
-    const categoryMapping = {
-      'Arena Chest': 'Arena Chests',
-      'Sand Chest': 'Common Chests', 
-      'Bone Chest': 'Common Chests',
-      'Iron Chest': 'Rare Chests',
-      'Steel Chest': 'Rare Chests',
-      'Golden Chest': 'Epic Chests',
-      'Tartaros Chest': 'Chests of Tartaros',
-      'Citadel Chest': 'Citadel Chests',
-      'Cursed Citadel Chest': 'Citadel cursed Chests',
-      'Bank Chest': 'Bank Chests',
-      'Runic Chest': 'Runic Chests',
-      'Heroic Chest': 'Heroic Chests',
-      'Vault of the Ancients': 'Vault of the Ancients',
-      'Quick March Chest': 'Quick March Chest',
-      'Ancient Chest': 'Ancients Chest',
-      'Jormungandr\'s Chest': 'Jormungandr Chests',
-      'Union Chest': 'Union Chest',
-      'Olympus Chest': 'Arena Chests' // Olympus Chests als Arena Chests behandeln
+    const getChestPoints = (chestName, level) => {
+      // Suche nach passender Zuordnung in der Firestore-Datenbank
+      const mapping = chestMappings.find(m => 
+        m.chestName === chestName && 
+        level >= m.levelStart && 
+        level <= m.levelEnd
+      );
+      
+      if (mapping) {
+        return mapping.points;
+      }
+      
+      // Fallback: Unbekannte Truhen
+      console.warn(`Unbekannte Truhe: ${chestName} (Level: ${level})`);
+      return 0;
+    };
+
+    const getCategoryForChest = (chestName, level) => {
+      // Suche nach passender Zuordnung in der Firestore-Datenbank
+      const mapping = chestMappings.find(m => 
+        m.chestName === chestName && 
+        level >= m.levelStart && 
+        level <= m.levelEnd
+      );
+      
+      if (mapping) {
+        return mapping.category;
+      }
+      
+      return 'Unknown';
     };
 
     // Gruppiere die Truhen nach Kategorie und Level
     const grouped = {};
     rawChests.forEach(chest => {
-      const category = categoryMapping[chest.Name] || 'Common Chests';
+      const chestName = chest.Name;
       const level = chest.Level || 0;
+      
+      const category = getCategoryForChest(chestName, level);
+      const points = getChestPoints(chestName, level);
+      
       const key = `${category}-${level}`;
       
       if (!grouped[key]) {
@@ -148,13 +175,7 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
         };
       }
       grouped[key].count++;
-      
-      // Einfache Punkteberechnung (kann angepasst werden)
-      if (level > 0) {
-        grouped[key].points += level * 10; // 10 Punkte pro Level
-      } else {
-        grouped[key].points += 50; // Standard für Level 0
-      }
+      grouped[key].points += points;
     });
 
     return Object.values(grouped);

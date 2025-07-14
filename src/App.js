@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { translations } from './translations/translations';
 import { ROUTES } from './routes';
+import { AuthProvider } from './contexts/AuthContext';
 import HomePage from './pages/HomePage';
 import InfoPage from './pages/InfoPage';
 import NavigationPage from './pages/NavigationPage';
@@ -9,6 +10,9 @@ import ManagePlayersPage from './pages/ManagePlayersPage';
 import ManageRanksPage from './pages/ManageRanksPage';
 import ManageTroopStrengthsPage from './pages/ManageTroopStrengthsPage';
 import ManageNormsPage from './pages/ManageNormsPage';
+import ManageChestMappingPage from './pages/ManageChestMappingPage';
+import AdminRegistrationPage from './pages/AdminRegistrationPage';
+import ManageAdminRequestsPage from './pages/ManageAdminRequestsPage';
 import CreatePeriodPage from './pages/CreatePeriodPage';
 import UploadResultsPage from './pages/UploadResultsPage';
 import ContactFormPage from './pages/ContactFormPage';
@@ -78,6 +82,8 @@ function App() {
       ROUTES.MANAGE_RANKS,
       ROUTES.MANAGE_TROOP_STRENGTHS,
       ROUTES.MANAGE_NORMS,
+      ROUTES.MANAGE_CHEST_MAPPING,
+      ROUTES.MANAGE_ADMIN_REQUESTS,
       ROUTES.UPLOAD_RESULTS,
       ROUTES.CREATE_PERIOD,
       ROUTES.CURRENT_TOTAL_EVENT_ADMIN,
@@ -110,6 +116,12 @@ function App() {
       return <ManageTroopStrengthsPage {...commonProps} />;
     case ROUTES.MANAGE_NORMS:
       return <ManageNormsPage {...commonProps} />;
+    case ROUTES.MANAGE_CHEST_MAPPING:
+      return <ManageChestMappingPage {...commonProps} />;
+    case ROUTES.ADMIN_REGISTRATION:
+      return <AdminRegistrationPage {...commonProps} />;
+    case ROUTES.MANAGE_ADMIN_REQUESTS:
+      return <ManageAdminRequestsPage {...commonProps} />;
     case ROUTES.CREATE_PERIOD:
       return <CreatePeriodPage {...commonProps} />;
     case ROUTES.UPLOAD_RESULTS:
@@ -134,6 +146,9 @@ function App() {
     default:
       return <HomePage {...commonProps} />;
   }
+      </div>
+    </AuthProvider>
+  );
 }
 
 export default App;
