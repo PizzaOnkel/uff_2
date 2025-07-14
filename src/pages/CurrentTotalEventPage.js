@@ -92,12 +92,19 @@ export default function CurrentTotalEventPage({ t, setCurrentPage }) {
   }
 
   function getNormPoints(troopStrengthName) {
+    // Fallback für leere Truppenstärken
+    if (!troopStrengthName || troopStrengthName.trim() === '') {
+      troopStrengthName = 'nicht definiert';
+    }
+    
     const troop = troopStrengths.find(ts => ts.name === troopStrengthName);
     // Debug: Logge die Truppenstärke-Daten
     console.log('Searching for troopStrength:', troopStrengthName);
     console.log('Available troopStrengths:', troopStrengths.map(ts => ts.name));
     console.log('Found troop:', troop);
-    return troop?.norm?.points || 0;
+    
+    // Korrigiere die Datenstruktur: points statt norm.points
+    return troop?.points || 0;
   }
 
   let totalIst = 0;
@@ -106,7 +113,13 @@ export default function CurrentTotalEventPage({ t, setCurrentPage }) {
   const tableRows = results.map((result) => {
     const player = findPlayer(result.Clanmate);
     const rank = player?.rank || "";
-    const troopStrength = player?.troopStrength || "";
+    let troopStrength = player?.troopStrength || "";
+    
+    // Fallback für leere Truppenstärken
+    if (!troopStrength || troopStrength.trim() === '') {
+      troopStrength = 'nicht definiert';
+    }
+    
     const normPoints = getNormPoints(troopStrength);
     const ist = result.Points || 0;
     const soll = normPoints;
