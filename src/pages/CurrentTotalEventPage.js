@@ -44,7 +44,6 @@ const verticalHeaders = [
 
 export default function CurrentTotalEventPage({ t, setCurrentPage }) {
   const [players, setPlayers] = useState([]);
-  const [ranks, setRanks] = useState([]);
   const [troopStrengths, setTroopStrengths] = useState([]);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,14 +55,12 @@ export default function CurrentTotalEventPage({ t, setCurrentPage }) {
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-      const [playersSnap, ranksSnap, troopSnap, resultsSnap] = await Promise.all([
+      const [playersSnap, troopSnap, resultsSnap] = await Promise.all([
         getDocs(collection(db, "players")),
-        getDocs(collection(db, "ranks")),
         getDocs(collection(db, "troopStrengths")),
         getDocs(collection(db, "results")),
       ]);
       setPlayers(playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      setRanks(ranksSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       setTroopStrengths(troopSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       setResults(resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       setLoading(false);
@@ -96,6 +93,10 @@ export default function CurrentTotalEventPage({ t, setCurrentPage }) {
 
   function getNormPoints(troopStrengthName) {
     const troop = troopStrengths.find(ts => ts.name === troopStrengthName);
+    // Debug: Logge die Truppenstärke-Daten
+    console.log('Searching for troopStrength:', troopStrengthName);
+    console.log('Available troopStrengths:', troopStrengths.map(ts => ts.name));
+    console.log('Found troop:', troop);
     return troop?.norm?.points || 0;
   }
 
@@ -230,8 +231,8 @@ export default function CurrentTotalEventPage({ t, setCurrentPage }) {
               </div>
               <div className="w-full bg-gray-700 rounded h-6 overflow-hidden">
                 <div
-                  className="bg-blue-500 h-6"
-                  style={{ width: `${totalSoll > 0 ? Math.min(100, (totalIst / totalSoll) * 100) : 0}%` }}
+                  className={`h-6 ${totalSoll > 0 && (totalIst / totalSoll) >= 1 ? 'bg-green-500' : 'bg-blue-500'}`}
+                  style={{ width: `${totalSoll > 0 ? Math.min(200, (totalIst / totalSoll) * 100) : 0}%` }}
                 />
               </div>
             </div>
@@ -351,8 +352,8 @@ export default function CurrentTotalEventPage({ t, setCurrentPage }) {
                       <td className="p-2 norm-column" style={{ width: "120px", minWidth: "120px" }}>
                         <div className="w-full bg-gray-700 rounded h-4">
                           <div
-                            className="bg-blue-500 h-4"
-                            style={{ width: `${Math.min(100, row.percent)}%` }}
+                            className={`h-4 ${row.percent >= 100 ? 'bg-green-500' : 'bg-blue-500'}`}
+                            style={{ width: `${Math.min(200, row.percent)}%` }}
                           />
                         </div>
                         <span className="ml-2">{row.percent}%</span>
