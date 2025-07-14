@@ -1,29 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
-import { collection, addDoc, deleteDoc, onSnapshot } from "firebase/firestore";
-import { doc } from "firebase/firestore";
+import { collection, addDoc, deleteDoc, onSnapshot, doc } from "firebase/firestore";
 
 export default function ManageTroopStrengthsPage({ t, setCurrentPage }) {
-  const [strengths, setStrengths] = useState([]);
+  const [troopStrengths, setTroopStrengths] = useState([]);
   const [newStrength, setNewStrength] = useState("");
 
-  // Firestore: Truppenstärken automatisch laden
+  // Firestore: Truppenstärken automatisch laden und nach Erstellungszeit sortieren
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "troopStrengths"), (snapshot) => {
-      const list = snapshot.docs.map(doc => ({
-        id: doc.id,
-        value: doc.data().value
-      }));
-      setStrengths(list);
+      const list = snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          name: doc.data().name,
+          createdAt: doc.data().createdAt || 0
+        }))
+        .sort((a, b) => a.createdAt - b.createdAt); // Sortiere nach Erstellungszeit
+      setTroopStrengths(list);
     });
     return () => unsub();
   }, []);
 
-  // Truppenstärke zu Firestore hinzufügen
+  // Truppenstärke zu Firestore hinzufügen (mit Zeitstempel)
   const handleAddStrength = async () => {
     if (!newStrength.trim()) return;
-    await addDoc(collection(db, "troopStrengths"), { value: newStrength.trim() });
+    await addDoc(collection(db, "troopStrengths"), { name: newStrength.trim(), createdAt: Date.now() });
     setNewStrength("");
   };
 
@@ -40,7 +42,7 @@ export default function ManageTroopStrengthsPage({ t, setCurrentPage }) {
           type="text"
           value={newStrength}
           onChange={e => setNewStrength(e.target.value)}
-          placeholder="Neue Truppenstärke (z.B. 5000)"
+          placeholder="Neue Truppenstärke (z.B. 100000)"
           className="mb-2 px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 w-full"
         />
         <button
@@ -51,9 +53,9 @@ export default function ManageTroopStrengthsPage({ t, setCurrentPage }) {
         </button>
       </div>
       <ul className="w-full max-w-xl">
-        {strengths.map(strength => (
+        {troopStrengths.map(strength => (
           <li key={strength.id} className="flex justify-between items-center bg-gray-800 rounded p-2 mb-2">
-            <span>{strength.value}</span>
+            <span>{strength.name}</span>
             <button
               onClick={() => handleDeleteStrength(strength.id)}
               className="px-3 py-1 bg-red-600 rounded text-white hover:bg-red-700"

@@ -1,38 +1,48 @@
 import React, { useState, useEffect } from "react";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
-import { collection, addDoc, deleteDoc, onSnapshot } from "firebase/firestore";
-import { doc } from "firebase/firestore";
+import { collection, addDoc, deleteDoc, onSnapshot, doc } from "firebase/firestore";
 
 export default function ManageNormsPage({ t, setCurrentPage }) {
   const [norms, setNorms] = useState([]);
-  const [form, setForm] = useState({ name: "", value: "" });
+  const [troopStrengths, setTroopStrengths] = useState([]);
+  const [selectedTroopStrength, setSelectedTroopStrength] = useState("");
+  const [newNormValue, setNewNormValue] = useState("");
 
-  // Firestore: Normen automatisch laden
+  // Normen automatisch laden und nach Erstellungszeit sortieren
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "norms"), (snapshot) => {
-      const list = snapshot.docs.map(doc => ({
-        id: doc.id,
-        name: doc.data().name,
-        value: doc.data().value
-      }));
+      const list = snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          troopStrength: doc.data().troopStrength,
+          value: doc.data().value,
+          createdAt: doc.data().createdAt || 0
+        }))
+        .sort((a, b) => a.createdAt - b.createdAt);
       setNorms(list);
     });
     return () => unsub();
   }, []);
 
-  const handleChange = e => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  // Norm zu Firestore hinzufügen
-  const handleAddNorm = async () => {
-    if (!form.name.trim() || !form.value.trim()) return;
-    await addDoc(collection(db, "norms"), {
-      name: form.name.trim(),
-      value: Number(form.value)
+  // Truppenstärken laden
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "troopStrengths"), (snapshot) => {
+      setTroopStrengths(snapshot.docs.map(doc => doc.data().name));
     });
-    setForm({ name: "", value: "" });
+    return () => unsub();
+  }, []);
+
+  // Norm zu Firestore hinzufügen (mit Zeitstempel)
+  const handleAddNorm = async () => {
+    if (!selectedTroopStrength || !newNormValue.trim()) return;
+    await addDoc(collection(db, "norms"), {
+      troopStrength: selectedTroopStrength,
+      value: newNormValue.trim(),
+      createdAt: Date.now()
+    });
+    setSelectedTroopStrength("");
+    setNewNormValue("");
   };
 
   // Norm aus Firestore löschen
@@ -44,20 +54,21 @@ export default function ManageNormsPage({ t, setCurrentPage }) {
     <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white p-4 pb-8">
       <h2 className="text-4xl font-bold mb-6 text-center text-purple-400">{t.manageNormsTitle}</h2>
       <div className="mb-8 w-full max-w-xl">
+        <select
+          value={selectedTroopStrength}
+          onChange={e => setSelectedTroopStrength(e.target.value)}
+          className="mb-2 px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 w-full"
+        >
+          <option value="">Truppenstärke auswählen</option>
+          {troopStrengths.map(strength => (
+            <option key={strength} value={strength}>{strength}</option>
+          ))}
+        </select>
         <input
           type="text"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          placeholder="Normenname (z.B. Clantruhen)"
-          className="mb-2 px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 w-full"
-        />
-        <input
-          type="number"
-          name="value"
-          value={form.value}
-          onChange={handleChange}
-          placeholder="Normwert (z.B. 10)"
+          value={newNormValue}
+          onChange={e => setNewNormValue(e.target.value)}
+          placeholder="Norm-Wert (z.B. 100)"
           className="mb-2 px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 w-full"
         />
         <button
@@ -70,7 +81,7 @@ export default function ManageNormsPage({ t, setCurrentPage }) {
       <ul className="w-full max-w-xl">
         {norms.map(norm => (
           <li key={norm.id} className="flex justify-between items-center bg-gray-800 rounded p-2 mb-2">
-            <span>{norm.name}: {norm.value}</span>
+            <span>{norm.troopStrength} ({norm.value})</span>
             <button
               onClick={() => handleDeleteNorm(norm.id)}
               className="px-3 py-1 bg-red-600 rounded text-white hover:bg-red-700"

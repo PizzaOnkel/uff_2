@@ -1,34 +1,37 @@
 import React, { useState, useEffect } from "react";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
-import { collection, addDoc, deleteDoc, onSnapshot, query, where } from "firebase/firestore";
+import { collection, addDoc, deleteDoc, onSnapshot, doc } from "firebase/firestore";
 
 export default function ManageRanksPage({ t, setCurrentPage }) {
   const [ranks, setRanks] = useState([]);
   const [newRank, setNewRank] = useState("");
 
-  // Firestore: Ränge automatisch laden
+  // Firestore: Ränge automatisch laden und nach Erstellungszeit sortieren
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "ranks"), (snapshot) => {
-      const list = snapshot.docs.map(doc => ({
-        id: doc.id,
-        name: doc.data().name
-      }));
+      const list = snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          name: doc.data().name,
+          createdAt: doc.data().createdAt || 0
+        }))
+        .sort((a, b) => a.createdAt - b.createdAt); // Sortiere nach Erstellungszeit
       setRanks(list);
     });
     return () => unsub();
   }, []);
 
-  // Rang zu Firestore hinzufügen
+  // Rang zu Firestore hinzufügen (mit Zeitstempel)
   const handleAddRank = async () => {
     if (!newRank.trim()) return;
-    await addDoc(collection(db, "ranks"), { name: newRank.trim() });
+    await addDoc(collection(db, "ranks"), { name: newRank.trim(), createdAt: Date.now() });
     setNewRank("");
   };
 
   // Rang aus Firestore löschen
   const handleDeleteRank = async (id) => {
-    await deleteDoc(collection(db, "ranks").doc(id));
+    await deleteDoc(doc(db, "ranks", id));
   };
 
   return (

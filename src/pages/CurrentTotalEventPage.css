@@ -1,0 +1,84 @@
+.event-page {
+  padding: 1rem;
+  font-family: Arial, sans-serif;
+}
+
+.clan-summary {
+  margin-bottom: 1rem;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.event-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.event-table th, .event-table td {
+  border: 1px solid #ddd;
+  padding: 0.4em;
+  text-align: center;
+}
+
+.event-table th {
+  background: #f5f5f5;
+  font-weight: bold;
+}
+
+.player-link {
+  background: none;
+  border: none;
+  color: #1976d2;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+}
+
+.progress-bar {
+  background: #eee;
+  border-radius: 6px;
+  height: 12px;
+  width: 60px;
+  display: inline-block;
+  margin-right: 0.5em;
+  vertical-align: middle;
+  overflow: hidden;
+}
+
+.progress {
+  background: #4caf50;
+  height: 100%;
+  border-radius: 6px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 2em;
+  border-radius: 10px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@media (max-width: 600px) {
+  .event-table th, .event-table td {
+    padding: 0.2em;
+    font-size: 0.85rem;
+  }
+  .modal-content {
+    padding: 1em;
+  }
+}

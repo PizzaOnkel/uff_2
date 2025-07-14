@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { translations } from './translations/translations';
 import { ROUTES } from './routes';
@@ -15,8 +14,53 @@ import UploadResultsPage from './pages/UploadResultsPage';
 import ContactFormPage from './pages/ContactFormPage';
 import ComingSoonPage from './pages/ComingSoonPage';
 import AdminLoginPage from './pages/AdminLoginPage';
-// NEU: Importiere die echte Seite!
 import CurrentTotalEventPage from './pages/CurrentTotalEventPage';
+
+// Beispiel-Daten für die Event-Seite
+const exampleClanData = {
+  players: [
+    {
+      id: 1,
+      name: "Max Mustermann",
+      rank: "Clanführer",
+      troopStrength: 12345,
+      totalChests: 12,
+      totalPoints: 3456,
+      norm: 4000,
+      timestamp: "2025-07-14T12:34:56",
+      chests: {
+        "Arena Chests": {
+          10: { count: 2, points: 100 },
+          15: { count: 1, points: 80 },
+        },
+        "Common Chests": {
+          10: { count: 3, points: 60 },
+        },
+        // weitere Kategorien nach Bedarf...
+      }
+    },
+    {
+      id: 2,
+      name: "Erika Musterfrau",
+      rank: "Offizier",
+      troopStrength: 11000,
+      totalChests: 10,
+      totalPoints: 3000,
+      norm: 3500,
+      timestamp: "2025-07-14T12:35:12",
+      chests: {
+        "Arena Chests": {
+          10: { count: 1, points: 50 },
+        },
+        "Rare Chests": {
+          10: { count: 2, points: 120 },
+        },
+        // weitere Kategorien nach Bedarf...
+      }
+    }
+    // weitere Spieler...
+  ]
+};
 
 function App() {
   const [currentPage, setCurrentPage] = useState(ROUTES.HOME);
@@ -72,9 +116,9 @@ function App() {
       return <UploadResultsPage {...commonProps} />;
     case ROUTES.CONTACT_FORM:
       return <ContactFormPage {...commonProps} />;
-    // HIER: Zeige die echte Seite!
+    // HIER: Zeige die Event-Seite mit Beispiel-Daten!
     case ROUTES.CURRENT_TOTAL_EVENT:
-      return <CurrentTotalEventPage {...commonProps} />;
+      return <CurrentTotalEventPage {...commonProps} clanData={exampleClanData} />;
     case ROUTES.STANDARDS_EVALUATION:
       return <ComingSoonPage {...commonProps} backPage={ROUTES.NAVIGATION} title={t.standardsEvaluationTitle} />;
     case ROUTES.EVENT_ARCHIVE:

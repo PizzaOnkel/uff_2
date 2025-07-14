@@ -8,6 +8,7 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
   const [error, setError] = useState("");
   const [selectedPeriod, setSelectedPeriod] = useState("");
   const [periods, setPeriods] = useState([]);
+  const [eventDate, setEventDate] = useState("");
 
   // Veranstaltungsperioden aus Firestore laden
   useEffect(() => {
@@ -28,11 +29,21 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
     reader.onload = (event) => {
       try {
         const data = JSON.parse(event.target.result);
-        setJsonData(data);
-        setError("");
+        // Prüfe, ob es ein Objekt mit Datumsschlüssel ist
+        const dateKeys = Object.keys(data);
+        if (dateKeys.length === 1 && Array.isArray(data[dateKeys[0]])) {
+          setJsonData(data[dateKeys[0]]);
+          setEventDate(dateKeys[0]);
+          setError("");
+        } else {
+          setError("Die JSON-Datei hat nicht das erwartete Format.");
+          setJsonData(null);
+          setEventDate("");
+        }
       } catch (err) {
         setError("Fehler beim Einlesen der Datei: Ungültiges JSON-Format.");
         setJsonData(null);
+        setEventDate("");
       }
     };
     reader.readAsText(file);
@@ -56,12 +67,14 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
       for (const playerResult of jsonData) {
         await addDoc(collection(db, "results"), {
           periodId: selectedPeriod,
+          eventDate: eventDate,
           ...playerResult,
           timestamp: new Date().toISOString()
         });
       }
       setJsonData(null);
       setSelectedPeriod("");
+      setEventDate("");
       setError("");
       alert("Alle Spieler-Ergebnisse wurden erfolgreich hochgeladen und zugeordnet!");
     } catch (err) {
