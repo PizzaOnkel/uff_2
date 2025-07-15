@@ -38,6 +38,47 @@ export default function ManageChestMappingPage({ t, setCurrentPage }) {
     "Jormungandr Total"
   ];
 
+  // Chest-Namen basierend auf der echten JSON-Analyse
+  const chestNames = {
+    // Level-basierte Chests (verwenden "default" als Name)
+    "Arena Chests": ["default"],
+    "Common Chests": ["default", "Barbarian Chest", "Common Chest"],
+    "Rare Chests": ["default", "Orc Chest", "Rare Chest"],
+    "Epic Chests": ["default", "Undead Chest", "Epic Chest"],
+    "Chests of Tartaros": ["default", "Demon Chest", "Tartaros Chest"],
+    "Elven Chests": ["default", "Elven Citadel Chest", "Elf Chest"],
+    "Cursed Chests": ["default", "Cursed Chest"],
+    "Runic Chests": ["default", "Runic Chest"],
+    "Heroic Chests": ["default", "Heroic Chest"],
+    "Vault of the Ancients": ["default", "Vault of the Ancients Chest", "Ancient Chest"],
+    
+    // Nicht level-basierte Chests (benötigen spezifische Namen)
+    "Bank Chests": [
+      "Uncommon Chest of Wealth",
+      "Rare Chest of Wealth", 
+      "Epic Chest of Wealth",
+      "Legendary Chest of Wealth",
+      "Magic Chest of Wealth",
+      "Chest of Wealth"
+    ],
+    "Quick March Chest": ["Quick March Chest"],
+    "Ancients Chest": ["Ancients Chest"],
+    "Union Chest": ["Union Chest"],
+    "Jormungandr Chests": ["Jormungandr Chest"],
+    "Epic Ancient squad": ["Epic Ancient squad"],
+    
+    // Totals (nicht direkt zuordenbar)
+    "ROTA Total": ["ROTA Total"],
+    "EAs Total": ["EAs Total"],
+    "Union Total": ["Union Total"],
+    "Jormungandr Total": ["Jormungandr Total"]
+  };
+
+  // Aktuelle Chest-Namen basierend auf ausgewählter Kategorie
+  const getChestNamesForCategory = (category) => {
+    return chestNames[category] || ["default"];
+  };
+
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "chestMappings"), (snapshot) => {
       const list = snapshot.docs.map(doc => ({
@@ -236,13 +277,19 @@ export default function ManageChestMappingPage({ t, setCurrentPage }) {
             <label className="block mb-2 text-sm font-medium text-gray-300">
               Truhen-Name *
             </label>
-            <input
-              type="text"
+            <select
               value={newMapping.chestName}
               onChange={(e) => setNewMapping({...newMapping, chestName: e.target.value})}
               className="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-purple-500 focus:outline-none"
-              placeholder="z.B. Sand Chest"
-            />
+            >
+              <option value="">Bitte wählen...</option>
+              {newMapping.category && getChestNamesForCategory(newMapping.category).map(chestName => (
+                <option key={chestName} value={chestName}>{chestName}</option>
+              ))}
+            </select>
+            {!newMapping.category && (
+              <p className="text-xs text-gray-400 mt-1">Erst Kategorie wählen</p>
+            )}
           </div>
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-300">
@@ -250,7 +297,11 @@ export default function ManageChestMappingPage({ t, setCurrentPage }) {
             </label>
             <select
               value={newMapping.category}
-              onChange={(e) => setNewMapping({...newMapping, category: e.target.value})}
+              onChange={(e) => setNewMapping({
+                ...newMapping, 
+                category: e.target.value,
+                chestName: "" // Reset chest name when category changes
+              })}
               className="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-purple-500 focus:outline-none"
             >
               <option value="">Bitte wählen...</option>
@@ -335,12 +386,16 @@ export default function ManageChestMappingPage({ t, setCurrentPage }) {
                   <tr key={mapping.id} className="border-b border-gray-700">
                     <td className="px-4 py-2">
                       {editingId === mapping.id ? (
-                        <input
-                          type="text"
+                        <select
                           value={editingMapping.chestName}
                           onChange={(e) => setEditingMapping({...editingMapping, chestName: e.target.value})}
                           className="w-full px-2 py-1 rounded bg-gray-700 text-white border border-gray-600"
-                        />
+                        >
+                          <option value="">Bitte wählen...</option>
+                          {editingMapping.category && getChestNamesForCategory(editingMapping.category).map(chestName => (
+                            <option key={chestName} value={chestName}>{chestName}</option>
+                          ))}
+                        </select>
                       ) : (
                         mapping.chestName
                       )}
@@ -349,7 +404,11 @@ export default function ManageChestMappingPage({ t, setCurrentPage }) {
                       {editingId === mapping.id ? (
                         <select
                           value={editingMapping.category}
-                          onChange={(e) => setEditingMapping({...editingMapping, category: e.target.value})}
+                          onChange={(e) => setEditingMapping({
+                            ...editingMapping, 
+                            category: e.target.value,
+                            chestName: "" // Reset chest name when category changes
+                          })}
                           className="w-full px-2 py-1 rounded bg-gray-700 text-white border border-gray-600"
                         >
                           {categories.map(cat => (
