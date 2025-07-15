@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Admins collection - nur für eingeloggte Admins lesbar
+    match /admins/{document} {
+      allow read: if request.auth != null && 
+                     (resource.data.email == request.auth.token.email || 
+                      get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'superAdmin');
+      allow write: if request.auth != null && 
+                      get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'superAdmin';
+    }
+    
+    // Admin requests collection - jeder kann schreiben (für Registrierung), nur Admins können lesen
+    match /adminRequests/{document} {
+      allow read: if request.auth != null && 
+                     get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'superAdmin';
+      allow create: if true; // Jeder kann eine Admin-Anfrage erstellen
+      allow update, delete: if request.auth != null && 
+                              get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'superAdmin';
+    }
+    
+    // Für alle anderen Collections - lockerer Zugriff für Entwicklung
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
 import { collection, addDoc, getDocs } from "firebase/firestore";
+import { debugAdminRegistration } from "../firebase-test";
 
 export default function AdminRegistrationPage({ t, setCurrentPage }) {
   const [formData, setFormData] = useState({
@@ -16,6 +17,13 @@ export default function AdminRegistrationPage({ t, setCurrentPage }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [debugInfo, setDebugInfo] = useState("");
+
+  const handleDebugTest = async () => {
+    setDebugInfo("Testing Firebase connection...");
+    const result = await debugAdminRegistration();
+    setDebugInfo(JSON.stringify(result, null, 2));
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -59,13 +67,20 @@ export default function AdminRegistrationPage({ t, setCurrentPage }) {
     }
 
     try {
+      console.log("Starting admin registration process...");
+      
       // Prüfe, ob es bereits Admins gibt
+      console.log("Checking for existing admins...");
       const adminsSnapshot = await getDocs(collection(db, "admins"));
       const isFirstAdmin = adminsSnapshot.empty;
       
+      console.log("Is first admin:", isFirstAdmin);
+      console.log("Existing admins count:", adminsSnapshot.size);
+      
       if (isFirstAdmin) {
+        console.log("Creating first admin...");
         // Erster Admin wird automatisch genehmigt
-        await addDoc(collection(db, "admins"), {
+        const adminDoc = await addDoc(collection(db, "admins"), {
           name: formData.name,
           email: formData.email,
           password: formData.password,
@@ -75,10 +90,12 @@ export default function AdminRegistrationPage({ t, setCurrentPage }) {
           requestedRole: 'superAdmin'
         });
         
+        console.log("First admin created successfully:", adminDoc.id);
         setMessage("🎉 Herzlichen Glückwunsch! Du wurdest als erster Super Administrator registriert und kannst dich jetzt anmelden!");
       } else {
+        console.log("Creating admin request...");
         // Normale Registrierungsanfrage
-        await addDoc(collection(db, "adminRequests"), {
+        const requestDoc = await addDoc(collection(db, "adminRequests"), {
           name: formData.name,
           email: formData.email,
           clanRole: formData.clanRole,
@@ -91,6 +108,7 @@ export default function AdminRegistrationPage({ t, setCurrentPage }) {
           requestedRole: formData.requestedRole
         });
         
+        console.log("Admin request created successfully:", requestDoc.id);
         setMessage("Deine Registrierungsanfrage wurde erfolgreich gesendet! Du erhältst eine E-Mail, sobald sie vom Haupt-Administrator bearbeitet wurde.");
       }
       
@@ -107,7 +125,18 @@ export default function AdminRegistrationPage({ t, setCurrentPage }) {
 
     } catch (err) {
       console.error("Registration request error:", err);
-      setError("Fehler beim Senden der Registrierungsanfrage. Bitte versuche es später erneut.");
+      console.error("Error details:", err.message);
+      
+      // Detailliertere Fehlermeldungen
+      if (err.code === 'permission-denied') {
+        setError("Berechtigung verweigert. Bitte wende dich an den Administrator.");
+      } else if (err.code === 'network-request-failed') {
+        setError("Netzwerkfehler. Bitte überprüfe deine Internetverbindung.");
+      } else if (err.code === 'unavailable') {
+        setError("Firebase-Dienst nicht verfügbar. Bitte versuche es später erneut.");
+      } else {
+        setError(`Fehler beim Senden der Registrierungsanfrage: ${err.message}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -135,6 +164,23 @@ export default function AdminRegistrationPage({ t, setCurrentPage }) {
             <p className="text-red-300 text-sm">{error}</p>
           </div>
         )}
+
+        {debugInfo && (
+          <div className="mb-6 p-4 bg-blue-900/30 border border-blue-600 rounded-lg">
+            <h4 className="text-blue-300 text-sm font-semibold mb-2">Debug Info:</h4>
+            <pre className="text-blue-200 text-xs overflow-auto max-h-32">{debugInfo}</pre>
+          </div>
+        )}
+
+        <div className="mb-6 text-center">
+          <button
+            type="button"
+            onClick={handleDebugTest}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium"
+          >
+            Test Firebase-Verbindung
+          </button>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
