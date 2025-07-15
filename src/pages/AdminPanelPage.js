@@ -214,6 +214,21 @@ export default function AdminPanelPage({ t, setCurrentPage }) {
             <span className="text-sm text-gray-400 text-center">Verwalte Administrator-Registrierungsanfragen</span>
           </button>
         )}
+        {hasPermission('manage_admin_requests') && (
+          <button
+            onClick={() => setCurrentPage(ROUTES.MANAGE_ADMINISTRATORS)}
+            className="flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border bg-cyan-900/30 hover:bg-cyan-800/40 border-cyan-800"
+          >
+            <svg className="w-12 h-12 text-cyan-400 mb-2" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            <span className="text-xl font-semibold text-white text-center mb-1">Administratoren</span>
+            <span className="text-sm text-gray-400 text-center">Verwalte bestehende Administratoren und deren Berechtigungen</span>
+          </button>
+        )}
         {hasPermission('create_period') && (
           <button
             onClick={() => setCurrentPage(ROUTES.CREATE_PERIOD)}

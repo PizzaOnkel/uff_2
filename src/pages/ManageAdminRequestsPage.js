@@ -10,8 +10,23 @@ export default function ManageAdminRequestsPage({ t, setCurrentPage }) {
   const [showRoleDialog, setShowRoleDialog] = useState(false);
   const [currentRequest, setCurrentRequest] = useState(null);
   const [selectedRole, setSelectedRole] = useState('contentAdmin');
+  const [customPermissions, setCustomPermissions] = useState([]);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
+
+  // Verfügbare Berechtigungen
+  const availablePermissions = [
+    { id: 'manage_players', label: 'Spieler verwalten', description: 'Spieler erstellen, bearbeiten und löschen' },
+    { id: 'upload', label: 'Daten hochladen', description: 'JSON-Daten hochladen und importieren' },
+    { id: 'delete', label: 'Daten löschen', description: 'Spieler und Daten permanent löschen' },
+    { id: 'manage_ranks', label: 'Ränge verwalten', description: 'Clan-Ränge und Normen bearbeiten' },
+    { id: 'manage_troop_strengths', label: 'Truppenstärken verwalten', description: 'Truppenstärken-Tabellen bearbeiten' },
+    { id: 'manage_norms', label: 'Normen verwalten', description: 'Clan-Normen und -Regeln bearbeiten' },
+    { id: 'manage_chest_mapping', label: 'Truhen-Zuordnungen verwalten', description: 'Truhen-Punkte-Zuordnungen bearbeiten' },
+    { id: 'create_period', label: 'Neue Perioden erstellen', description: 'Neue Bewertungsperioden anlegen' },
+    { id: 'manage_admin_requests', label: 'Admin-Anfragen verwalten', description: 'Neue Admin-Anfragen genehmigen oder ablehnen' },
+    { id: 'view_admin_data', label: 'Admin-Daten einsehen', description: 'Zugriff auf alle Admin-Bereiche' }
+  ];
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "adminRequests"), (snapshot) => {
@@ -32,7 +47,27 @@ export default function ManageAdminRequestsPage({ t, setCurrentPage }) {
     if (!request) return;
 
     setCurrentRequest(request);
+    setSelectedRole('custom'); // Standardmäßig auf custom setzen
+    setCustomPermissions([]); // Leere Berechtigungen zu Beginn
     setShowRoleDialog(true);
+  };
+
+  // Hilfsfunktionen für Berechtigungsverwaltung
+  const handlePermissionToggle = (permissionId) => {
+    setCustomPermissions(prev => {
+      if (prev.includes(permissionId)) {
+        return prev.filter(p => p !== permissionId);
+      } else {
+        return [...prev, permissionId];
+      }
+    });
+  };
+
+  const handleRoleChange = (newRole) => {
+    setSelectedRole(newRole);
+    if (newRole !== 'custom') {
+      setCustomPermissions([]);
+    }
   };
 
   const confirmApproval = async () => {
@@ -42,12 +77,28 @@ export default function ManageAdminRequestsPage({ t, setCurrentPage }) {
     setShowRoleDialog(false);
 
     try {
+      // Bestimme die Berechtigungen basierend auf der Auswahl
+      let finalPermissions = [];
+      
+      if (selectedRole === 'custom') {
+        finalPermissions = customPermissions;
+      } else {
+        // Vordefinierte Rollen
+        const rolePermissions = {
+          superAdmin: ['upload', 'delete', 'manage_players', 'manage_ranks', 'manage_troop_strengths', 'manage_norms', 'manage_chest_mapping', 'manage_admin_requests', 'create_period', 'view_admin_data'],
+          contentAdmin: ['manage_players', 'manage_ranks', 'manage_troop_strengths', 'manage_norms', 'manage_chest_mapping', 'view_admin_data'],
+          viewer: ['view_admin_data']
+        };
+        finalPermissions = rolePermissions[selectedRole] || [];
+      }
+
       // Erstelle den neuen Administrator
       await addDoc(collection(db, "admins"), {
         name: currentRequest.name,
         email: currentRequest.email,
         clanRole: currentRequest.clanRole,
-        role: selectedRole,
+        role: selectedRole === 'custom' ? 'custom' : selectedRole,
+        permissions: finalPermissions,
         password: currentRequest.password,
         createdBy: "Haupt-Administrator",
         createdDate: new Date().toISOString(),
@@ -59,13 +110,15 @@ export default function ManageAdminRequestsPage({ t, setCurrentPage }) {
         status: "approved",
         approvedBy: "Haupt-Administrator",
         approvedDate: new Date().toISOString(),
-        assignedRole: selectedRole
+        assignedRole: selectedRole,
+        assignedPermissions: finalPermissions
       });
       
       const roleNames = {
         'superAdmin': 'Super Admin',
         'contentAdmin': 'Content Admin',
-        'viewer': 'Viewer'
+        'viewer': 'Viewer',
+        'custom': 'Benutzerdefinierte Berechtigungen'
       };
       
       alert(`Administrator-Anfrage wurde genehmigt! Rolle: ${roleNames[selectedRole]}`);
@@ -75,6 +128,7 @@ export default function ManageAdminRequestsPage({ t, setCurrentPage }) {
     } finally {
       setProcessingId(null);
       setCurrentRequest(null);
+      setCustomPermissions([]);
     }
   };
 
@@ -299,12 +353,12 @@ export default function ManageAdminRequestsPage({ t, setCurrentPage }) {
       {/* Rolle-Auswahl Dialog */}
       {showRoleDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 max-w-md w-full mx-4">
+          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-semibold mb-4 text-white">
               Administratorrolle zuweisen
             </h3>
             <p className="text-gray-300 mb-4">
-              Wähle die Rolle für <strong>{currentRequest?.name}</strong>:
+              Wähle die Rolle und Berechtigungen für <strong>{currentRequest?.name}</strong>:
             </p>
             
             <div className="space-y-3 mb-6">
@@ -314,7 +368,7 @@ export default function ManageAdminRequestsPage({ t, setCurrentPage }) {
                   name="role"
                   value="viewer"
                   checked={selectedRole === 'viewer'}
-                  onChange={(e) => setSelectedRole(e.target.value)}
+                  onChange={(e) => handleRoleChange(e.target.value)}
                   className="mr-3"
                 />
                 <div>
@@ -329,7 +383,7 @@ export default function ManageAdminRequestsPage({ t, setCurrentPage }) {
                   name="role"
                   value="contentAdmin"
                   checked={selectedRole === 'contentAdmin'}
-                  onChange={(e) => setSelectedRole(e.target.value)}
+                  onChange={(e) => handleRoleChange(e.target.value)}
                   className="mr-3"
                 />
                 <div>
@@ -344,7 +398,7 @@ export default function ManageAdminRequestsPage({ t, setCurrentPage }) {
                   name="role"
                   value="superAdmin"
                   checked={selectedRole === 'superAdmin'}
-                  onChange={(e) => setSelectedRole(e.target.value)}
+                  onChange={(e) => handleRoleChange(e.target.value)}
                   className="mr-3"
                 />
                 <div>
@@ -352,12 +406,60 @@ export default function ManageAdminRequestsPage({ t, setCurrentPage }) {
                   <p className="text-gray-400 text-sm">Vollzugriff auf alle Funktionen</p>
                 </div>
               </label>
+              
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="role"
+                  value="custom"
+                  checked={selectedRole === 'custom'}
+                  onChange={(e) => handleRoleChange(e.target.value)}
+                  className="mr-3"
+                />
+                <div>
+                  <span className="text-white font-medium">Benutzerdefinierte Berechtigungen</span>
+                  <p className="text-gray-400 text-sm">Wähle spezifische Berechtigungen aus</p>
+                </div>
+              </label>
             </div>
+            
+            {/* Benutzerdefinierte Berechtigungen */}
+            {selectedRole === 'custom' && (
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold mb-3 text-purple-400">Berechtigungen auswählen:</h4>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {availablePermissions.map(permission => (
+                    <label key={permission.id} className="flex items-start p-3 bg-gray-700 rounded-lg">
+                      <input
+                        type="checkbox"
+                        checked={customPermissions.includes(permission.id)}
+                        onChange={() => handlePermissionToggle(permission.id)}
+                        className="mr-3 mt-1"
+                      />
+                      <div className="flex-1">
+                        <span className="text-white font-medium">{permission.label}</span>
+                        <p className="text-gray-400 text-sm">{permission.description}</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+                {customPermissions.length === 0 && (
+                  <p className="text-red-400 text-sm mt-2">
+                    ⚠️ Bitte wähle mindestens eine Berechtigung aus!
+                  </p>
+                )}
+              </div>
+            )}
             
             <div className="flex gap-3">
               <button
                 onClick={confirmApproval}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded font-semibold transition"
+                disabled={selectedRole === 'custom' && customPermissions.length === 0}
+                className={`flex-1 py-2 px-4 rounded font-semibold transition ${
+                  selectedRole === 'custom' && customPermissions.length === 0
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+                }`}
               >
                 Genehmigen
               </button>
@@ -365,6 +467,7 @@ export default function ManageAdminRequestsPage({ t, setCurrentPage }) {
                 onClick={() => {
                   setShowRoleDialog(false);
                   setCurrentRequest(null);
+                  setCustomPermissions([]);
                 }}
                 className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded font-semibold transition"
               >

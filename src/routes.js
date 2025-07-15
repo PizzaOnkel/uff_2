@@ -10,6 +10,7 @@ export const ROUTES = {
   MANAGE_CHEST_MAPPING: 'manageChestMapping',
   ADMIN_REGISTRATION: 'adminRegistration',
   MANAGE_ADMIN_REQUESTS: 'manageAdminRequests',
+  MANAGE_ADMINISTRATORS: 'manageAdministrators',
   UPLOAD_RESULTS: 'uploadResults',
   CREATE_PERIOD: 'createPeriod',
   CURRENT_TOTAL_EVENT: 'currentTotalEvent',

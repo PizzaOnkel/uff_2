@@ -114,6 +114,12 @@ export function AuthProvider({ children }) {
   const hasPermission = (permission) => {
     if (!currentAdmin) return false;
     
+    // Überprüfe, ob der Admin spezifische Berechtigungen hat
+    if (currentAdmin.permissions && Array.isArray(currentAdmin.permissions)) {
+      return currentAdmin.permissions.includes(permission);
+    }
+    
+    // Fallback für alte Rollen-basierte Berechtigungen
     const permissions = {
       superAdmin: ['upload', 'delete', 'manage_players', 'manage_ranks', 'manage_troop_strengths', 'manage_norms', 'manage_chest_mapping', 'manage_admin_requests', 'create_period', 'view_admin_data'],
       contentAdmin: ['manage_players', 'manage_ranks', 'manage_troop_strengths', 'manage_norms', 'manage_chest_mapping', 'view_admin_data'],

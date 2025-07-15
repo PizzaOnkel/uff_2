@@ -13,6 +13,7 @@ import ManageNormsPage from './pages/ManageNormsPage';
 import ManageChestMappingPage from './pages/ManageChestMappingPage';
 import AdminRegistrationPage from './pages/AdminRegistrationPage';
 import ManageAdminRequestsPage from './pages/ManageAdminRequestsPage';
+import ManageAdministratorsPage from './pages/ManageAdministratorsPage';
 import CreatePeriodPage from './pages/CreatePeriodPage';
 import UploadResultsPage from './pages/UploadResultsPage';
 import ContactFormPage from './pages/ContactFormPage';
@@ -102,6 +103,7 @@ function AppContent() {
     ROUTES.MANAGE_NORMS,
     ROUTES.MANAGE_CHEST_MAPPING,
     ROUTES.MANAGE_ADMIN_REQUESTS,
+    ROUTES.MANAGE_ADMINISTRATORS,
     ROUTES.CREATE_PERIOD,
     ROUTES.UPLOAD_RESULTS,
     ROUTES.CURRENT_TOTAL_EVENT_ADMIN,
@@ -139,6 +141,8 @@ function AppContent() {
         return <AdminRegistrationPage {...commonProps} />;
       case ROUTES.MANAGE_ADMIN_REQUESTS:
         return <ManageAdminRequestsPage {...commonProps} />;
+      case ROUTES.MANAGE_ADMINISTRATORS:
+        return <ManageAdministratorsPage {...commonProps} />;
       case ROUTES.CREATE_PERIOD:
         return <CreatePeriodPage {...commonProps} />;
       case ROUTES.UPLOAD_RESULTS:
