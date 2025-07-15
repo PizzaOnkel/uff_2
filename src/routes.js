@@ -21,4 +21,5 @@ export const ROUTES = {
   CONTACT_FORM: 'contactForm',
   CURRENT_TOTAL_EVENT_ADMIN: 'currentTotalEventAdmin',
   EVENT_ARCHIVE_ADMIN: 'eventArchiveAdmin',
+  EMAIL_TEST: 'emailTest',
 };

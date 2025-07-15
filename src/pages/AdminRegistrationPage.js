@@ -3,6 +3,7 @@ import { ROUTES } from "../routes";
 import { db } from "../firebase";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { debugAdminRegistration } from "../firebase-test";
+import { sendAdminRequestEmail } from "../utils/emailService";
 
 export default function AdminRegistrationPage({ t, setCurrentPage }) {
   const [formData, setFormData] = useState({
@@ -109,7 +110,21 @@ export default function AdminRegistrationPage({ t, setCurrentPage }) {
         });
         
         console.log("Admin request created successfully:", requestDoc.id);
-        setMessage("Deine Registrierungsanfrage wurde erfolgreich gesendet! Du erhältst eine E-Mail, sobald sie vom Haupt-Administrator bearbeitet wurde.");
+        
+        // E-Mail-Benachrichtigung senden
+        try {
+          const emailResult = await sendAdminRequestEmail(formData);
+          if (emailResult.success) {
+            console.log("✅ E-Mail-Benachrichtigung erfolgreich gesendet:", emailResult);
+            setMessage("Deine Registrierungsanfrage wurde erfolgreich gesendet! Du erhältst eine E-Mail, sobald sie vom Haupt-Administrator bearbeitet wurde. Eine Benachrichtigung wurde an den Administrator gesendet.");
+          } else {
+            console.warn("⚠️ E-Mail-Benachrichtigung fehlgeschlagen:", emailResult.error);
+            setMessage("Deine Registrierungsanfrage wurde erfolgreich gesendet! Du erhältst eine E-Mail, sobald sie vom Haupt-Administrator bearbeitet wurde.");
+          }
+        } catch (emailError) {
+          console.error("❌ E-Mail-Fehler:", emailError);
+          setMessage("Deine Registrierungsanfrage wurde erfolgreich gesendet! Du erhältst eine E-Mail, sobald sie vom Haupt-Administrator bearbeitet wurde.");
+        }
       }
       
       // Formular zurücksetzen

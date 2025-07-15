@@ -267,6 +267,18 @@ export default function AdminPanelPage({ t, setCurrentPage }) {
           <span className="text-xl font-semibold text-white text-center mb-1">{t.eventArchiveAdmin}</span>
           <span className="text-sm text-gray-400 text-center">{t.eventArchiveAdminDesc}</span>
         </button>
+        {/* E-Mail-Test-Seite für alle Admins */}
+        <button
+          onClick={() => setCurrentPage(ROUTES.EMAIL_TEST)}
+          className="flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border bg-indigo-900/30 hover:bg-indigo-800/40 border-indigo-800"
+        >
+          <svg className="w-12 h-12 text-indigo-400 mb-2" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
+          </svg>
+          <span className="text-xl font-semibold text-white text-center mb-1">E-Mail-Test</span>
+          <span className="text-sm text-gray-400 text-center">Teste die E-Mail-Konfiguration</span>
+        </button>
       </div>
       {/* Dialog zur Auswahl und Löschung */}
       {showDeleteDialog && (

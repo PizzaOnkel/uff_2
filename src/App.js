@@ -17,6 +17,7 @@ import ManageAdministratorsPage from './pages/ManageAdministratorsPage';
 import CreatePeriodPage from './pages/CreatePeriodPage';
 import UploadResultsPage from './pages/UploadResultsPage';
 import ContactFormPage from './pages/ContactFormPage';
+import EmailTestPage from './pages/EmailTestPage';
 import ComingSoonPage from './pages/ComingSoonPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import CurrentTotalEventPage from './pages/CurrentTotalEventPage';
@@ -148,7 +149,9 @@ function AppContent() {
       case ROUTES.UPLOAD_RESULTS:
         return <UploadResultsPage {...commonProps} />;
       case ROUTES.CONTACT_FORM:
-        return <ContactFormPage {...commonProps} />;
+        return <ContactFormPage t={t} setCurrentPage={setCurrentPage} />;
+      case ROUTES.EMAIL_TEST:
+        return <EmailTestPage t={t} setCurrentPage={setCurrentPage} />;
       case ROUTES.CURRENT_TOTAL_EVENT:
         return <CurrentTotalEventPage {...commonProps} clanData={exampleClanData} />;
       case ROUTES.STANDARDS_EVALUATION:
