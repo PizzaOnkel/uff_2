@@ -16,17 +16,26 @@ export default function ManageChestMappingPage({ t, setCurrentPage }) {
   const [editingMapping, setEditingMapping] = useState({});
 
   const categories = [
-    "Arena",
-    "Crypts",
-    "Citadel",
-    "Heroic Monster",
-    "Epic Monster",
+    "Arena Chests",
+    "Common Chests", 
+    "Rare Chests",
+    "Epic Chests",
+    "Chests of Tartaros",
+    "Elven Chests",
+    "Cursed Chests",
     "Bank Chests",
-    "Runic Squads",
+    "Runic Chests",
+    "Heroic Chests",
     "Vault of the Ancients",
-    "Rise of the Ancients",
+    "Quick March Chest",
+    "Ancients Chest",
+    "ROTA Total",
     "Epic Ancient squad",
-    "Union"
+    "EAs Total",
+    "Union Chest",
+    "Union Total",
+    "Jormungandr Chests",
+    "Jormungandr Total"
   ];
 
   useEffect(() => {

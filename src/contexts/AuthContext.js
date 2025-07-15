@@ -16,13 +16,59 @@ export function AuthProvider({ children }) {
     // Überprüfe, ob Admin in localStorage gespeichert ist
     const storedAdmin = localStorage.getItem('currentAdmin');
     if (storedAdmin) {
-      setCurrentAdmin(JSON.parse(storedAdmin));
+      try {
+        const admin = JSON.parse(storedAdmin);
+        // Nur setzen, wenn es ein gültiger Admin ist
+        if (admin && admin.id && admin.email && admin.role) {
+          setCurrentAdmin(admin);
+        } else {
+          // Ungültige Daten entfernen
+          localStorage.removeItem('currentAdmin');
+        }
+      } catch (error) {
+        console.error('Fehler beim Laden der Admin-Daten:', error);
+        localStorage.removeItem('currentAdmin');
+      }
     }
     setLoading(false);
   }, []);
 
   const login = async (email, password) => {
     try {
+      // Prüfe, ob bereits Admins existieren
+      const allAdminsQuery = query(collection(db, 'admins'));
+      const allAdminsSnapshot = await getDocs(allAdminsQuery);
+      
+      // Wenn keine Admins existieren, erstelle automatisch einen Super-Admin
+      if (allAdminsSnapshot.size === 0) {
+        try {
+          const { addDoc } = await import('firebase/firestore');
+          const emergencyAdmin = {
+            name: 'Emergency Admin',
+            email: email,
+            password: password,
+            role: 'superAdmin',
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            requestedRole: 'superAdmin'
+          };
+          
+          const docRef = await addDoc(collection(db, 'admins'), emergencyAdmin);
+          
+          const admin = {
+            id: docRef.id,
+            ...emergencyAdmin
+          };
+          
+          setCurrentAdmin(admin);
+          localStorage.setItem('currentAdmin', JSON.stringify(admin));
+          return { success: true, admin };
+        } catch (error) {
+          console.error('Fehler beim Erstellen des Emergency-Admins:', error);
+          return { success: false, error: 'Fehler beim Erstellen des Emergency-Admins: ' + error.message };
+        }
+      }
+      
       const q = query(
         collection(db, 'admins'),
         where('email', '==', email),
@@ -34,6 +80,7 @@ export function AuthProvider({ children }) {
       
       if (!querySnapshot.empty) {
         const adminData = querySnapshot.docs[0].data();
+        
         const admin = {
           id: querySnapshot.docs[0].id,
           ...adminData
@@ -54,6 +101,14 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setCurrentAdmin(null);
     localStorage.removeItem('currentAdmin');
+    // Zusätzlich alle anderen möglichen Session-Daten löschen
+    sessionStorage.clear();
+    // Falls später weitere Session-Daten hinzugefügt werden
+  };
+
+  const clearSession = () => {
+    setCurrentAdmin(null);
+    localStorage.clear();
   };
 
   const hasPermission = (permission) => {
@@ -72,6 +127,7 @@ export function AuthProvider({ children }) {
     currentAdmin,
     login,
     logout,
+    clearSession,
     hasPermission,
     loading
   };

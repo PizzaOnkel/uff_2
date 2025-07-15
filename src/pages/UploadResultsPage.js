@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
-import { collection, addDoc, onSnapshot, query, where, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, query, where, getDocs, doc, deleteDoc } from "firebase/firestore";
 
 export default function UploadResultsPage({ t, setCurrentPage }) {
   console.log("🔄 UploadResultsPage component loaded");
@@ -14,6 +14,8 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
   const [periods, setPeriods] = useState([]);
   const [eventDate, setEventDate] = useState("");
   const [chestMappings, setChestMappings] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, currentDate: '' });
 
   // Veranstaltungsperioden aus Firestore laden
   useEffect(() => {
@@ -119,158 +121,307 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
     reader.readAsText(file);
   };
 
-  // Funktion zum Konvertieren der Truhen basierend auf Firestore-Zuordnungen
+  // Funktion zum Konvertieren der Truhen basierend auf Google Sheets-Logik
   const convertChests = (rawChests) => {
-    if (!rawChests || !Array.isArray(rawChests)) return [];
+    if (!rawChests || !Array.isArray(rawChests)) return {};
     
-    const getChestPoints = (chestName, level) => {
-      // Suche nach passender Zuordnung in der Firestore-Datenbank
-      const mapping = chestMappings.find(m => 
-        m.chestName === chestName && 
-        level >= m.levelStart && 
-        level <= m.levelEnd
-      );
-      
-      if (mapping) {
-        return mapping.points;
-      }
-      
-      // Fallback: Unbekannte Truhen
-      console.warn(`Unbekannte Truhe: ${chestName} (Level: ${level})`);
-      return 0;
+    console.log("🔄 Converting chests:", rawChests.length);
+    
+    // Initialisiere die Struktur basierend auf den Kategorien aus CurrentTotalEventPage
+    const chestCounts = {
+      "Arena Chests": {},
+      "Common Chests": { 5: 0, 10: 0, 15: 0, 20: 0, 25: 0 },
+      "Rare Chests": { 10: 0, 15: 0, 20: 0, 25: 0, 30: 0 },
+      "Epic Chests": { 15: 0, 20: 0, 25: 0, 30: 0, 35: 0 },
+      "Chests of Tartaros": { 15: 0, 20: 0, 25: 0, 30: 0, 35: 0 },
+      "Elven Chests": { 10: 0, 15: 0, 20: 0, 25: 0, 30: 0 },
+      "Cursed Chests": { 20: 0, 25: 0 },
+      "Bank Chests": { "Wooden": 0, "Bronze": 0, "Silver": 0, "Golden": 0, "Precious": 0, "Magic": 0 },
+      "Runic Chests": { "20-24": 0, "25-29": 0, "30-34": 0, "35-39": 0, "40-44": 0, "45": 0 },
+      "Heroic Chests": {},
+      "Vault of the Ancients": { "10-14": 0, "15-19": 0, "20-24": 0, "25-29": 0, "30-34": 0, "35-39": 0, "40-44": 0 },
+      "Quick March Chest": { total: 0 },
+      "Ancients Chest": { total: 0 },
+      "ROTA Total": { total: 0 },
+      "Epic Ancient squad": { total: 0 },
+      "EAs Total": { total: 0 },
+      "Union Chest": { total: 0 },
+      "Union Total": { total: 0 },
+      "Jormungandr Chests": { total: 0 },
+      "Jormungandr Total": { total: 0 }
     };
 
-    const getCategoryForChest = (chestName, level) => {
-      // Suche nach passender Zuordnung in der Firestore-Datenbank
-      const mapping = chestMappings.find(m => 
-        m.chestName === chestName && 
-        level >= m.levelStart && 
-        level <= m.levelEnd
-      );
-      
-      if (mapping) {
-        return mapping.category;
-      }
-      
-      return 'Unknown';
-    };
+    // Initialisiere Heroic Chests (16-45)
+    for (let i = 16; i <= 45; i++) {
+      chestCounts["Heroic Chests"][i] = 0;
+    }
 
-    // Gruppiere die Truhen nach Kategorie und Level
-    const grouped = {};
+    // Verarbeite jede Truhe
     rawChests.forEach(chest => {
       const chestName = chest.Name;
       const level = chest.Level || 0;
       
-      const category = getCategoryForChest(chestName, level);
-      const points = getChestPoints(chestName, level);
+      console.log(`📦 Processing chest: ${chestName} (Level: ${level})`);
       
-      const key = `${category}-${level}`;
-      
-      if (!grouped[key]) {
-        grouped[key] = {
-          category,
-          level,
-          count: 0,
-          points: 0
-        };
+      // Mapping-Logik basierend auf Google Sheets
+      if (chestName.includes("Arena")) {
+        // Arena Chests haben keine Level-Unterteilungen
+        if (!chestCounts["Arena Chests"].total) chestCounts["Arena Chests"].total = 0;
+        chestCounts["Arena Chests"].total++;
       }
-      grouped[key].count++;
-      grouped[key].points += points;
+      else if (chestName.includes("Common") || chestName.includes("Barbarian")) {
+        // Common Chests: Barbarian Chest, Common Chest, etc.
+        if (chestCounts["Common Chests"][level] !== undefined) {
+          chestCounts["Common Chests"][level]++;
+        }
+      }
+      else if (chestName.includes("Rare") || chestName.includes("Orc")) {
+        // Rare Chests: Orc Chest, Rare Chest, etc.
+        if (chestCounts["Rare Chests"][level] !== undefined) {
+          chestCounts["Rare Chests"][level]++;
+        }
+      }
+      else if (chestName.includes("Epic") || chestName.includes("Undead")) {
+        // Epic Chests: Undead Chest, Epic Chest, etc.
+        if (chestCounts["Epic Chests"][level] !== undefined) {
+          chestCounts["Epic Chests"][level]++;
+        }
+      }
+      else if (chestName.includes("Tartaros") || chestName.includes("Demon")) {
+        // Chests of Tartaros: Demon Chest, Tartaros Chest, etc.
+        if (chestCounts["Chests of Tartaros"][level] !== undefined) {
+          chestCounts["Chests of Tartaros"][level]++;
+        }
+      }
+      else if (chestName.includes("Elven") || chestName.includes("Elf")) {
+        // Elven Chests: Elven Citadel Chest, Elf Chest, etc.
+        if (chestCounts["Elven Chests"][level] !== undefined) {
+          chestCounts["Elven Chests"][level]++;
+        }
+      }
+      else if (chestName.includes("Cursed")) {
+        // Cursed Chests
+        if (chestCounts["Cursed Chests"][level] !== undefined) {
+          chestCounts["Cursed Chests"][level]++;
+        }
+      }
+      else if (chestName.includes("Wealth") || chestName.includes("Bank")) {
+        // Bank Chests: verschiedene Typen basierend auf Beschreibung
+        let bankType = "Wooden"; // Default
+        if (chestName.includes("Uncommon")) bankType = "Bronze";
+        else if (chestName.includes("Rare")) bankType = "Silver";
+        else if (chestName.includes("Epic")) bankType = "Golden";
+        else if (chestName.includes("Legendary")) bankType = "Precious";
+        else if (chestName.includes("Magic")) bankType = "Magic";
+        
+        chestCounts["Bank Chests"][bankType]++;
+      }
+      else if (chestName.includes("Runic")) {
+        // Runic Chests: Level-Bereiche
+        let runicLevel = "20-24"; // Default
+        if (level >= 20 && level <= 24) runicLevel = "20-24";
+        else if (level >= 25 && level <= 29) runicLevel = "25-29";
+        else if (level >= 30 && level <= 34) runicLevel = "30-34";
+        else if (level >= 35 && level <= 39) runicLevel = "35-39";
+        else if (level >= 40 && level <= 44) runicLevel = "40-44";
+        else if (level >= 45) runicLevel = "45";
+        
+        chestCounts["Runic Chests"][runicLevel]++;
+      }
+      else if (chestName.includes("Heroic")) {
+        // Heroic Chests: Level 16-45
+        if (level >= 16 && level <= 45) {
+          chestCounts["Heroic Chests"][level]++;
+        }
+      }
+      else if (chestName.includes("Vault") || chestName.includes("Ancient")) {
+        // Vault of the Ancients: Level-Bereiche
+        let vaultLevel = "10-14"; // Default
+        if (level >= 10 && level <= 14) vaultLevel = "10-14";
+        else if (level >= 15 && level <= 19) vaultLevel = "15-19";
+        else if (level >= 20 && level <= 24) vaultLevel = "20-24";
+        else if (level >= 25 && level <= 29) vaultLevel = "25-29";
+        else if (level >= 30 && level <= 34) vaultLevel = "30-34";
+        else if (level >= 35 && level <= 39) vaultLevel = "35-39";
+        else if (level >= 40 && level <= 44) vaultLevel = "40-44";
+        
+        chestCounts["Vault of the Ancients"][vaultLevel]++;
+      }
+      else if (chestName.includes("Quick March")) {
+        chestCounts["Quick March Chest"].total++;
+      }
+      else if (chestName.includes("Union")) {
+        chestCounts["Union Chest"].total++;
+      }
+      else if (chestName.includes("Jormungandr")) {
+        chestCounts["Jormungandr Chests"].total++;
+      }
+      else {
+        // Fallback für unbekannte Truhen
+        console.warn(`⚠️ Unbekannte Truhe: ${chestName} (Level: ${level})`);
+        // Versuche Firestore-Mapping als Fallback
+        const mapping = chestMappings.find(m => 
+          m.chestName === chestName && 
+          level >= m.levelStart && 
+          level <= m.levelEnd
+        );
+        if (mapping && chestCounts[mapping.category]) {
+          if (chestCounts[mapping.category][level] !== undefined) {
+            chestCounts[mapping.category][level]++;
+          } else if (chestCounts[mapping.category].total !== undefined) {
+            chestCounts[mapping.category].total++;
+          }
+        }
+      }
     });
 
-    return Object.values(grouped);
+    // Berechne Totals für aggregierte Kategorien
+    chestCounts["ROTA Total"].total = 
+      Object.values(chestCounts["Vault of the Ancients"]).reduce((sum, count) => sum + count, 0);
+    
+    chestCounts["EAs Total"].total = 
+      (chestCounts["Ancients Chest"].total || 0) + 
+      (chestCounts["Epic Ancient squad"].total || 0);
+    
+    chestCounts["Union Total"].total = chestCounts["Union Chest"].total;
+    chestCounts["Jormungandr Total"].total = chestCounts["Jormungandr Chests"].total;
+
+    console.log("✅ Converted chests:", chestCounts);
+    return chestCounts;
   };
 
   const handlePeriodChange = (e) => {
     setSelectedPeriod(e.target.value);
   };
 
-  const handleDateChange = (e) => {
-    const selectedDate = e.target.value;
-    setEventDate(selectedDate);
-    if (fullJsonData && fullJsonData[selectedDate]) {
-      setJsonData(fullJsonData[selectedDate]);
-    }
-  };
-
   // JSON-Ergebnisse pro Spieler als eigenes Dokument speichern
   const handleUpload = async () => {
-    if (!jsonData || !selectedPeriod) {
+    if (!fullJsonData || !selectedPeriod) {
       setError("Bitte wähle eine Veranstaltungsperiode und lade eine Datei hoch.");
       return;
     }
-    if (!Array.isArray(jsonData)) {
-      setError("Die JSON-Datei muss ein Array von Spieler-Ergebnissen enthalten.");
-      return;
-    }
+    
+    setIsUploading(true);
+    setError("");
     
     try {
-      // Prüfe zuerst, ob bereits Daten für diese Periode existieren
+      const totalDates = Object.keys(fullJsonData).length;
+      setUploadProgress({ current: 0, total: totalDates + 1, currentDate: 'Vorbereitung...' });
+      
+      // SCHRITT 1: Lösche alle bestehenden Ergebnisse für diese Periode
+      setUploadProgress({ current: 0, total: totalDates + 1, currentDate: 'Lösche bestehende Daten...' });
+      
       const existingResultsQuery = query(
         collection(db, "results"),
-        where("periodId", "==", selectedPeriod),
-        where("eventDate", "==", eventDate)
+        where("periodId", "==", selectedPeriod)
       );
       
       const existingResultsSnapshot = await getDocs(existingResultsQuery);
       
-      // Lösche alle bestehenden Ergebnisse für diese Periode und dieses Datum
       if (!existingResultsSnapshot.empty) {
-        console.log(`🗑️ Lösche ${existingResultsSnapshot.docs.length} bestehende Ergebnisse für ${eventDate}`);
+        console.log(`🗑️ Lösche ${existingResultsSnapshot.docs.length} bestehende Ergebnisse für die Periode`);
         
         for (const docSnapshot of existingResultsSnapshot.docs) {
           await deleteDoc(doc(db, "results", docSnapshot.id));
         }
       }
       
-      // Gruppiere die Spieler nach Namen und summiere ihre Daten
-      const playerMap = new Map();
+      // SCHRITT 2: Sammle und aggregiere ALLE Spielerdaten über ALLE Tage
+      setUploadProgress({ current: 1, total: totalDates + 1, currentDate: 'Aggregiere Spielerdaten...' });
       
-      for (const playerResult of jsonData) {
-        const playerName = playerResult.Clanmate;
+      const globalPlayerMap = new Map(); // Hier sammeln wir ALLE Spieler über ALLE Tage
+      let processedDates = 0;
+      
+      // Durchlaufe alle Event-Tage und sammle Spielerdaten
+      for (const [currentEventDate, currentJsonData] of Object.entries(fullJsonData)) {
+        console.log(`🗓️ Verarbeite Datum: ${currentEventDate} mit ${currentJsonData.length} Einträgen`);
         
-        if (playerMap.has(playerName)) {
-          // Spieler bereits vorhanden, summiere die Daten
-          const existingPlayer = playerMap.get(playerName);
-          existingPlayer.Points += (playerResult.Points || 0);
-          existingPlayer.chests = existingPlayer.chests.concat(playerResult.chests || []);
-        } else {
-          // Neuer Spieler
-          playerMap.set(playerName, {
-            Clanmate: playerName,
-            Points: playerResult.Points || 0,
-            chests: playerResult.chests || []
-          });
+        if (!Array.isArray(currentJsonData)) {
+          console.warn(`⚠️ Daten für ${currentEventDate} sind kein Array, überspringe...`);
+          continue;
         }
+        
+        // Verarbeite jeden Spieler für dieses Datum
+        for (const playerResult of currentJsonData) {
+          const playerName = playerResult.Clanmate;
+          
+          if (globalPlayerMap.has(playerName)) {
+            // Spieler bereits vorhanden, summiere die Daten über alle Tage
+            const existingPlayer = globalPlayerMap.get(playerName);
+            existingPlayer.Points += (playerResult.Points || 0);
+            existingPlayer.chests = existingPlayer.chests.concat(playerResult.chests || []);
+            
+            // Füge das Datum zur Liste hinzu
+            if (!existingPlayer.eventDates.includes(currentEventDate)) {
+              existingPlayer.eventDates.push(currentEventDate);
+            }
+          } else {
+            // Neuer Spieler - erstelle Eintrag
+            globalPlayerMap.set(playerName, {
+              Clanmate: playerName,
+              Points: playerResult.Points || 0,
+              chests: playerResult.chests || [],
+              eventDates: [currentEventDate]
+            });
+          }
+        }
+        
+        processedDates++;
+        setUploadProgress({ 
+          current: processedDates + 1, 
+          total: totalDates + 1, 
+          currentDate: `Verarbeitet: ${currentEventDate}` 
+        });
+        
+        // Kurze Pause für bessere UX
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
       
-      console.log(`📊 Zusammengefasste Spieler: ${playerMap.size} einzigartige Spieler`);
+      // SCHRITT 3: Speichere die aggregierten Spielerdaten
+      setUploadProgress({ 
+        current: totalDates + 1, 
+        total: totalDates + 1, 
+        currentDate: `Speichere ${globalPlayerMap.size} Spieler...` 
+      });
       
-      // Speichere die zusammengefassten Spieler
-      for (const [playerName, playerData] of playerMap) {
+      console.log(`📊 Gesamt-Aggregation: ${globalPlayerMap.size} einzigartige Spieler über ${totalDates} Tage`);
+      
+      for (const [playerName, playerData] of globalPlayerMap) {
         // Konvertiere die Truhen ins richtige Format
         const convertedChests = convertChests(playerData.chests);
         
-        console.log(`💾 Speichere ${playerName} mit ${playerData.Points} Punkten und ${playerData.chests.length} Truhen`);
+        console.log(`💾 Speichere ${playerName} mit ${playerData.Points} Punkten (${playerData.chests.length} Truhen) über ${playerData.eventDates.length} Tage`);
         
         await addDoc(collection(db, "results"), {
           periodId: selectedPeriod,
-          eventDate: eventDate,
           Clanmate: playerData.Clanmate,
           Points: playerData.Points,
           chests: convertedChests,
+          eventDates: playerData.eventDates, // Alle Tage, an denen der Spieler aktiv war
+          totalEventDays: playerData.eventDates.length, // Anzahl der aktiven Tage
           timestamp: new Date().toISOString()
         });
       }
       
+      setUploadProgress({ current: totalDates + 1, total: totalDates + 1, currentDate: 'Abgeschlossen!' });
+      
       setJsonData(null);
+      setFullJsonData(null);
+      setAvailableDates([]);
       setSelectedPeriod("");
       setEventDate("");
       setError("");
-      alert(`Alle Spieler-Ergebnisse wurden erfolgreich hochgeladen! ${playerMap.size} einzigartige Spieler gespeichert.`);
+      
+      setTimeout(() => {
+        alert(`Alle Spieler-Ergebnisse wurden erfolgreich aggregiert und hochgeladen!\n\n${globalPlayerMap.size} einzigartige Spieler\n${totalDates} Event-Tage verarbeitet\n\nJeder Spieler erscheint jetzt nur EINMAL in der Liste mit seinen Gesamtpunkten!`);
+      }, 500);
+      
     } catch (err) {
       console.error("Upload error:", err);
-      setError("Fehler beim Hochladen der Ergebnisse.");
+      setError("Fehler beim Hochladen der Ergebnisse: " + err.message);
+    } finally {
+      setIsUploading(false);
+      setUploadProgress({ current: 0, total: 0, currentDate: '' });
     }
   };
 
@@ -284,26 +435,25 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
           onChange={handleFileChange}
           className="mb-4 px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 w-full"
         />
-        {jsonData && (
+        {fullJsonData && (
           <div className="mb-4">
-            {availableDates.length > 1 && (
-              <div className="mb-4">
-                <label className="block mb-2 text-lg font-semibold text-orange-300">
-                  Ereignisdatum auswählen:
-                </label>
-                <select
-                  value={eventDate}
-                  onChange={handleDateChange}
-                  className="mb-4 px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 w-full"
-                >
-                  {availableDates.map(date => (
-                    <option key={date} value={date}>
-                      {date} ({fullJsonData[date].length} Spieler)
-                    </option>
-                  ))}
-                </select>
+            <div className="mb-4 p-4 bg-gray-800 rounded border border-gray-600">
+              <h3 className="text-lg font-semibold text-orange-300 mb-2">Gefundene Event-Daten:</h3>
+              <div className="space-y-2">
+                {availableDates.map(date => (
+                  <div key={date} className="flex justify-between text-sm">
+                    <span className="text-white">{date}</span>
+                    <span className="text-gray-400">{fullJsonData[date].length} Spieler</span>
+                  </div>
+                ))}
               </div>
-            )}
+              <div className="mt-3 pt-3 border-t border-gray-700">
+                <span className="text-orange-300 font-semibold">
+                  Insgesamt: {availableDates.length} Event-Tage
+                </span>
+              </div>
+            </div>
+            
             <label className="block mb-2 text-lg font-semibold text-orange-300">
               Veranstaltungsperiode auswählen:
             </label>
@@ -321,15 +471,49 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
             </select>
             <button
               onClick={handleUpload}
-              className="px-6 py-2 bg-orange-600 rounded text-white font-semibold hover:bg-orange-700 transition w-full"
+              disabled={isUploading}
+              className={`px-6 py-2 rounded text-white font-semibold transition w-full ${
+                isUploading 
+                  ? 'bg-gray-600 cursor-not-allowed' 
+                  : 'bg-orange-600 hover:bg-orange-700'
+              }`}
             >
-              Datei zuordnen & hochladen ({eventDate}, {jsonData.length} Spieler)
+              {isUploading 
+                ? `Lade hoch... (${uploadProgress.current}/${uploadProgress.total})` 
+                : `Alle Event-Daten hochladen (${availableDates.length} Tage)`
+              }
             </button>
+            
+            {/* Fortschrittsanzeige */}
+            {isUploading && (
+              <div className="mt-4 p-4 bg-gray-800 rounded border border-gray-600">
+                <div className="mb-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white">Fortschritt:</span>
+                    <span className="text-orange-300">
+                      {uploadProgress.current} von {uploadProgress.total} Event-Tagen
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded-full h-2 mt-1">
+                    <div 
+                      className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+                {uploadProgress.currentDate && (
+                  <div className="text-sm text-gray-300">
+                    Aktuell: <span className="text-orange-300">{uploadProgress.currentDate}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
         {error && <p className="text-red-400 mb-4">{error}</p>}
         {jsonData && (
           <div className="bg-gray-800 rounded p-4 text-sm overflow-x-auto max-h-96">
+            <h3 className="text-lg font-semibold text-orange-300 mb-2">Vorschau (erstes Datum: {eventDate}):</h3>
             <pre>{JSON.stringify(jsonData, null, 2)}</pre>
           </div>
         )}

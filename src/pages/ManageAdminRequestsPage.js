@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
-import { collection, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc } from "firebase/firestore";
 
 export default function ManageAdminRequestsPage({ t, setCurrentPage }) {
   const [adminRequests, setAdminRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState(null);
+  const [showRoleDialog, setShowRoleDialog] = useState(false);
+  const [currentRequest, setCurrentRequest] = useState(null);
+  const [selectedRole, setSelectedRole] = useState('contentAdmin');
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "adminRequests"), (snapshot) => {
@@ -23,84 +28,87 @@ export default function ManageAdminRequestsPage({ t, setCurrentPage }) {
   }, []);
 
   const handleApprove = async (requestId) => {
-    const request = requests.find(r => r.id === requestId);
+    const request = adminRequests.find(r => r.id === requestId);
     if (!request) return;
 
-    // Rolle-Auswahl Dialog
-    const roleOptions = {
-      'superAdmin': 'Super Admin - Alle Rechte',
-      'contentAdmin': 'Content Admin - Spieler, Truhen, Ränge verwalten',
-      'viewer': 'Viewer - Nur Einsicht in Daten'
-    };
+    setCurrentRequest(request);
+    setShowRoleDialog(true);
+  };
 
-    const selectedRole = window.prompt(
-      `Wähle eine Rolle für ${request.name}:\n\n` +
-      Object.entries(roleOptions).map(([key, desc], index) => `${index + 1}. ${desc}`).join('\n') +
-      '\n\nGib die Nummer ein (1-3):',
-      '2'
-    );
+  const confirmApproval = async () => {
+    if (!currentRequest) return;
 
-    if (!selectedRole) return; // Benutzer hat abgebrochen
+    setProcessingId(currentRequest.id);
+    setShowRoleDialog(false);
 
-    const roleMap = ['superAdmin', 'contentAdmin', 'viewer'];
-    const roleIndex = parseInt(selectedRole) - 1;
-    const finalRole = roleMap[roleIndex] || 'contentAdmin';
-
-    if (!window.confirm(`Administrator-Anfrage von ${request.name} mit Rolle "${roleOptions[finalRole]}" genehmigen?`)) {
-      return;
-    }
-
-    setProcessingId(requestId);
     try {
       // Erstelle den neuen Administrator
       await addDoc(collection(db, "admins"), {
-        name: request.name,
-        email: request.email,
-        clanRole: request.clanRole,
-        role: finalRole,
-        password: request.password,
+        name: currentRequest.name,
+        email: currentRequest.email,
+        clanRole: currentRequest.clanRole,
+        role: selectedRole,
+        password: currentRequest.password,
         createdBy: "Haupt-Administrator",
         createdDate: new Date().toISOString(),
         status: "active"
       });
 
       // Aktualisiere den Status der Anfrage
-      await updateDoc(doc(db, "adminRequests", requestId), {
+      await updateDoc(doc(db, "adminRequests", currentRequest.id), {
         status: "approved",
         approvedBy: "Haupt-Administrator",
         approvedDate: new Date().toISOString(),
-        assignedRole: finalRole
+        assignedRole: selectedRole
       });
       
-      alert(`Administrator-Anfrage wurde genehmigt! Rolle: ${roleOptions[finalRole]}`);
+      const roleNames = {
+        'superAdmin': 'Super Admin',
+        'contentAdmin': 'Content Admin',
+        'viewer': 'Viewer'
+      };
+      
+      alert(`Administrator-Anfrage wurde genehmigt! Rolle: ${roleNames[selectedRole]}`);
     } catch (err) {
       console.error("Error approving request:", err);
       alert("Fehler beim Genehmigen der Anfrage!");
     } finally {
       setProcessingId(null);
+      setCurrentRequest(null);
     }
   };
 
   const handleReject = async (requestId) => {
-    const reason = window.prompt("Grund für die Ablehnung (optional):");
-    if (reason === null) return; // Benutzer hat abgebrochen
+    const request = adminRequests.find(r => r.id === requestId);
+    if (!request) return;
 
-    setProcessingId(requestId);
+    setCurrentRequest(request);
+    setRejectionReason('');
+    setShowRejectDialog(true);
+  };
+
+  const confirmRejection = async () => {
+    if (!currentRequest) return;
+
+    setProcessingId(currentRequest.id);
+    setShowRejectDialog(false);
+
     try {
-      await updateDoc(doc(db, "adminRequests", requestId), {
+      await updateDoc(doc(db, "adminRequests", currentRequest.id), {
         status: "rejected",
         rejectedBy: "Haupt-Administrator",
         rejectedDate: new Date().toISOString(),
-        rejectionReason: reason
+        rejectionReason: rejectionReason || "Kein Grund angegeben"
       });
       
-      // Hier würdest du normalerweise eine E-Mail an den Benutzer senden
       alert("Administrator-Anfrage wurde abgelehnt.");
     } catch (err) {
       console.error("Error rejecting request:", err);
       alert("Fehler beim Ablehnen der Anfrage!");
     } finally {
       setProcessingId(null);
+      setCurrentRequest(null);
+      setRejectionReason('');
     }
   };
 
@@ -287,6 +295,131 @@ export default function ManageAdminRequestsPage({ t, setCurrentPage }) {
       >
         Zurück zum Admin-Panel
       </button>
+      
+      {/* Rolle-Auswahl Dialog */}
+      {showRoleDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 max-w-md w-full mx-4">
+            <h3 className="text-xl font-semibold mb-4 text-white">
+              Administratorrolle zuweisen
+            </h3>
+            <p className="text-gray-300 mb-4">
+              Wähle die Rolle für <strong>{currentRequest?.name}</strong>:
+            </p>
+            
+            <div className="space-y-3 mb-6">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="role"
+                  value="viewer"
+                  checked={selectedRole === 'viewer'}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                  className="mr-3"
+                />
+                <div>
+                  <span className="text-white font-medium">Viewer</span>
+                  <p className="text-gray-400 text-sm">Kann nur Daten einsehen</p>
+                </div>
+              </label>
+              
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="role"
+                  value="contentAdmin"
+                  checked={selectedRole === 'contentAdmin'}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                  className="mr-3"
+                />
+                <div>
+                  <span className="text-white font-medium">Content Admin</span>
+                  <p className="text-gray-400 text-sm">Kann Daten bearbeiten und verwalten</p>
+                </div>
+              </label>
+              
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="role"
+                  value="superAdmin"
+                  checked={selectedRole === 'superAdmin'}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                  className="mr-3"
+                />
+                <div>
+                  <span className="text-white font-medium">Super Admin</span>
+                  <p className="text-gray-400 text-sm">Vollzugriff auf alle Funktionen</p>
+                </div>
+              </label>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={confirmApproval}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded font-semibold transition"
+              >
+                Genehmigen
+              </button>
+              <button
+                onClick={() => {
+                  setShowRoleDialog(false);
+                  setCurrentRequest(null);
+                }}
+                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded font-semibold transition"
+              >
+                Abbrechen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Ablehnung Dialog */}
+      {showRejectDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 max-w-md w-full mx-4">
+            <h3 className="text-xl font-semibold mb-4 text-white">
+              Administrator-Anfrage ablehnen
+            </h3>
+            <p className="text-gray-300 mb-4">
+              Anfrage von <strong>{currentRequest?.name}</strong> ablehnen?
+            </p>
+            
+            <div className="mb-6">
+              <label className="block text-white font-medium mb-2">
+                Grund für die Ablehnung (optional):
+              </label>
+              <textarea
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                className="w-full bg-gray-700 border border-gray-600 rounded p-3 text-white resize-none"
+                rows="3"
+                placeholder="Grund für die Ablehnung..."
+              />
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={confirmRejection}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded font-semibold transition"
+              >
+                Ablehnen
+              </button>
+              <button
+                onClick={() => {
+                  setShowRejectDialog(false);
+                  setCurrentRequest(null);
+                  setRejectionReason('');
+                }}
+                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded font-semibold transition"
+              >
+                Abbrechen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       <footer className="mt-auto text-gray-500 text-sm">{t.copyright}</footer>
     </div>

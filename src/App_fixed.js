@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { translations } from './translations/translations';
 import { ROUTES } from './routes';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import HomePage from './pages/HomePage';
 import InfoPage from './pages/InfoPage';
 import NavigationPage from './pages/NavigationPage';
@@ -78,10 +78,9 @@ const exampleClanData = {
   }
 };
 
-function AppContent() {
+function App() {
   const [currentPage, setCurrentPage] = useState(ROUTES.HOME);
   const [language, setLanguage] = useState('de');
-  const { currentAdmin } = useAuth();
 
   const t = translations[language];
 
@@ -93,27 +92,7 @@ function AppContent() {
     t
   };
 
-  // Admin-Seiten die Login erfordern
-  const adminPages = [
-    ROUTES.ADMIN_PANEL,
-    ROUTES.MANAGE_PLAYERS,
-    ROUTES.MANAGE_RANKS,
-    ROUTES.MANAGE_TROOP_STRENGTHS,
-    ROUTES.MANAGE_NORMS,
-    ROUTES.MANAGE_CHEST_MAPPING,
-    ROUTES.MANAGE_ADMIN_REQUESTS,
-    ROUTES.CREATE_PERIOD,
-    ROUTES.UPLOAD_RESULTS,
-    ROUTES.CURRENT_TOTAL_EVENT_ADMIN,
-    ROUTES.EVENT_ARCHIVE_ADMIN
-  ];
-
   const renderPage = () => {
-    // Wenn es eine Admin-Seite ist und der User nicht angemeldet ist, leite zum Login weiter
-    if (adminPages.includes(currentPage) && !currentAdmin) {
-      return <AdminLoginPage {...commonProps} />;
-    }
-
     switch (currentPage) {
       case ROUTES.HOME:
         return <HomePage {...commonProps} />;
@@ -165,16 +144,10 @@ function AppContent() {
   };
 
   return (
-    <div className="App">
-      {renderPage()}
-    </div>
-  );
-}
-
-function App() {
-  return (
     <AuthProvider>
-      <AppContent />
+      <div className="App">
+        {renderPage()}
+      </div>
     </AuthProvider>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs } from "firebase/firestore";
 
 export default function AdminRegistrationPage({ t, setCurrentPage }) {
   const [formData, setFormData] = useState({
@@ -59,22 +59,40 @@ export default function AdminRegistrationPage({ t, setCurrentPage }) {
     }
 
     try {
-      // Speichere die Registrierungsanfrage in Firestore
-      await addDoc(collection(db, "adminRequests"), {
-        name: formData.name,
-        email: formData.email,
-        clanRole: formData.clanRole,
-        reason: formData.reason,
-        password: formData.password, // In der Praxis sollte das gehashed werden
-        status: "pending", // pending, approved, rejected
-        requestDate: new Date().toISOString(),
-        approvedBy: null,
-        approvedDate: null
-      });
-
-      // Hier würdest du normalerweise eine E-Mail an den Haupt-Admin senden
-      // Da wir kein E-Mail-System haben, zeigen wir nur eine Nachricht
-      setMessage("Deine Registrierungsanfrage wurde erfolgreich gesendet! Du erhältst eine E-Mail, sobald sie vom Haupt-Administrator bearbeitet wurde.");
+      // Prüfe, ob es bereits Admins gibt
+      const adminsSnapshot = await getDocs(collection(db, "admins"));
+      const isFirstAdmin = adminsSnapshot.empty;
+      
+      if (isFirstAdmin) {
+        // Erster Admin wird automatisch genehmigt
+        await addDoc(collection(db, "admins"), {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: 'superAdmin', // Erster Admin ist immer Super Admin
+          status: 'active',
+          createdAt: new Date().toISOString(),
+          requestedRole: 'superAdmin'
+        });
+        
+        setMessage("🎉 Herzlichen Glückwunsch! Du wurdest als erster Super Administrator registriert und kannst dich jetzt anmelden!");
+      } else {
+        // Normale Registrierungsanfrage
+        await addDoc(collection(db, "adminRequests"), {
+          name: formData.name,
+          email: formData.email,
+          clanRole: formData.clanRole,
+          reason: formData.reason,
+          password: formData.password,
+          status: "pending",
+          requestDate: new Date().toISOString(),
+          approvedBy: null,
+          approvedDate: null,
+          requestedRole: formData.requestedRole
+        });
+        
+        setMessage("Deine Registrierungsanfrage wurde erfolgreich gesendet! Du erhältst eine E-Mail, sobald sie vom Haupt-Administrator bearbeitet wurde.");
+      }
       
       // Formular zurücksetzen
       setFormData({

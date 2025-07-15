@@ -33,7 +33,7 @@ export default function AdminLoginPage({ t, setCurrentPage, setIsAdmin }) {
     const result = await login(formData.email, formData.password);
     
     if (result.success) {
-      setIsAdmin(true);
+      // setIsAdmin ist nicht mehr nötig, da AuthContext das übernimmt
       setCurrentPage(ROUTES.ADMIN_PANEL);
     } else {
       setError(result.error);
