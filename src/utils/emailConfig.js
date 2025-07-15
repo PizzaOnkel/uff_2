@@ -13,19 +13,19 @@
 
 export const EMAILJS_CONFIG = {
   // Deine EmailJS Service-ID (z.B. 'service_abc123')
-  SERVICE_ID: 'your_service_id',
+  SERVICE_ID: 'service_proy5xl',
   
   // Template für Kontaktformular
-  TEMPLATE_ID_CONTACT: 'contact_form_template',
+  TEMPLATE_ID_CONTACT: 'template_s5h2p0z',
   
   // Template für Admin-Registrierung
-  TEMPLATE_ID_ADMIN: 'admin_registration_template',
+  TEMPLATE_ID_ADMIN: 'template_22sj8u1',
   
-  // Dein EmailJS Public Key (User ID)
-  PUBLIC_KEY: 'your_public_key',
+  // Dein EmailJS Public Key (User ID) - NUR DEN PUBLIC KEY VERWENDEN!
+  PUBLIC_KEY: 'NLUS5nZ0apdX33KXW',
   
   // Deine E-Mail-Adresse für Benachrichtigungen
-  RECIPIENT_EMAIL: 'your_email@example.com'
+  RECIPIENT_EMAIL: 'Superdampf1965@gmail.com'
 };
 
 // Template-Parameter für Kontaktformular:
