@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ROUTES } from '../routes';
 import { db } from '../firebase';
-import { collection, getDocs, onSnapshot, addDoc } from 'firebase/firestore';
+import { collection, getDocs, onSnapshot, addDoc, deleteDoc, doc } from 'firebase/firestore';
 import { testEmailConfiguration } from '../utils/emailService';
 import { sendAdminRequestEmail } from '../utils/emailService';
 import { EMAILJS_CONFIG } from '../utils/emailConfig';
@@ -16,6 +16,12 @@ const AdminDebugPage = ({ setCurrentPage }) => {
   const [adminEmailTesting, setAdminEmailTesting] = useState(false);
   const [adminCreation, setAdminCreation] = useState(null);
   const [adminCreating, setAdminCreating] = useState(false);
+  const [adminDeletion, setAdminDeletion] = useState(null);
+  const [adminDeleting, setAdminDeleting] = useState(false);
+  const [adminRestore, setAdminRestore] = useState(null);
+  const [adminRestoring, setAdminRestoring] = useState(false);
+  const [liveMonitoring, setLiveMonitoring] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState(new Date());
 
   useEffect(() => {
     // Admin-Anfragen live überwachen
@@ -25,7 +31,13 @@ const AdminDebugPage = ({ setCurrentPage }) => {
         ...doc.data()
       }));
       setAdminRequests(requests);
+      setLastUpdate(new Date());
       setLoading(false);
+      
+      // Log für Live-Monitoring
+      if (liveMonitoring) {
+        console.log(`🔄 Live-Update: ${requests.length} Admin-Anfragen geladen um ${new Date().toLocaleTimeString()}`);
+      }
     });
 
     // Admins laden
@@ -112,6 +124,109 @@ const AdminDebugPage = ({ setCurrentPage }) => {
       });
     }
     setAdminCreating(false);
+  };
+
+  const handleDeleteEmergencyAdmin = async () => {
+    // Erst prüfen, ob der Emergency Admin existiert
+    const emergencyAdmin = admins.find(admin => admin.email === 'admin@clan.de');
+    
+    if (!emergencyAdmin) {
+      setAdminDeletion({ 
+        success: false, 
+        error: 'Emergency Admin nicht gefunden',
+        message: 'Admin mit admin@clan.de nicht in der Datenbank gefunden'
+      });
+      return;
+    }
+    
+    // Detaillierte Bestätigung
+    const confirmMessage = `VORSICHT! Sie sind dabei, folgenden Admin zu löschen:
+    
+📧 Email: ${emergencyAdmin.email}
+👤 Name: ${emergencyAdmin.name}
+🎯 Rolle: ${emergencyAdmin.role}
+🆔 ID: ${emergencyAdmin.id}
+📅 Erstellt: ${formatDate(emergencyAdmin.createdAt)}
+
+Sind Sie SICHER, dass Sie diesen Admin löschen möchten?`;
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+    
+    setAdminDeleting(true);
+    try {
+      // Lösche den spezifischen Admin
+      await deleteDoc(doc(db, 'admins', emergencyAdmin.id));
+      
+      setAdminDeletion({ 
+        success: true, 
+        message: `Emergency Admin erfolgreich gelöscht!`,
+        deletedAdmin: emergencyAdmin
+      });
+      
+      // Admins neu laden
+      const adminsSnapshot = await getDocs(collection(db, "admins"));
+      const adminsList = adminsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setAdmins(adminsList);
+      
+    } catch (error) {
+      setAdminDeletion({ 
+        success: false, 
+        error: error.message,
+        message: 'Fehler beim Löschen des Admins'
+      });
+    }
+    setAdminDeleting(false);
+  };
+
+  const handleRestoreAdmin = async () => {
+    if (!adminDeletion || !adminDeletion.deletedAdmin) {
+      alert('Kein gelöschter Admin zum Wiederherstellen gefunden!');
+      return;
+    }
+    
+    setAdminRestoring(true);
+    try {
+      const adminData = adminDeletion.deletedAdmin;
+      
+      // Admin wieder hinzufügen
+      const docRef = await addDoc(collection(db, 'admins'), {
+        name: adminData.name,
+        email: adminData.email,
+        password: adminData.password,
+        role: adminData.role,
+        status: adminData.status,
+        createdAt: adminData.createdAt,
+        requestedRole: adminData.requestedRole,
+        restoredAt: new Date().toISOString()
+      });
+      
+      setAdminRestore({ 
+        success: true, 
+        message: `Admin erfolgreich wiederhergestellt! Neue ID: ${docRef.id}`,
+        restoredAdmin: adminData
+      });
+      
+      // Admins neu laden
+      const adminsSnapshot = await getDocs(collection(db, "admins"));
+      const adminsList = adminsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setAdmins(adminsList);
+      
+    } catch (error) {
+      setAdminRestore({ 
+        success: false, 
+        error: error.message,
+        message: 'Fehler beim Wiederherstellen des Admins'
+      });
+    }
+    setAdminRestoring(false);
   };
 
   const formatDate = (dateString) => {
@@ -206,6 +321,40 @@ const AdminDebugPage = ({ setCurrentPage }) => {
             {adminCreating ? 'Erstelle Admin...' : 'Ersten Admin erstellen'}
           </button>
           
+          <button
+            onClick={handleDeleteEmergencyAdmin}
+            disabled={adminDeleting}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: adminDeleting ? '#9CA3AF' : '#DC2626',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: adminDeleting ? 'not-allowed' : 'pointer',
+              marginLeft: '10px'
+            }}
+          >
+            {adminDeleting ? 'Lösche Admin...' : 'Emergency Admin löschen'}
+          </button>
+          
+          {adminDeletion && adminDeletion.success && (
+            <button
+              onClick={handleRestoreAdmin}
+              disabled={adminRestoring}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: adminRestoring ? '#9CA3AF' : '#059669',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: adminRestoring ? 'not-allowed' : 'pointer',
+                marginLeft: '10px'
+              }}
+            >
+              {adminRestoring ? 'Stelle wieder her...' : 'Gelöschten Admin wiederherstellen'}
+            </button>
+          )}
+          
           {emailTest && (
             <div style={{ 
               marginTop: '10px', 
@@ -258,12 +407,88 @@ const AdminDebugPage = ({ setCurrentPage }) => {
               )}
             </div>
           )}
+          
+          {adminDeletion && (
+            <div style={{ 
+              marginTop: '10px', 
+              padding: '10px', 
+              backgroundColor: adminDeletion.success ? '#D1FAE5' : '#FEE2E2',
+              borderRadius: '5px',
+              color: adminDeletion.success ? '#065F46' : '#B91C1C'
+            }}>
+              {adminDeletion.success ? 
+                `✅ ${adminDeletion.message}` : 
+                `❌ Admin-Löschung fehlgeschlagen: ${adminDeletion.error}`
+              }
+              {adminDeletion.success && adminDeletion.deletedAdmin && (
+                <div style={{ marginTop: '10px', fontSize: '14px', fontFamily: 'monospace' }}>
+                  <strong>Gelöschter Admin:</strong><br />
+                  📧 Email: {adminDeletion.deletedAdmin.email}<br />
+                  🎯 Rolle: {adminDeletion.deletedAdmin.role}<br />
+                  🗑️ Gelöscht am: {new Date().toLocaleString('de-DE')}
+                </div>
+              )}
+            </div>
+          )}
+          
+          {adminRestore && (
+            <div style={{ 
+              marginTop: '10px', 
+              padding: '10px', 
+              backgroundColor: adminRestore.success ? '#D1FAE5' : '#FEE2E2',
+              borderRadius: '5px',
+              color: adminRestore.success ? '#065F46' : '#B91C1C'
+            }}>
+              {adminRestore.success ? 
+                `✅ ${adminRestore.message}` : 
+                `❌ Admin-Wiederherstellung fehlgeschlagen: ${adminRestore.error}`
+              }
+            </div>
+          )}
         </div>
       </div>
 
       {/* Admin-Anfragen */}
       <div style={{ marginBottom: '30px', padding: '20px', backgroundColor: '#f3f4f6', borderRadius: '8px' }}>
-        <h2>📋 Admin-Anfragen ({adminRequests.length})</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+          <h2>📋 Admin-Anfragen ({adminRequests.length})</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ 
+              fontSize: '12px', 
+              color: liveMonitoring ? '#059669' : '#DC2626',
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '5px' 
+            }}>
+              <span style={{ 
+                width: '8px', 
+                height: '8px', 
+                backgroundColor: liveMonitoring ? '#059669' : '#DC2626',
+                borderRadius: '50%',
+                display: 'inline-block'
+              }}></span>
+              {liveMonitoring ? 'Live-Monitoring aktiv' : 'Live-Monitoring pausiert'}
+            </span>
+            <button
+              onClick={() => setLiveMonitoring(!liveMonitoring)}
+              style={{
+                padding: '5px 10px',
+                fontSize: '12px',
+                backgroundColor: liveMonitoring ? '#DC2626' : '#059669',
+                color: 'white',
+                border: 'none',
+                borderRadius: '3px',
+                cursor: 'pointer'
+              }}
+            >
+              {liveMonitoring ? 'Pausieren' : 'Aktivieren'}
+            </button>
+          </div>
+        </div>
+        <p style={{ fontSize: '12px', color: '#6B7280', marginBottom: '15px' }}>
+          Letzte Aktualisierung: {lastUpdate.toLocaleTimeString()} 
+          {liveMonitoring && ' • Aktualisiert sich automatisch bei neuen Anfragen'}
+        </p>
         {loading ? (
           <p>Lade Anfragen...</p>
         ) : adminRequests.length === 0 ? (
