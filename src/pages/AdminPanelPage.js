@@ -279,6 +279,19 @@ export default function AdminPanelPage({ t, setCurrentPage }) {
           <span className="text-xl font-semibold text-white text-center mb-1">E-Mail-Test</span>
           <span className="text-sm text-gray-400 text-center">Teste die E-Mail-Konfiguration</span>
         </button>
+        {/* Admin-Debug-Seite für alle Admins */}
+        <button
+          onClick={() => setCurrentPage(ROUTES.ADMIN_DEBUG)}
+          className="flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border bg-red-900/30 hover:bg-red-800/40 border-red-800"
+        >
+          <svg className="w-12 h-12 text-red-400 mb-2" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span className="text-xl font-semibold text-white text-center mb-1">Admin Debug</span>
+          <span className="text-sm text-gray-400 text-center">Admin-Requests & E-Mail-Debug</span>
+        </button>
       </div>
       {/* Dialog zur Auswahl und Löschung */}
       {showDeleteDialog && (

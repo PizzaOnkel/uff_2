@@ -22,6 +22,8 @@ import ComingSoonPage from './pages/ComingSoonPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import CurrentTotalEventPage from './pages/CurrentTotalEventPage';
 import TopTen from './pages/TopTen';
+import TopTenCategory from './pages/TopTenCategory';
+import AdminDebugPage from './pages/AdminDebugPage';
 
 // Beispiel-Daten für die Event-Seite
 const exampleClanData = {
@@ -153,6 +155,8 @@ function AppContent() {
         return <ContactFormPage t={t} setCurrentPage={setCurrentPage} />;
       case ROUTES.EMAIL_TEST:
         return <EmailTestPage t={t} setCurrentPage={setCurrentPage} />;
+      case ROUTES.ADMIN_DEBUG:
+        return <AdminDebugPage t={t} setCurrentPage={setCurrentPage} />;
       case ROUTES.CURRENT_TOTAL_EVENT:
         return <CurrentTotalEventPage {...commonProps} clanData={exampleClanData} />;
       case ROUTES.STANDARDS_EVALUATION:
@@ -161,6 +165,36 @@ function AppContent() {
         return <ComingSoonPage {...commonProps} backPage={ROUTES.NAVIGATION} title={t.eventArchiveTitle} />;
       case ROUTES.TOP_TEN:
         return <TopTen {...commonProps} />;
+      case ROUTES.TOP_TEN_ARENA:
+        return <TopTenCategory {...commonProps} category="Arena Total" categoryInfo={{ label: 'Arena Chests', icon: '⚔️', color: '#7C3AED' }} />;
+      case ROUTES.TOP_TEN_COMMON:
+        return <TopTenCategory {...commonProps} category="Common Total" categoryInfo={{ label: 'Common Chests', icon: '📦', color: '#10B981' }} />;
+      case ROUTES.TOP_TEN_RARE:
+        return <TopTenCategory {...commonProps} category="Rare Total" categoryInfo={{ label: 'Rare Chests', icon: '💎', color: '#3B82F6' }} />;
+      case ROUTES.TOP_TEN_EPIC:
+        return <TopTenCategory {...commonProps} category="Epic Total" categoryInfo={{ label: 'Epic Chests', icon: '👑', color: '#8B5CF6' }} />;
+      case ROUTES.TOP_TEN_TARTAROS:
+        return <TopTenCategory {...commonProps} category="Tartaros Total" categoryInfo={{ label: 'Tartaros Chests', icon: '🔥', color: '#DC2626' }} />;
+      case ROUTES.TOP_TEN_ELVEN:
+        return <TopTenCategory {...commonProps} category="Elven Total" categoryInfo={{ label: 'Elven Chests', icon: '🧝', color: '#059669' }} />;
+      case ROUTES.TOP_TEN_CURSED:
+        return <TopTenCategory {...commonProps} category="Cursed Total" categoryInfo={{ label: 'Cursed Chests', icon: '🌙', color: '#6B46C1' }} />;
+      case ROUTES.TOP_TEN_BANK:
+        return <TopTenCategory {...commonProps} category="Bank Total" categoryInfo={{ label: 'Bank Chests', icon: '💰', color: '#D97706' }} />;
+      case ROUTES.TOP_TEN_RUNIC:
+        return <TopTenCategory {...commonProps} category="Runic Total" categoryInfo={{ label: 'Runic Chests', icon: '🔮', color: '#F97316' }} />;
+      case ROUTES.TOP_TEN_HEROIC:
+        return <TopTenCategory {...commonProps} category="Heroic Total" categoryInfo={{ label: 'Heroic Chests', icon: '🏆', color: '#EF4444' }} />;
+      case ROUTES.TOP_TEN_VOTA:
+        return <TopTenCategory {...commonProps} category="VotA Total" categoryInfo={{ label: 'Vault of the Ancients', icon: '🏛️', color: '#8B5CF6' }} />;
+      case ROUTES.TOP_TEN_ROTA:
+        return <TopTenCategory {...commonProps} category="ROTA Total" categoryInfo={{ label: 'Rise of the Ancients', icon: '🌟', color: '#EC4899' }} />;
+      case ROUTES.TOP_TEN_EAS:
+        return <TopTenCategory {...commonProps} category="EAs Total" categoryInfo={{ label: 'Epic Ancient Squad', icon: '⚡', color: '#F59E0B' }} />;
+      case ROUTES.TOP_TEN_UNION:
+        return <TopTenCategory {...commonProps} category="Union Total" categoryInfo={{ label: 'Union Chests', icon: '🤝', color: '#6366F1' }} />;
+      case ROUTES.TOP_TEN_JORMUNGANDR:
+        return <TopTenCategory {...commonProps} category="Jormungandr Total" categoryInfo={{ label: 'Jormungandr Chests', icon: '🐉', color: '#059669' }} />;
       case ROUTES.HALL_OF_CHAMPIONS:
         return <ComingSoonPage {...commonProps} backPage={ROUTES.NAVIGATION} title={t.hallOfChampionsTitle} />;
       case ROUTES.CURRENT_TOTAL_EVENT_ADMIN:

@@ -38,4 +38,5 @@ export const ROUTES = {
   CURRENT_TOTAL_EVENT_ADMIN: 'currentTotalEventAdmin',
   EVENT_ARCHIVE_ADMIN: 'eventArchiveAdmin',
   EMAIL_TEST: 'emailTest',
+  ADMIN_DEBUG: 'adminDebug',
 };
