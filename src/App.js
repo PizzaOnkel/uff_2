@@ -21,6 +21,7 @@ import EmailTestPage from './pages/EmailTestPage';
 import ComingSoonPage from './pages/ComingSoonPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import CurrentTotalEventPage from './pages/CurrentTotalEventPage';
+import TopTen from './pages/TopTen';
 
 // Beispiel-Daten für die Event-Seite
 const exampleClanData = {
@@ -159,7 +160,7 @@ function AppContent() {
       case ROUTES.EVENT_ARCHIVE:
         return <ComingSoonPage {...commonProps} backPage={ROUTES.NAVIGATION} title={t.eventArchiveTitle} />;
       case ROUTES.TOP_TEN:
-        return <ComingSoonPage {...commonProps} backPage={ROUTES.NAVIGATION} title={t.topTenTitle} />;
+        return <TopTen {...commonProps} />;
       case ROUTES.HALL_OF_CHAMPIONS:
         return <ComingSoonPage {...commonProps} backPage={ROUTES.NAVIGATION} title={t.hallOfChampionsTitle} />;
       case ROUTES.CURRENT_TOTAL_EVENT_ADMIN:
