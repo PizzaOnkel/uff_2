@@ -54,12 +54,12 @@ export default function ManageChestMappingPage({ t, setCurrentPage }) {
     
     // Nicht level-basierte Chests (benötigen spezifische Namen)
     "Bank Chests": [
-      "Uncommon Chest of Wealth",
-      "Rare Chest of Wealth", 
-      "Epic Chest of Wealth",
-      "Legendary Chest of Wealth",
-      "Magic Chest of Wealth",
-      "Chest of Wealth"
+      "Wooden Chest",
+      "Bronze Chest", 
+      "Silver Chest",
+      "Golden Chest",
+      "Precious Chest",
+      "Magic Chest"
     ],
     "Quick March Chest": ["Quick March Chest"],
     "Ancients Chest": ["Ancients Chest"],
@@ -85,7 +85,15 @@ export default function ManageChestMappingPage({ t, setCurrentPage }) {
         id: doc.id,
         ...doc.data()
       }));
-      setChestMappings(list.sort((a, b) => a.chestName.localeCompare(b.chestName)));
+      
+      // Sortiere nach Timestamp (neueste zuerst)
+      const sortedList = list.sort((a, b) => {
+        const timeA = a.timestamp ? new Date(a.timestamp) : new Date(0);
+        const timeB = b.timestamp ? new Date(b.timestamp) : new Date(0);
+        return timeB - timeA; // Neueste zuerst
+      });
+      
+      setChestMappings(sortedList);
     });
     return () => unsub();
   }, []);
@@ -353,13 +361,6 @@ export default function ManageChestMappingPage({ t, setCurrentPage }) {
             className="px-6 py-2 bg-purple-600 rounded text-white font-semibold hover:bg-purple-700 transition"
           >
             Hinzufügen
-          </button>
-          <button
-            type="button"
-            onClick={handleInitializeDefaultMappings}
-            className="px-6 py-2 bg-green-600 rounded text-white font-semibold hover:bg-green-700 transition"
-          >
-            Standard-Zuordnungen erstellen
           </button>
         </div>
       </form>
