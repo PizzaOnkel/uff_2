@@ -6,7 +6,7 @@ import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDocs } fr
 export default function ManageChestMappingPage({ t, setCurrentPage }) {
   const [chestMappings, setChestMappings] = useState([]);
   const [newMapping, setNewMapping] = useState({
-    chestName: "",
+    chestName: "default",
     category: "",
     levelStart: "",
     levelEnd: "",
@@ -16,41 +16,34 @@ export default function ManageChestMappingPage({ t, setCurrentPage }) {
   const [editingMapping, setEditingMapping] = useState({});
 
   const categories = [
-    "Arena Chests",
-    "Common Chests", 
-    "Rare Chests",
-    "Epic Chests",
-    "Chests of Tartaros",
-    "Elven Chests",
-    "Cursed Chests",
-    "Bank Chests",
-    "Runic Chests",
-    "Heroic Chests",
-    "Vault of the Ancients",
-    "Quick March Chest",
-    "Ancients Chest",
-    "ROTA Total",
-    "Epic Ancient squad",
-    "EAs Total",
-    "Union Chest",
-    "Union Total",
-    "Jormungandr Chests",
-    "Jormungandr Total"
+    "Arena", "Common", "Rare", "Epic", "Tartaros",
+    "Elven", "Cursed", "Bank", "Runic", "Heroic",
+    "Vota", "Quick March", "Ancients", "ROTA", "Epic Ancient",
+    "Union", "Jormungandr"
   ];
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "chestMappings"), snapshot => {
+      const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
+        .sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+      setChestMappings(list);
+    });
+    return unsub;
+  }, []);
 
   // Chest-Namen basierend auf der echten JSON-Analyse
   const chestNames = {
     // Level-basierte Chests (verwenden "default" als Name)
     "Arena Chests": ["default"],
-    "Common Chests": ["default", "Barbarian Chest", "Common Chest"],
-    "Rare Chests": ["default", "Orc Chest", "Rare Chest"],
-    "Epic Chests": ["default", "Undead Chest", "Epic Chest"],
-    "Chests of Tartaros": ["default", "Demon Chest", "Tartaros Chest"],
-    "Elven Chests": ["default", "Elven Citadel Chest", "Elf Chest"],
-    "Cursed Chests": ["default", "Cursed Chest"],
-    "Runic Chests": ["default", "Runic Chest"],
-    "Heroic Chests": ["default", "Heroic Chest"],
-    "Vault of the Ancients": ["default", "Vault of the Ancients Chest", "Ancient Chest"],
+    "Common Chests": ["default"],
+    "Rare Chests": ["default"],
+    "Epic Chests": ["default"],
+    "Chests of Tartaros": ["default"],
+    "Elven Chests": ["default"],
+    "Cursed Chests": ["default"],
+    "Runic Chests": ["default"],
+    "Heroic Chests": ["default"],
+    "Vault of the Ancients": ["default"],
     
     // Nicht level-basierte Chests (benötigen spezifische Namen)
     "Bank Chests": [
@@ -130,14 +123,13 @@ export default function ManageChestMappingPage({ t, setCurrentPage }) {
     }
   };
 
-  const handleEdit = (mapping) => {
-    setEditingId(mapping.id);
+  const handleEdit = (m) => {
+    setEditingId(m.id);
     setEditingMapping({
-      chestName: mapping.chestName,
-      category: mapping.category,
-      levelStart: mapping.levelStart.toString(),
-      levelEnd: mapping.levelEnd.toString(),
-      points: mapping.points.toString()
+      chestName: m.chestName, category: m.category,
+      levelStart: m.levelStart.toString(),
+      levelEnd: m.levelEnd.toString(),
+      points: m.points.toString()
     });
   };
 
@@ -181,76 +173,61 @@ export default function ManageChestMappingPage({ t, setCurrentPage }) {
 
     const defaultMappings = [
       // Arena
-      { chestName: "Arena Chest", category: "Arena", levelStart: 0, levelEnd: 0, points: 0 },
-      { chestName: "Olympus Chest", category: "Arena", levelStart: 0, levelEnd: 0, points: 0 },
-      
-      // Crypts - Common
-      { chestName: "Sand Chest", category: "Crypts", levelStart: 5, levelEnd: 5, points: 2 },
-      { chestName: "Sand Chest", category: "Crypts", levelStart: 10, levelEnd: 10, points: 10 },
-      { chestName: "Sand Chest", category: "Crypts", levelStart: 15, levelEnd: 15, points: 20 },
-      { chestName: "Sand Chest", category: "Crypts", levelStart: 20, levelEnd: 20, points: 64 },
-      { chestName: "Sand Chest", category: "Crypts", levelStart: 25, levelEnd: 25, points: 256 },
-      
-      { chestName: "Bone Chest", category: "Crypts", levelStart: 5, levelEnd: 5, points: 2 },
-      { chestName: "Bone Chest", category: "Crypts", levelStart: 10, levelEnd: 10, points: 10 },
-      { chestName: "Bone Chest", category: "Crypts", levelStart: 15, levelEnd: 15, points: 20 },
-      { chestName: "Bone Chest", category: "Crypts", levelStart: 20, levelEnd: 20, points: 64 },
-      { chestName: "Bone Chest", category: "Crypts", levelStart: 25, levelEnd: 25, points: 256 },
-      
-      { chestName: "Stone Chest", category: "Crypts", levelStart: 5, levelEnd: 5, points: 2 },
-      { chestName: "Stone Chest", category: "Crypts", levelStart: 10, levelEnd: 10, points: 10 },
-      { chestName: "Stone Chest", category: "Crypts", levelStart: 15, levelEnd: 15, points: 20 },
-      { chestName: "Stone Chest", category: "Crypts", levelStart: 20, levelEnd: 20, points: 64 },
-      { chestName: "Stone Chest", category: "Crypts", levelStart: 25, levelEnd: 25, points: 256 },
-      
-      // Crypts - Rare
-      { chestName: "Iron Chest", category: "Crypts", levelStart: 10, levelEnd: 10, points: 16 },
-      { chestName: "Iron Chest", category: "Crypts", levelStart: 15, levelEnd: 15, points: 40 },
-      { chestName: "Iron Chest", category: "Crypts", levelStart: 20, levelEnd: 20, points: 128 },
-      { chestName: "Iron Chest", category: "Crypts", levelStart: 25, levelEnd: 25, points: 350 },
-      { chestName: "Iron Chest", category: "Crypts", levelStart: 30, levelEnd: 30, points: 1280 },
-      
-      // Citadel
-      { chestName: "Citadel Chest", category: "Citadel", levelStart: 10, levelEnd: 10, points: 20 },
-      { chestName: "Citadel Chest", category: "Citadel", levelStart: 15, levelEnd: 15, points: 40 },
-      { chestName: "Citadel Chest", category: "Citadel", levelStart: 20, levelEnd: 20, points: 80 },
-      { chestName: "Citadel Chest", category: "Citadel", levelStart: 25, levelEnd: 25, points: 170 },
-      { chestName: "Citadel Chest", category: "Citadel", levelStart: 30, levelEnd: 30, points: 350 },
-      
-      { chestName: "Cursed Citadel Chest", category: "Citadel", levelStart: 20, levelEnd: 20, points: 80 },
-      { chestName: "Cursed Citadel Chest", category: "Citadel", levelStart: 25, levelEnd: 25, points: 170 },
-      
-      // Heroic Monster
-      { chestName: "Heroic Chest", category: "Heroic Monster", levelStart: 16, levelEnd: 19, points: 40 },
-      { chestName: "Heroic Chest", category: "Heroic Monster", levelStart: 20, levelEnd: 24, points: 75 },
-      { chestName: "Heroic Chest", category: "Heroic Monster", levelStart: 25, levelEnd: 29, points: 150 },
-      { chestName: "Heroic Chest", category: "Heroic Monster", levelStart: 30, levelEnd: 34, points: 250 },
-      { chestName: "Heroic Chest", category: "Heroic Monster", levelStart: 35, levelEnd: 39, points: 350 },
-      { chestName: "Heroic Chest", category: "Heroic Monster", levelStart: 40, levelEnd: 45, points: 500 },
-      
-      // Epic Monster
-      { chestName: "Doomsday Chest", category: "Epic Monster", levelStart: 0, levelEnd: 0, points: 8000 },
-      { chestName: "Arachne Chest", category: "Epic Monster", levelStart: 0, levelEnd: 0, points: 8000 },
-      { chestName: "Armageddon Chest", category: "Epic Monster", levelStart: 0, levelEnd: 0, points: 8000 },
-      { chestName: "Fenrir Chest", category: "Epic Monster", levelStart: 0, levelEnd: 0, points: 2000 },
-      { chestName: "Jormungandr's Chest", category: "Epic Monster", levelStart: 0, levelEnd: 0, points: 2000 },
-      { chestName: "Ancient Chest", category: "Epic Monster", levelStart: 0, levelEnd: 0, points: 0 },
-      
+      { chestName: "default", category: "arena", levelStart: 0, levelEnd: 0, points: 0 },
+      // Common
+      { chestName: "default", category: "common", levelStart: 5, levelEnd: 5, points: 2 },
+      { chestName: "default", category: "common", levelStart: 10, levelEnd: 10, points: 10 },
+      { chestName: "default", category: "common", levelStart: 15, levelEnd: 15, points: 20 },
+      { chestName: "default", category: "common", levelStart: 20, levelEnd: 20, points: 64 },
+      { chestName: "default", category: "common", levelStart: 25, levelEnd: 25, points: 256 },
+      // Rare
+      { chestName: "default", category: "rare", levelStart: 10, levelEnd: 10, points: 16 },
+      { chestName: "default", category: "rare", levelStart: 15, levelEnd: 15, points: 40 },
+      { chestName: "default", category: "rare", levelStart: 20, levelEnd: 20, points: 128 },
+      { chestName: "default", category: "rare", levelStart: 25, levelEnd: 25, points: 350 },
+      { chestName: "default", category: "rare", levelStart: 30, levelEnd: 30, points: 1280 },
+      // Epic
+      { chestName: "default", category: "epic", levelStart: 15, levelEnd: 15, points: 40 },
+      { chestName: "default", category: "epic", levelStart: 20, levelEnd: 20, points: 75 },
+      { chestName: "default", category: "epic", levelStart: 25, levelEnd: 25, points: 150 },
+      { chestName: "default", category: "epic", levelStart: 30, levelEnd: 30, points: 250 },
+      { chestName: "default", category: "epic", levelStart: 35, levelEnd: 35, points: 350 },
+      // Tartaros
+      { chestName: "default", category: "tartaros", levelStart: 15, levelEnd: 15, points: 40 },
+      { chestName: "default", category: "tartaros", levelStart: 20, levelEnd: 20, points: 75 },
+      { chestName: "default", category: "tartaros", levelStart: 25, levelEnd: 25, points: 150 },
+      { chestName: "default", category: "tartaros", levelStart: 30, levelEnd: 30, points: 250 },
+      { chestName: "default", category: "tartaros", levelStart: 35, levelEnd: 35, points: 350 },
+      // Elven
+      { chestName: "default", category: "elven", levelStart: 10, levelEnd: 10, points: 20 },
+      { chestName: "default", category: "elven", levelStart: 15, levelEnd: 15, points: 40 },
+      { chestName: "default", category: "elven", levelStart: 20, levelEnd: 20, points: 80 },
+      { chestName: "default", category: "elven", levelStart: 25, levelEnd: 25, points: 170 },
+      { chestName: "default", category: "elven", levelStart: 30, levelEnd: 30, points: 350 },
+      // Cursed
+      { chestName: "default", category: "cursed", levelStart: 20, levelEnd: 20, points: 80 },
+      { chestName: "default", category: "cursed", levelStart: 25, levelEnd: 25, points: 170 },
+      // Heroic
+      { chestName: "default", category: "heroic", levelStart: 16, levelEnd: 19, points: 40 },
+      { chestName: "default", category: "heroic", levelStart: 20, levelEnd: 24, points: 75 },
+      { chestName: "default", category: "heroic", levelStart: 25, levelEnd: 29, points: 150 },
+      { chestName: "default", category: "heroic", levelStart: 30, levelEnd: 34, points: 250 },
+      { chestName: "default", category: "heroic", levelStart: 35, levelEnd: 39, points: 350 },
+      { chestName: "default", category: "heroic", levelStart: 40, levelEnd: 45, points: 500 },
       // Bank Chests
-      { chestName: "Wooden Chest", category: "Bank Chests", levelStart: 0, levelEnd: 0, points: 50 },
-      { chestName: "Bronze Chest", category: "Bank Chests", levelStart: 0, levelEnd: 0, points: 100 },
-      { chestName: "Silver Chest", category: "Bank Chests", levelStart: 0, levelEnd: 0, points: 200 },
-      { chestName: "Bank Chest", category: "Bank Chests", levelStart: 0, levelEnd: 0, points: 500 },
-      { chestName: "Precious Chest", category: "Bank Chests", levelStart: 0, levelEnd: 0, points: 1000 },
-      { chestName: "Magic Chest", category: "Bank Chests", levelStart: 0, levelEnd: 0, points: 2500 },
-      
+      { chestName: "wooden chest", category: "bank", levelStart: 0, levelEnd: 0, points: 50 },
+      { chestName: "bronze chest", category: "bank", levelStart: 0, levelEnd: 0, points: 100 },
+      { chestName: "silver chest", category: "bank", levelStart: 0, levelEnd: 0, points: 200 },
+      { chestName: "bank chest", category: "bank", levelStart: 0, levelEnd: 0, points: 500 },
+      { chestName: "precious chest", category: "bank", levelStart: 0, levelEnd: 0, points: 1000 },
+      { chestName: "magic chest", category: "bank", levelStart: 0, levelEnd: 0, points: 2500 },
       // Andere Kategorien mit 0 Punkten
-      { chestName: "Runic Chest", category: "Runic Squads", levelStart: 0, levelEnd: 0, points: 0 },
-      { chestName: "Vault of the Ancients", category: "Vault of the Ancients", levelStart: 0, levelEnd: 0, points: 0 },
-      { chestName: "Quick March Chest", category: "Rise of the Ancients", levelStart: 0, levelEnd: 0, points: 0 },
-      { chestName: "Ancients' Chest", category: "Rise of the Ancients", levelStart: 0, levelEnd: 0, points: 0 },
-      { chestName: "Epic Ancient squad Chest", category: "Epic Ancient squad", levelStart: 0, levelEnd: 0, points: 0 },
-      { chestName: "Union Chest", category: "Union", levelStart: 0, levelEnd: 0, points: 0 },
+      { chestName: "runic chest", category: "runic", levelStart: 0, levelEnd: 0, points: 0 },
+      { chestName: "vault of the ancients", category: "vota", levelStart: 0, levelEnd: 0, points: 0 },
+      { chestName: "quick march chest", category: "rota", levelStart: 0, levelEnd: 0, points: 0 },
+      { chestName: "ancients chest", category: "rota", levelStart: 0, levelEnd: 0, points: 0 },
+      { chestName: "epic ancient squad chest", category: "epic ancient", levelStart: 0, levelEnd: 0, points: 0 },
+      { chestName: "union chest", category: "union", levelStart: 0, levelEnd: 0, points: 0 },
     ];
 
     try {

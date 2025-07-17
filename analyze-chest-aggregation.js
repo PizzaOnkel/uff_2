@@ -59,74 +59,89 @@ function processChest(playerData, chest) {
   let typeRaw = (chest.Type || "").toString().toLowerCase().trim();
   const chestNameLower = (chest.Name || "").toString().toLowerCase().trim();
   const sourceLower = (chest.Source || "").toString().toLowerCase().trim();
+
+  // IGNORIERE Truhen vom Typ/Source "Clash for the Throne tournament" (robust, egal wie geschrieben)
+  const ignoreStrings = [
+    "clash for the throne tournament",
+    "clash for the throne",
+    "clash tournament",
+    "clash for throne",
+    "clash for the throne event"
+  ];
+  const ignoreType = ignoreStrings.some(str => typeRaw.includes(str));
+  const ignoreSource = ignoreStrings.some(str => sourceLower.includes(str));
+  if (ignoreType || ignoreSource) {
+    return;
+  }
+
   // NEU: Kategorie aus Type extrahieren (z. B. 'common chests', 'common crypt', 'common chest' -> 'common')
   function normalizeCategory(typeStr, chestNameStr = "") {
-  typeStr = typeStr.toLowerCase().trim();
-  chestNameStr = chestNameStr.toLowerCase().trim();
-  // Common
-  if (
-    typeStr.includes("common") ||
-    chestNameStr.includes("common") ||
-    typeStr.includes("crypt") ||
-    chestNameStr.includes("crypt") ||
-    typeStr.includes("stone") ||
-    chestNameStr.includes("stone") ||
-    typeStr.includes("wooden") ||
-    chestNameStr.includes("wooden")
-  ) return "common";
-  // Rare
-  if (
-    typeStr.includes("rare") ||
-    chestNameStr.includes("rare") ||
-    typeStr.includes("elegant") ||
-    chestNameStr.includes("elegant") ||
-    typeStr.includes("cobalt") ||
-    chestNameStr.includes("cobalt") ||
-    typeStr.includes("dragon") ||
-    chestNameStr.includes("dragon")
-  ) return "rare";
-  // Epic
-  if (
-    typeStr.includes("epic") ||
-    chestNameStr.includes("epic") ||
-    typeStr.includes("infernal") ||
-    chestNameStr.includes("infernal") ||
-    typeStr.includes("scorpion") ||
-    chestNameStr.includes("scorpion") ||
-    typeStr.includes("barbarian") ||
-    chestNameStr.includes("barbarian") ||
-    typeStr.includes("orc") ||
-    chestNameStr.includes("orc") ||
-    typeStr.includes("bone") ||
-    chestNameStr.includes("bone") ||
-    typeStr.includes("sand") ||
-    chestNameStr.includes("sand")
-  ) return "epic";
-  // Tartaros
-  if (typeStr.includes("tartaros") || chestNameStr.includes("tartaros")) return "tartaros";
-  // Elven
-  if (typeStr.includes("elven") || chestNameStr.includes("elven")) return "elven";
-  // Cursed
-  if (typeStr.includes("cursed") || chestNameStr.includes("cursed")) return "cursed";
-  // Runic
-  if (typeStr.includes("runic") || chestNameStr.includes("runic")) return "runic";
-  // Heroic
-  if (typeStr.includes("heroic") || chestNameStr.includes("heroic")) return "heroic";
-  // Vota
-  if (typeStr.includes("vota") || chestNameStr.includes("vota")) return "vota";
-  // Bank
-  if (typeStr.includes("bank") || chestNameStr.includes("bank")) return "bank";
-  // Citadel
-  if (typeStr.includes("citadel") || chestNameStr.includes("citadel")) return "citadel";
-  // Rise of the Ancients
-  if (typeStr.includes("rise of the ancients") || chestNameStr.includes("rise of the ancients")) return "rota";
-  // Epic Ancient
-  if (typeStr.includes("epic ancient") || chestNameStr.includes("epic ancient")) return "epic ancient";
-  // Union
-  if (typeStr.includes("union") || chestNameStr.includes("union")) return "union";
-  // Jormungandr
-  if (typeStr.includes("jormungandr") || chestNameStr.includes("jormungandr")) return "jormungandr";
-  return typeStr;
+    typeStr = typeStr.toLowerCase().trim();
+    chestNameStr = chestNameStr.toLowerCase().trim();
+    // Common
+    if (
+      typeStr.includes("common") ||
+      chestNameStr.includes("common") ||
+      typeStr.includes("crypt") ||
+      chestNameStr.includes("crypt") ||
+      typeStr.includes("stone") ||
+      chestNameStr.includes("stone") ||
+      typeStr.includes("wooden") ||
+      chestNameStr.includes("wooden")
+    ) return "common";
+    // Rare
+    if (
+      typeStr.includes("rare") ||
+      chestNameStr.includes("rare") ||
+      typeStr.includes("elegant") ||
+      chestNameStr.includes("elegant") ||
+      typeStr.includes("cobalt") ||
+      chestNameStr.includes("cobalt") ||
+      typeStr.includes("dragon") ||
+      chestNameStr.includes("dragon")
+    ) return "rare";
+    // Epic
+    if (
+      typeStr.includes("epic") ||
+      chestNameStr.includes("epic") ||
+      typeStr.includes("infernal") ||
+      chestNameStr.includes("infernal") ||
+      typeStr.includes("scorpion") ||
+      chestNameStr.includes("scorpion") ||
+      typeStr.includes("barbarian") ||
+      chestNameStr.includes("barbarian") ||
+      typeStr.includes("orc") ||
+      chestNameStr.includes("orc") ||
+      typeStr.includes("bone") ||
+      chestNameStr.includes("bone") ||
+      typeStr.includes("sand") ||
+      chestNameStr.includes("sand")
+    ) return "epic";
+    // Tartaros
+    if (typeStr.includes("tartaros") || chestNameStr.includes("tartaros")) return "tartaros";
+    // Elven
+    if (typeStr.includes("elven") || chestNameStr.includes("elven")) return "elven";
+    // Cursed
+    if (typeStr.includes("cursed") || chestNameStr.includes("cursed")) return "cursed";
+    // Runic
+    if (typeStr.includes("runic") || chestNameStr.includes("runic")) return "runic";
+    // Heroic
+    if (typeStr.includes("heroic") || chestNameStr.includes("heroic")) return "heroic";
+    // Vota
+    if (typeStr.includes("vota") || chestNameStr.includes("vota")) return "vota";
+    // Bank
+    if (typeStr.includes("bank") || chestNameStr.includes("bank")) return "bank";
+    // Citadel
+    if (typeStr.includes("citadel") || chestNameStr.includes("citadel")) return "citadel";
+    // Rise of the Ancients
+    if (typeStr.includes("rise of the ancients") || chestNameStr.includes("rise of the ancients")) return "rota";
+    // Epic Ancient
+    if (typeStr.includes("epic ancient") || chestNameStr.includes("epic ancient")) return "epic ancient";
+    // Union
+    if (typeStr.includes("union") || chestNameStr.includes("union")) return "union";
+    // Jormungandr
+    if (typeStr.includes("jormungandr") || chestNameStr.includes("jormungandr")) return "jormungandr";
+    return typeStr;
   }
   typeRaw = normalizeCategory(typeRaw, chestNameLower);
 
