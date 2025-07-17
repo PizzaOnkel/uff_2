@@ -60,40 +60,109 @@ function processChest(playerData, chest) {
   const chestNameLower = (chest.Name || "").toString().toLowerCase().trim();
   const sourceLower = (chest.Source || "").toString().toLowerCase().trim();
   // NEU: Kategorie aus Type extrahieren (z. B. 'common chests', 'common crypt', 'common chest' -> 'common')
-  function normalizeCategory(typeStr) {
-    typeStr = typeStr.toLowerCase().trim();
-    if (typeStr.startsWith("common")) return "common";
-    if (typeStr.startsWith("rare")) return "rare";
-    if (typeStr.startsWith("epic")) return "epic";
-    if (typeStr.startsWith("tartaros")) return "tartaros";
-    if (typeStr.startsWith("elven")) return "elven";
-    if (typeStr.startsWith("cursed")) return "cursed";
-    if (typeStr.startsWith("runic")) return "runic";
-    if (typeStr.startsWith("heroic")) return "heroic";
-    if (typeStr.startsWith("vota")) return "vota";
-    return typeStr;
+  function normalizeCategory(typeStr, chestNameStr = "") {
+  typeStr = typeStr.toLowerCase().trim();
+  chestNameStr = chestNameStr.toLowerCase().trim();
+  // Common
+  if (
+    typeStr.includes("common") ||
+    chestNameStr.includes("common") ||
+    typeStr.includes("crypt") ||
+    chestNameStr.includes("crypt") ||
+    typeStr.includes("stone") ||
+    chestNameStr.includes("stone") ||
+    typeStr.includes("wooden") ||
+    chestNameStr.includes("wooden")
+  ) return "common";
+  // Rare
+  if (
+    typeStr.includes("rare") ||
+    chestNameStr.includes("rare") ||
+    typeStr.includes("elegant") ||
+    chestNameStr.includes("elegant") ||
+    typeStr.includes("cobalt") ||
+    chestNameStr.includes("cobalt") ||
+    typeStr.includes("dragon") ||
+    chestNameStr.includes("dragon")
+  ) return "rare";
+  // Epic
+  if (
+    typeStr.includes("epic") ||
+    chestNameStr.includes("epic") ||
+    typeStr.includes("infernal") ||
+    chestNameStr.includes("infernal") ||
+    typeStr.includes("scorpion") ||
+    chestNameStr.includes("scorpion") ||
+    typeStr.includes("barbarian") ||
+    chestNameStr.includes("barbarian") ||
+    typeStr.includes("orc") ||
+    chestNameStr.includes("orc") ||
+    typeStr.includes("bone") ||
+    chestNameStr.includes("bone") ||
+    typeStr.includes("sand") ||
+    chestNameStr.includes("sand")
+  ) return "epic";
+  // Tartaros
+  if (typeStr.includes("tartaros") || chestNameStr.includes("tartaros")) return "tartaros";
+  // Elven
+  if (typeStr.includes("elven") || chestNameStr.includes("elven")) return "elven";
+  // Cursed
+  if (typeStr.includes("cursed") || chestNameStr.includes("cursed")) return "cursed";
+  // Runic
+  if (typeStr.includes("runic") || chestNameStr.includes("runic")) return "runic";
+  // Heroic
+  if (typeStr.includes("heroic") || chestNameStr.includes("heroic")) return "heroic";
+  // Vota
+  if (typeStr.includes("vota") || chestNameStr.includes("vota")) return "vota";
+  // Bank
+  if (typeStr.includes("bank") || chestNameStr.includes("bank")) return "bank";
+  // Citadel
+  if (typeStr.includes("citadel") || chestNameStr.includes("citadel")) return "citadel";
+  // Rise of the Ancients
+  if (typeStr.includes("rise of the ancients") || chestNameStr.includes("rise of the ancients")) return "rota";
+  // Epic Ancient
+  if (typeStr.includes("epic ancient") || chestNameStr.includes("epic ancient")) return "epic ancient";
+  // Union
+  if (typeStr.includes("union") || chestNameStr.includes("union")) return "union";
+  // Jormungandr
+  if (typeStr.includes("jormungandr") || chestNameStr.includes("jormungandr")) return "jormungandr";
+  return typeStr;
   }
-  typeRaw = normalizeCategory(typeRaw);
+  typeRaw = normalizeCategory(typeRaw, chestNameLower);
 
   // Mapping wird jetzt global geladen
   const mapping = global.chestMappingCache || [];
-
-  // --- NEU: Nur Chests mit Mapping-Treffer zählen und punkten ---
-  // NEU: Für Level-Kategorien (common, rare, epic, tartaros, elven, cursed, runic, heroic, vota):
-  // Wenn Mapping-Eintrag mit chestName 'default' existiert, wird dieser verwendet
+  // Level-Kategorien und Mapping nur einmal deklarieren
   const levelCategories = ["common", "rare", "epic", "tartaros", "elven", "cursed", "runic", "heroic", "vota"];
   let foundMapping = null;
+
+  // 1. Default-Mapping für erkannte Level-Kategorie
   if (levelCategories.some(cat => typeRaw === cat)) {
     foundMapping = mapping.find(m => {
       const isDefault = m.chestName.trim().toLowerCase() === "default";
-      // NEU: Kategorievergleich: Normalisiere auch die Mapping-Kategorie
       const mapCatNorm = normalizeCategory(m.category || "");
       const categoryMatch = mapCatNorm === typeRaw;
       const levelMatch = m.levelStart <= level && m.levelEnd >= level;
       return isDefault && categoryMatch && levelMatch;
     });
   }
-  // Falls kein Default-Mapping gefunden, normales Mapping nach Name
+  // 2. Wenn keine Kategorie erkannt, aber Level > 0, versuche alle Default-Mappings
+  if (!foundMapping && level > 0) {
+    for (const cat of levelCategories) {
+      foundMapping = mapping.find(m => {
+        const isDefault = m.chestName.trim().toLowerCase() === "default";
+        const mapCatNorm = normalizeCategory(m.category || "");
+        const categoryMatch = mapCatNorm === cat;
+        const levelMatch = m.levelStart <= level && m.levelEnd >= level;
+        return isDefault && categoryMatch && levelMatch;
+      });
+      if (foundMapping) {
+        typeRaw = cat;
+        break;
+      }
+    }
+  }
+  // 3. Falls kein Default-Mapping gefunden, normales Mapping nach Name
   if (!foundMapping) {
     foundMapping = mapping.find(m => {
       const mapName = m.chestName.replace(/\s+/g, '').toLowerCase();
