@@ -56,26 +56,56 @@ function initializePlayerData() {
 function processChest(playerData, chest) {
   const level = chest.Level || 0;
   // Alle relevanten Felder in Kleinbuchstaben und getrimmt
-  const typeRaw = (chest.Type || "").toString().toLowerCase().trim();
+  let typeRaw = (chest.Type || "").toString().toLowerCase().trim();
   const chestNameLower = (chest.Name || "").toString().toLowerCase().trim();
   const sourceLower = (chest.Source || "").toString().toLowerCase().trim();
+  // NEU: Kategorie aus Type extrahieren (z. B. 'common chests', 'common crypt', 'common chest' -> 'common')
+  function normalizeCategory(typeStr) {
+    typeStr = typeStr.toLowerCase().trim();
+    if (typeStr.startsWith("common")) return "common";
+    if (typeStr.startsWith("rare")) return "rare";
+    if (typeStr.startsWith("epic")) return "epic";
+    if (typeStr.startsWith("tartaros")) return "tartaros";
+    if (typeStr.startsWith("elven")) return "elven";
+    if (typeStr.startsWith("cursed")) return "cursed";
+    if (typeStr.startsWith("runic")) return "runic";
+    if (typeStr.startsWith("heroic")) return "heroic";
+    if (typeStr.startsWith("vota")) return "vota";
+    return typeStr;
+  }
+  typeRaw = normalizeCategory(typeRaw);
 
   // Mapping wird jetzt global geladen
   const mapping = global.chestMappingCache || [];
 
   // --- NEU: Nur Chests mit Mapping-Treffer zählen und punkten ---
-  // Flexibles Mapping für alle Kategorien
-  const foundMapping = mapping.find(m => {
-    const mapName = m.chestName.replace(/\s+/g, '').toLowerCase();
-    const chestNameNorm = chestNameLower.replace(/\s+/g, '');
-    const nameMatch = mapName === chestNameNorm || chestNameNorm.includes(mapName) || mapName.includes(chestNameNorm);
-    const levelMatch = m.levelStart <= level && m.levelEnd >= level;
-    return nameMatch && levelMatch;
-  });
+  // NEU: Für Level-Kategorien (common, rare, epic, tartaros, elven, cursed, runic, heroic, vota):
+  // Wenn Mapping-Eintrag mit chestName 'default' existiert, wird dieser verwendet
+  const levelCategories = ["common", "rare", "epic", "tartaros", "elven", "cursed", "runic", "heroic", "vota"];
+  let foundMapping = null;
+  if (levelCategories.some(cat => typeRaw === cat)) {
+    foundMapping = mapping.find(m => {
+      const isDefault = m.chestName.trim().toLowerCase() === "default";
+      // NEU: Kategorievergleich: Normalisiere auch die Mapping-Kategorie
+      const mapCatNorm = normalizeCategory(m.category || "");
+      const categoryMatch = mapCatNorm === typeRaw;
+      const levelMatch = m.levelStart <= level && m.levelEnd >= level;
+      return isDefault && categoryMatch && levelMatch;
+    });
+  }
+  // Falls kein Default-Mapping gefunden, normales Mapping nach Name
+  if (!foundMapping) {
+    foundMapping = mapping.find(m => {
+      const mapName = m.chestName.replace(/\s+/g, '').toLowerCase();
+      const chestNameNorm = chestNameLower.replace(/\s+/g, '');
+      const nameMatch = mapName === chestNameNorm || chestNameNorm.includes(mapName) || mapName.includes(chestNameNorm);
+      const levelMatch = m.levelStart <= level && m.levelEnd >= level;
+      return nameMatch && levelMatch;
+    });
+  }
   if (!foundMapping) return;
   let points = foundMapping.points || 0;
   playerData.points += points;
-  // Setze die Punkte direkt im Truhenobjekt
   chest.points = points;
   // Ausführliches Mapping-Logging
   if (typeRaw.startsWith("common") || typeRaw.startsWith("rare") || typeRaw.startsWith("epic")) {
@@ -353,6 +383,19 @@ async function aggregateAllData() {
   }
 
   global.chestMappingCache = await loadMappingFromFirestore();
+  // Logging: Wie viele Mapping-Einträge wurden geladen?
+  const mappingCount = Array.isArray(global.chestMappingCache) ? global.chestMappingCache.length : 0;
+  console.log(`\n=== MAPPING-INFO ===`);
+  console.log(`Mapping-Einträge geladen: ${mappingCount}`);
+  if (mappingCount > 0) {
+    // Zeige die ersten 5 Einträge als Vorschau
+    global.chestMappingCache.slice(0, 5).forEach((m, idx) => {
+      console.log(`  [${idx+1}] Kategorie: "${m.category}", Name: "${m.chestName}", Level: ${m.levelStart}-${m.levelEnd}, Punkte: ${m.points}`);
+    });
+  } else {
+    console.log("WARNUNG: Keine Mapping-Einträge gefunden! Firestore leer oder offline?");
+  }
+  console.log(`====================\n`);
 
   console.log(`Verarbeite ${files.length} JSON-Dateien...`);
   files.forEach(file => {
