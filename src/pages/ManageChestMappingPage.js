@@ -106,9 +106,10 @@ export default function ManageChestMappingPage({ t, setCurrentPage }) {
     }
 
     try {
+      // Speichere alles in Kleinschreibung und ohne überflüssige Leerzeichen
       await addDoc(collection(db, "chestMappings"), {
-        chestName: newMapping.chestName,
-        category: newMapping.category,
+        chestName: newMapping.chestName.trim().toLowerCase(),
+        category: newMapping.category.trim().toLowerCase(),
         levelStart: parseInt(newMapping.levelStart) || 0,
         levelEnd: parseInt(newMapping.levelEnd) || parseInt(newMapping.levelStart) || 0,
         points: parseInt(newMapping.points),
@@ -142,9 +143,10 @@ export default function ManageChestMappingPage({ t, setCurrentPage }) {
 
   const handleSaveEdit = async () => {
     try {
+      // Speichere alles in Kleinschreibung und ohne überflüssige Leerzeichen
       await updateDoc(doc(db, "chestMappings", editingId), {
-        chestName: editingMapping.chestName,
-        category: editingMapping.category,
+        chestName: editingMapping.chestName.trim().toLowerCase(),
+        category: editingMapping.category.trim().toLowerCase(),
         levelStart: parseInt(editingMapping.levelStart) || 0,
         levelEnd: parseInt(editingMapping.levelEnd) || parseInt(editingMapping.levelStart) || 0,
         points: parseInt(editingMapping.points),
@@ -314,7 +316,7 @@ export default function ManageChestMappingPage({ t, setCurrentPage }) {
             >
               <option value="">Bitte wählen...</option>
               {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
+                <option key={cat} value={cat}>{cat.toLowerCase()}</option>
               ))}
             </select>
           </div>
@@ -394,7 +396,7 @@ export default function ManageChestMappingPage({ t, setCurrentPage }) {
                         >
                           <option value="">Bitte wählen...</option>
                           {editingMapping.category && getChestNamesForCategory(editingMapping.category).map(chestName => (
-                            <option key={chestName} value={chestName}>{chestName}</option>
+                            <option key={chestName} value={chestName}>{chestName.toLowerCase()}</option>
                           ))}
                         </select>
                       ) : (

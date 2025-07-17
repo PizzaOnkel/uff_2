@@ -12,11 +12,9 @@ service cloud.firestore {
     
     // Admin requests collection - jeder kann schreiben (für Registrierung), nur Admins können lesen
     match /adminRequests/{document} {
-      allow read: if request.auth != null && 
-                     get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'superAdmin';
+      allow read: if true; // Temporär für Debug-Zwecke
       allow create: if true; // Jeder kann eine Admin-Anfrage erstellen
-      allow update, delete: if request.auth != null && 
-                              get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'superAdmin';
+      allow update, delete: if true; // Temporär für Debug-Zwecke
     }
     
     // Für alle anderen Collections - lockerer Zugriff für Entwicklung

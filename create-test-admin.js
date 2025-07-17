@@ -1,7 +1,7 @@
 // Test-Admin erstellen
 // Führe diesen Code in der Browser-Console aus oder als separates Script
 
-import { db } from './firebase';
+import { db } from './src/firebase.js';
 import { collection, addDoc } from 'firebase/firestore';
 
 async function createTestAdmin() {

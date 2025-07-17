@@ -1,6 +1,22 @@
 // Script zur Analyse der Truhen-Aggregierung basierend auf dem Google Apps Script
 const fs = require('fs');
 const path = require('path');
+const { initializeApp } = require('firebase/app');
+const { getFirestore, collection, getDocs } = require('firebase/firestore');
+
+// Firebase-Konfiguration aus src/firebase.js
+const firebaseConfig = {
+  apiKey: "AIzaSyDsh7jXiFXIgCPRIXh0PNpFhhsshS4pLmE",
+  authDomain: "pizzaonkel-clan.firebaseapp.com",
+  projectId: "pizzaonkel-clan",
+  storageBucket: "pizzaonkel-clan.firebasestorage.app",
+  messagingSenderId: "77478212384",
+  appId: "1:77478212384:web:d240b46780e96d65a51d45",
+  measurementId: "G-XPBX8KGGRZ"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 // Pfad zum JSON-Ordner
 const jsonDir = 'c:\\Users\\user\\Desktop\\clan-dashboard\\uff_2\\public\\json-data';
@@ -39,17 +55,52 @@ function initializePlayerData() {
  */
 function processChest(playerData, chest) {
   const level = chest.Level || 0;
-  const typeRaw = (chest.Type || "").toString().toLowerCase();
-  const chestNameLower = (chest.Name || "").toString().toLowerCase();
-  const sourceLower = (chest.Source || "").toString().toLowerCase();
+  // Alle relevanten Felder in Kleinbuchstaben und getrimmt
+  const typeRaw = (chest.Type || "").toString().toLowerCase().trim();
+  const chestNameLower = (chest.Name || "").toString().toLowerCase().trim();
+  const sourceLower = (chest.Source || "").toString().toLowerCase().trim();
 
+  // Mapping wird jetzt global geladen
+  const mapping = global.chestMappingCache || [];
+
+  // --- NEU: Nur Chests mit Mapping-Treffer zählen und punkten ---
+  // Flexibles Mapping für alle Kategorien
+  const foundMapping = mapping.find(m => {
+    const mapName = m.chestName.replace(/\s+/g, '').toLowerCase();
+    const chestNameNorm = chestNameLower.replace(/\s+/g, '');
+    const nameMatch = mapName === chestNameNorm || chestNameNorm.includes(mapName) || mapName.includes(chestNameNorm);
+    const levelMatch = m.levelStart <= level && m.levelEnd >= level;
+    return nameMatch && levelMatch;
+  });
+  if (!foundMapping) return;
+  let points = foundMapping.points || 0;
+  playerData.points += points;
+  // Setze die Punkte direkt im Truhenobjekt
+  chest.points = points;
+  // Ausführliches Mapping-Logging
+  if (typeRaw.startsWith("common") || typeRaw.startsWith("rare") || typeRaw.startsWith("epic")) {
+    console.log(`[MAPPING-COMMON/RARE/EPIC] Chest: Name="${chest.Name}" | Level=${level} | Type="${chest.Type}" | Source="${chest.Source}"`);
+    if (foundMapping) {
+      console.log(`  -> Mapping gefunden: Name="${foundMapping.chestName}" | Kategorie="${foundMapping.category}" | LevelStart=${foundMapping.levelStart} | LevelEnd=${foundMapping.levelEnd} | Punkte=${foundMapping.points}`);
+    } else {
+      console.log(`  -> KEIN Mapping gefunden für Name="${chestNameLower}" und Level=${level}`);
+    }
+  } else {
+    console.log(`[MAPPING] Chest: Name="${chest.Name}" | Level=${level} | Type="${chest.Type}" | Source="${chest.Source}"`);
+    if (foundMapping) {
+      console.log(`  -> Mapping gefunden: Name="${foundMapping.chestName}" | Kategorie="${foundMapping.category}" | LevelStart=${foundMapping.levelStart} | LevelEnd=${foundMapping.levelEnd} | Punkte=${foundMapping.points}`);
+    } else {
+      console.log(`  -> KEIN Mapping gefunden für Name="${chestNameLower}" und Level=${level}`);
+    }
+  }
+
+  // --- Originale Zählung (nur für erlaubte Chests) ---
   // Arena Chests
   if (typeRaw === "arena") {
     playerData.arena.count++;
     playerData.arena.total++;
     return;
   }
-
   // Common Chests
   if (typeRaw.startsWith("common") || (typeRaw === "" && sourceLower.includes("level") && sourceLower.includes("crypt"))) {
     const key = "lv" + level;
@@ -59,7 +110,6 @@ function processChest(playerData, chest) {
     }
     return;
   }
-
   // 🟡 NEUE ZUORDNUNG: Level X Crypt ohne Type -> Common
   if (typeRaw === "" && sourceLower.match(/level \d+ crypt$/)) {
     const key = "lv" + level;
@@ -69,7 +119,6 @@ function processChest(playerData, chest) {
     }
     return;
   }
-
   // Rare Chests
   if (typeRaw.startsWith("rare")) {
     const key = "lv" + level;
@@ -293,41 +342,37 @@ function processChest(playerData, chest) {
 /**
  * Aggregiert Daten aus allen JSON-Dateien
  */
-function aggregateAllData() {
+async function aggregateAllData() {
   const aggregated = {};
   const files = fs.readdirSync(jsonDir).filter(file => file.endsWith('.json'));
-  
+
+  // Mapping aus Firestore laden
+  async function loadMappingFromFirestore() {
+    const snapshot = await getDocs(collection(db, "chestMappings"));
+    return snapshot.docs.map(doc => doc.data());
+  }
+
+  global.chestMappingCache = await loadMappingFromFirestore();
+
   console.log(`Verarbeite ${files.length} JSON-Dateien...`);
-  
   files.forEach(file => {
     const filePath = path.join(jsonDir, file);
     console.log(`Lese ${file}...`);
-    
     try {
       const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-      
-      // Durchgehe alle Datumseinträge
       Object.keys(data).forEach(date => {
         const entries = data[date];
-        
         if (!Array.isArray(entries)) {
           console.log(`Warnung: Erwartetes Array unter Datum '${date}' in ${file} nicht gefunden.`);
           return;
         }
-        
-        // Durchgehe alle Clanmate-Einträge
         entries.forEach(entry => {
           const clanmate = entry.Clanmate || 'UNBEKANNT';
-          
           if (!aggregated[clanmate]) {
             aggregated[clanmate] = initializePlayerData();
           }
-          
-          // Punkte hinzufügen
           aggregated[clanmate].points += entry.Points || 0;
           aggregated[clanmate].participation++;
-          
-          // Truhen verarbeiten
           if (entry.chests && Array.isArray(entry.chests)) {
             entry.chests.forEach(chest => {
               processChest(aggregated[clanmate], chest);
@@ -339,7 +384,6 @@ function aggregateAllData() {
       console.error(`Fehler beim Lesen von ${file}:`, error.message);
     }
   });
-  
   return aggregated;
 }
 
@@ -352,7 +396,6 @@ function createCSVHeaders() {
     "VotA LV 10-14", "VotA LV 15-19", "VotA LV 20-24", "VotA LV 25-29",
     "VotA LV 30-34", "VotA LV 35-39", "VotA LV 40-44", "VotA LV 45", "VotA Total"
   ];
-  
   return [
     "Clanmate",
     "Arena Chest", "Arena Total",
@@ -370,7 +413,7 @@ function createCSVHeaders() {
     "Epic Ancient squad", "EAs Total",
     "Union Chest", "Union Total",
     "Jormungandr's Chest", "Jormungandr Total",
-    "Points"
+    "Points", "", "Timestamp"
   ];
 }
 
@@ -380,9 +423,14 @@ function createCSVHeaders() {
 function convertToCSVRows(aggregatedData) {
   const rows = [];
   
+  const getTimestamp = () => {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const ms = String(now.getMilliseconds()).padStart(3, '0');
+    return `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}.${ms}Z`;
+  };
   for (const name in aggregatedData) {
     const d = aggregatedData[name];
-    
     const row = [
       name,
       d.arena.count, d.arena.total,
@@ -400,7 +448,7 @@ function convertToCSVRows(aggregatedData) {
       d.eas.count, d.eas.total,
       d.union.count, d.union.total,
       d.jormungandr.count, d.jormungandr.total,
-      d.points
+      d.points, "", getTimestamp()
     ];
     rows.push(row);
   }
@@ -408,31 +456,37 @@ function convertToCSVRows(aggregatedData) {
   return rows;
 }
 
-// Hauptausführung
-console.log('=== CHEST AGGREGATION ANALYSIS ===');
-const aggregatedData = aggregateAllData();
 
-console.log(`\nGefundene Spieler: ${Object.keys(aggregatedData).length}`);
+// Hauptausführung jetzt asynchron
+async function main() {
+  console.log('=== CHEST AGGREGATION ANALYSIS ===');
+  // Aggregation asynchron ausführen
+  const aggregatedData = await aggregateAllData();
 
-// CSV erstellen
-const headers = createCSVHeaders();
-const rows = convertToCSVRows(aggregatedData);
+  console.log(`\nGefundene Spieler: ${Object.keys(aggregatedData).length}`);
 
-let csvContent = headers.join(',') + '\n';
-rows.forEach(row => {
-  csvContent += row.map(cell => `"${cell}"`).join(',') + '\n';
-});
+  // CSV erstellen
+  const headers = createCSVHeaders();
+  const rows = convertToCSVRows(aggregatedData);
 
-// CSV-Datei schreiben
-const csvPath = path.join(jsonDir, 'chest_aggregation_preview.csv');
-fs.writeFileSync(csvPath, csvContent);
+  let csvContent = headers.join(',') + '\n';
+  rows.forEach(row => {
+    csvContent += row.map(cell => `"${cell}"`).join(',') + '\n';
+  });
 
-console.log(`\nCSV-Datei erstellt: ${csvPath}`);
-console.log(`\nErste 5 Zeilen der Aggregation:`);
-console.log(headers.slice(0, 10).join(' | '));
-console.log(''.padStart(100, '-'));
-rows.slice(0, 5).forEach(row => {
-  console.log(row.slice(0, 10).map(cell => String(cell).padStart(8)).join(' | '));
-});
+  // CSV-Datei schreiben
+  const csvPath = path.join(jsonDir, 'chest_aggregation_preview.csv');
+  fs.writeFileSync(csvPath, csvContent);
 
-console.log('\n=== ANALYSE ABGESCHLOSSEN ===');
+  console.log(`\nCSV-Datei erstellt: ${csvPath}`);
+  console.log(`\nErste 5 Zeilen der Aggregation:`);
+  console.log(headers.slice(0, 10).join(' | '));
+  console.log(''.padStart(100, '-'));
+  rows.slice(0, 5).forEach(row => {
+    console.log(row.slice(0, 10).map(cell => String(cell).padStart(8)).join(' | '));
+  });
+
+  console.log('\n=== ANALYSE ABGESCHLOSSEN ===');
+}
+
+main();
