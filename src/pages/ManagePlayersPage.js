@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../firebase";
 import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { getDocs } from "firebase/firestore";
 
 const rankOrder = [
   "Clanführer",
@@ -14,7 +15,15 @@ const rankOrder = [
 ];
 
 export default function ManagePlayersPage({ t, setCurrentPage }) {
+  // Fallback für t, falls nicht übergeben
+  const translations = {
+    managePlayersTitle: 'Spieler verwalten',
+    // ...weitere Defaults nach Bedarf
+  };
+  t = t || translations;
   const [players, setPlayers] = useState([]);
+
+  const [missingClanmates, setMissingClanmates] = useState([]);
   const [ranks, setRanks] = useState([]);
   const [troopStrengths, setTroopStrengths] = useState([]);
   const [form, setForm] = useState({
@@ -54,6 +63,29 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
     return () => unsub();
   }, []);
 
+  // Suche Clanmates aus results, die nicht in players stehen
+  useEffect(() => {
+    async function findMissingClanmates() {
+      const playersSnap = await getDocs(collection(db, "players"));
+      const playerNames = playersSnap.docs.map(doc => doc.data().name);
+      const playerAliases = playersSnap.docs
+        .map(doc => (doc.data().aliases || "").split(",").map(a => a.trim()))
+        .flat();
+      const allKnownNames = new Set([...playerNames, ...playerAliases]);
+      const resultsSnap = await getDocs(collection(db, "results"));
+      const allClanmates = new Set();
+      resultsSnap.forEach(doc => {
+        const data = doc.data();
+        if (data.Clanmate) allClanmates.add(data.Clanmate);
+        if (data.name) allClanmates.add(data.name);
+        if (data.player) allClanmates.add(data.player);
+      });
+      const missing = Array.from(allClanmates).filter(name => name && !allKnownNames.has(name));
+      setMissingClanmates(missing);
+    }
+    findMissingClanmates();
+  }, [players]);
+
   // Ränge laden
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "ranks"), (snapshot) => {
@@ -80,6 +112,17 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
   // Spieler zu Firestore hinzufügen
   const handleAddPlayer = async () => {
     if (!form.name || !form.rank || !form.troopStrength) return;
+
+    // Prüfe auf Namens- oder Alias-Kollision
+    const lowerName = form.name.trim().toLowerCase();
+    const newAliases = form.aliases.split(",").map(a => a.trim().toLowerCase()).filter(a => a);
+    const allNames = players.map(p => p.name.toLowerCase());
+    const allAliases = players.flatMap(p => (p.aliases || []).map(a => a.toLowerCase()));
+    const conflict = allNames.includes(lowerName) || allAliases.includes(lowerName) || newAliases.some(a => allNames.includes(a) || allAliases.includes(a));
+    if (conflict) {
+      const proceed = window.confirm("Achtung: Ein Spieler mit diesem Namen oder Alias existiert bereits. Trotzdem anlegen?");
+      if (!proceed) return;
+    }
 
     // Normen aus der gewählten Truppenstärke holen
     const selectedTroop = troopStrengths.find(ts => ts.name === form.troopStrength);
@@ -145,9 +188,33 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white p-4 pb-8">
-      <h2 className="text-4xl font-bold mb-6 text-center text-blue-400">{t.managePlayersTitle}</h2>
-      <div className="mb-8 w-full max-w-xl">
+    <div className="min-h-screen flex flex-col bg-gray-900 text-white p-4 pb-8 relative">
+      {/* Button oben rechts */}
+      <button
+        onClick={() => setCurrentPage("adminPanel")}
+        className="absolute top-4 right-4 px-4 py-2 bg-blue-800 text-white rounded shadow hover:bg-blue-900 z-10"
+      >
+        Zurück zum Admin-Panel
+      </button>
+
+      <div className="flex w-full max-w-7xl mx-auto">
+        {/* Fehlende Clanmates links */}
+        {missingClanmates.length > 0 && (
+          <div className="bg-yellow-900 text-yellow-200 rounded-lg p-4 mb-6 mr-8 w-80 self-start">
+            <div className="font-bold mb-2">Clanmates in Ergebnissen, aber nicht in der Spieler-Liste:</div>
+            <ul className="list-disc pl-6">
+              {missingClanmates.map(name => (
+                <li key={name}>{name}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <div className="flex-1 flex flex-col items-center">
+          <h2 className="text-4xl font-bold mb-2 text-center text-blue-400">{t.managePlayersTitle}</h2>
+          <div className="mb-6 text-center text-lg text-gray-300 font-semibold">
+            Anzahl Spieler in der Datenbank: <span className="text-yellow-300">{players.length}</span>
+          </div>
+          <div className="mb-8 w-full max-w-xl">
         <input
           type="text"
           name="name"
@@ -195,7 +262,7 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
           Spieler hinzufügen
         </button>
       </div>
-      <ul className="w-full max-w-xl">
+          <ul className="w-full max-w-xl">
         {players.map(player => (
           <li key={player.id} className="flex flex-col bg-gray-800 rounded p-2 mb-2">
             {editId === player.id ? (
@@ -284,6 +351,8 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
       >
         Zurück zum Admin-Panel
       </button>
+        </div>
+      </div>
       <footer className="mt-auto text-gray-500 text-sm">{t.copyright}</footer>
     </div>
   );

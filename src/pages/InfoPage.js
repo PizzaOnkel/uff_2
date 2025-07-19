@@ -1,5 +1,5 @@
 import React from "react";
-import { ROUTES } from "../routes";
+// import entfernt, da kein Router mehr verwendet wird
 
 export default function InfoPage({ t, setCurrentPage }) {
   return (
@@ -23,7 +23,7 @@ export default function InfoPage({ t, setCurrentPage }) {
         <p className="text-right text-blue-300 font-medium">{t.signature}</p>
       </div>
       <button
-        onClick={() => setCurrentPage(ROUTES.NAVIGATION)}
+        onClick={() => setCurrentPage("navigation")}
         className="flex items-center px-8 py-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-xl font-semibold rounded-full shadow-lg hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-500 focus:ring-opacity-50 mb-12"
       >
         {/* Icon */}

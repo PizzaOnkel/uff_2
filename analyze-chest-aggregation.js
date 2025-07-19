@@ -75,75 +75,32 @@ function processChest(playerData, chest) {
   }
 
   // NEU: Kategorie aus Type extrahieren (z. B. 'common chests', 'common crypt', 'common chest' -> 'common')
+  // Verschärfte Normalisierung: Nur exakte und klar definierte Zuordnung
   function normalizeCategory(typeStr, chestNameStr = "") {
     typeStr = typeStr.toLowerCase().trim();
     chestNameStr = chestNameStr.toLowerCase().trim();
-    // Common
-    if (
-      typeStr.includes("common") ||
-      chestNameStr.includes("common") ||
-      typeStr.includes("crypt") ||
-      chestNameStr.includes("crypt") ||
-      typeStr.includes("stone") ||
-      chestNameStr.includes("stone") ||
-      typeStr.includes("wooden") ||
-      chestNameStr.includes("wooden")
-    ) return "common";
-    // Rare
-    if (
-      typeStr.includes("rare") ||
-      chestNameStr.includes("rare") ||
-      typeStr.includes("elegant") ||
-      chestNameStr.includes("elegant") ||
-      typeStr.includes("cobalt") ||
-      chestNameStr.includes("cobalt") ||
-      typeStr.includes("dragon") ||
-      chestNameStr.includes("dragon")
-    ) return "rare";
-    // Epic
-    if (
-      typeStr.includes("epic") ||
-      chestNameStr.includes("epic") ||
-      typeStr.includes("infernal") ||
-      chestNameStr.includes("infernal") ||
-      typeStr.includes("scorpion") ||
-      chestNameStr.includes("scorpion") ||
-      typeStr.includes("barbarian") ||
-      chestNameStr.includes("barbarian") ||
-      typeStr.includes("orc") ||
-      chestNameStr.includes("orc") ||
-      typeStr.includes("bone") ||
-      chestNameStr.includes("bone") ||
-      typeStr.includes("sand") ||
-      chestNameStr.includes("sand")
-    ) return "epic";
-    // Tartaros
-    if (typeStr.includes("tartaros") || chestNameStr.includes("tartaros")) return "tartaros";
-    // Elven
-    if (typeStr.includes("elven") || chestNameStr.includes("elven")) return "elven";
-    // Cursed
-    if (typeStr.includes("cursed") || chestNameStr.includes("cursed")) return "cursed";
-    // Runic
-    if (typeStr.includes("runic") || chestNameStr.includes("runic")) return "runic";
-    // Heroic
-    if (typeStr.includes("heroic") || chestNameStr.includes("heroic")) return "heroic";
-    // Vota
-    if (typeStr.includes("vota") || chestNameStr.includes("vota")) return "vota";
-    // Bank
-    if (typeStr.includes("bank") || chestNameStr.includes("bank")) return "bank";
-    // Citadel
-    if (typeStr.includes("citadel") || chestNameStr.includes("citadel")) return "citadel";
-    // Rise of the Ancients
-    if (typeStr.includes("rise of the ancients") || chestNameStr.includes("rise of the ancients")) return "rota";
-    // Epic Ancient
-    if (typeStr.includes("epic ancient") || chestNameStr.includes("epic ancient")) return "epic ancient";
-    // Union
-    if (typeStr.includes("union") || chestNameStr.includes("union")) return "union";
-    // Jormungandr
-    if (typeStr.includes("jormungandr") || chestNameStr.includes("jormungandr")) return "jormungandr";
-    return typeStr;
+    // Liste der erlaubten Kategorien
+    const allowed = [
+      "arena", "common", "rare", "epic", "tartaros", "elven", "cursed", "bank", "runic", "heroic", "vota", "rota", "epic ancient", "union", "jormungandr"
+    ];
+    // Exakte Zuordnung
+    for (const cat of allowed) {
+      if (typeStr === cat || chestNameStr === cat) return cat;
+    }
+    // Klar definierte Zuordnung (z. B. "common chest", "rare crypt")
+    if (typeStr.match(/^common( chest| crypt)?$/) || chestNameStr.match(/^common( chest| crypt)?$/)) return "common";
+    if (typeStr.match(/^rare( chest| crypt)?$/) || chestNameStr.match(/^rare( chest| crypt)?$/)) return "rare";
+    if (typeStr.match(/^epic( chest| crypt)?$/) || chestNameStr.match(/^epic( chest| crypt)?$/)) return "epic";
+    // Keine willkürliche Zuordnung!
+    return "";
   }
   typeRaw = normalizeCategory(typeRaw, chestNameLower);
+  // Wenn keine Kategorie erkannt, ignoriere die Truhe und entferne sie aus dem chests-Array
+  if (!typeRaw) {
+    console.log(`UNBEKANNTE TRUHE (strenge Zuordnung): Name="${chest.Name}", Type="${chest.Type}", Source="${chest.Source}", Level=${level}`);
+    chest._ignore = true; // Markiere Truhe als ignoriert
+    return false; // Signalisiere, dass diese Truhe entfernt werden soll
+  }
 
   // Mapping wird jetzt global geladen
   const mapping = global.chestMappingCache || [];
@@ -189,8 +146,11 @@ function processChest(playerData, chest) {
   }
   if (!foundMapping) return;
   let points = foundMapping.points || 0;
-  playerData.points += points;
-  chest.points = points;
+  // Punkte werden nur gezählt, wenn die Truhe nicht ignoriert wird und eine erlaubte Kategorie hat
+  if (points > 0 && typeRaw) {
+    playerData.points += points;
+    chest.points = points;
+  }
   // Ausführliches Mapping-Logging
   if (typeRaw.startsWith("common") || typeRaw.startsWith("rare") || typeRaw.startsWith("epic")) {
     console.log(`[MAPPING-COMMON/RARE/EPIC] Chest: Name="${chest.Name}" | Level=${level} | Type="${chest.Type}" | Source="${chest.Source}"`);
@@ -221,6 +181,8 @@ function processChest(playerData, chest) {
     if (key in playerData.common) {
       playerData.common[key]++;
       playerData.common.total++;
+      // Punkte aus Mapping für Common Chests addieren
+      if (chest.points) playerData.points += chest.points;
     }
     return;
   }
@@ -458,7 +420,8 @@ function processChest(playerData, chest) {
  */
 async function aggregateAllData() {
   const aggregated = {};
-  const files = fs.readdirSync(jsonDir).filter(file => file.endsWith('.json'));
+  // Nur die aktuelle Punkte-Tabelle verwenden
+  const files = ['aktuelle_Punkte-Tabelle.json'];
 
   // Mapping aus Firestore laden
   async function loadMappingFromFirestore() {
@@ -498,12 +461,19 @@ async function aggregateAllData() {
           if (!aggregated[clanmate]) {
             aggregated[clanmate] = initializePlayerData();
           }
-          aggregated[clanmate].points += entry.Points || 0;
-          aggregated[clanmate].participation++;
+          let validChestCount = 0;
           if (entry.chests && Array.isArray(entry.chests)) {
-            entry.chests.forEach(chest => {
-              processChest(aggregated[clanmate], chest);
+            // Verarbeite Truhen und entferne ignorierte
+            entry.chests = entry.chests.filter(chest => {
+              const valid = processChest(aggregated[clanmate], chest) !== false;
+              if (valid) validChestCount++;
+              return valid;
             });
+          }
+          // Nur Punkte und Teilnahme zählen, wenn mindestens eine gültige Truhe vorhanden ist
+          if (validChestCount > 0) {
+            aggregated[clanmate].points += entry.Points || 0;
+            aggregated[clanmate].participation++;
           }
         });
       });
@@ -613,6 +583,26 @@ async function main() {
     console.log(row.slice(0, 10).map(cell => String(cell).padStart(8)).join(' | '));
   });
 
+  // --- Firestore Import ---
+  const { getDocs, collection, deleteDoc, doc, setDoc } = require('firebase/firestore');
+  const resultsCollection = collection(db, 'results');
+
+  // Vorher alle alten Ergebnisse löschen
+  const oldResults = await getDocs(resultsCollection);
+  for (const oldDoc of oldResults.docs) {
+    await deleteDoc(doc(db, 'results', oldDoc.id));
+  }
+
+  // Schreibe neue Ergebnisse
+  for (const name in aggregatedData) {
+    const playerData = aggregatedData[name];
+    await setDoc(doc(db, 'results', name), {
+      Clanmate: name,
+      ...playerData,
+      timestamp: new Date().toISOString()
+    });
+  }
+  console.log('\nAlle aggregierten Daten wurden in Firestore (Collection "results") gespeichert.');
   console.log('\n=== ANALYSE ABGESCHLOSSEN ===');
 }
 

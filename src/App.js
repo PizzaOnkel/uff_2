@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { translations } from './translations/translations';
-import { ROUTES } from './routes';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminDashboard2 from './pages/AdminDashboard2';
 import HomePage from './pages/HomePage';
 import InfoPage from './pages/InfoPage';
 import NavigationPage from './pages/NavigationPage';
@@ -25,193 +26,119 @@ import TopTen from './pages/TopTen';
 import TopTenCategory from './pages/TopTenCategory';
 import AdminDebugPage from './pages/AdminDebugPage';
 
-// Beispiel-Daten für die Event-Seite
-const exampleClanData = {
-  players: [
-    {
-      id: 1,
-      name: "Max Mustermann",
-      rank: "Clanführer",
-      troopStrength: 12345,
-      totalChests: 12,
-      totalPoints: 3456,
-      norm: 4000,
-      timestamp: "2025-07-14T12:34:56",
-      chests: {
-        "Arena Chests": {
-          10: { count: 2, points: 100 },
-          15: { count: 1, points: 80 },
-        },
-        "Common Chests": {
-          10: { count: 3, points: 60 },
-        },
-        // weitere Kategorien nach Bedarf...
-      }
-    },
-    {
-      id: 2,
-      name: "Erika Musterfrau",
-      rank: "Offizier",
-      troopStrength: 11000,
-      totalChests: 8,
-      totalPoints: 2890,
-      norm: 3200,
-      timestamp: "2025-07-14T12:34:56",
-      chests: {
-        "Arena Chests": {
-          10: { count: 1, points: 50 },
-          15: { count: 2, points: 160 },
-        },
-        "Common Chests": {
-          10: { count: 2, points: 40 },
-        },
-        "Rare Chests": {
-          10: { count: 1, points: 100 },
-        },
-        // weitere Kategorien nach Bedarf...
-      }
-    },
-    // Weitere Beispielspieler...
-  ],
-  summary: {
-    totalPlayers: 50,
-    totalChests: 500,
-    totalPoints: 125000,
-    averagePointsPerPlayer: 2500,
-    topPlayer: "Max Mustermann",
-    lastUpdated: "2025-07-14T12:34:56"
+// ...existing code...
+
+class AppContent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      currentPage: 'home',
+      language: 'de',
+    };
   }
-};
 
-function AppContent() {
-  const [currentPage, setCurrentPage] = useState(ROUTES.HOME);
-  const [language, setLanguage] = useState('de');
-  const { currentAdmin } = useAuth();
-
-  const t = translations[language];
-
-  const commonProps = {
-    currentPage,
-    setCurrentPage,
-    language,
-    setLanguage,
-    t
+  setCurrentPage = (page) => {
+    this.setState({ currentPage: page });
   };
 
-  // Admin-Seiten die Login erfordern
-  const adminPages = [
-    ROUTES.ADMIN_PANEL,
-    ROUTES.MANAGE_PLAYERS,
-    ROUTES.MANAGE_RANKS,
-    ROUTES.MANAGE_TROOP_STRENGTHS,
-    ROUTES.MANAGE_NORMS,
-    ROUTES.MANAGE_CHEST_MAPPING,
-    ROUTES.MANAGE_ADMIN_REQUESTS,
-    ROUTES.MANAGE_ADMINISTRATORS,
-    ROUTES.CREATE_PERIOD,
-    ROUTES.UPLOAD_RESULTS,
-    ROUTES.CURRENT_TOTAL_EVENT_ADMIN,
-    ROUTES.EVENT_ARCHIVE_ADMIN
-  ];
+  setLanguage = (lang) => {
+    this.setState({ language: lang });
+  };
 
-  const renderPage = () => {
-    // Wenn es eine Admin-Seite ist und der User nicht angemeldet ist, leite zum Login weiter
-    if (adminPages.includes(currentPage) && !currentAdmin) {
-      return <AdminLoginPage {...commonProps} />;
-    }
-
+  render() {
+    const { currentPage, language } = this.state;
+    const t = translations[language];
     switch (currentPage) {
-      case ROUTES.HOME:
-        return <HomePage {...commonProps} />;
-      case ROUTES.INFO:
-        return <InfoPage {...commonProps} />;
-      case ROUTES.NAVIGATION:
-        return <NavigationPage {...commonProps} />;
-      case ROUTES.ADMIN_LOGIN:
-        return <AdminLoginPage {...commonProps} />;
-      case ROUTES.ADMIN_PANEL:
-        return <AdminPanelPage {...commonProps} />;
-      case ROUTES.MANAGE_PLAYERS:
-        return <ManagePlayersPage {...commonProps} />;
-      case ROUTES.MANAGE_RANKS:
-        return <ManageRanksPage {...commonProps} />;
-      case ROUTES.MANAGE_TROOP_STRENGTHS:
-        return <ManageTroopStrengthsPage {...commonProps} />;
-      case ROUTES.MANAGE_NORMS:
-        return <ManageNormsPage {...commonProps} />;
-      case ROUTES.MANAGE_CHEST_MAPPING:
-        return <ManageChestMappingPage {...commonProps} />;
-      case ROUTES.ADMIN_REGISTRATION:
-        return <AdminRegistrationPage {...commonProps} />;
-      case ROUTES.MANAGE_ADMIN_REQUESTS:
-        return <ManageAdminRequestsPage {...commonProps} />;
-      case ROUTES.MANAGE_ADMINISTRATORS:
-        return <ManageAdministratorsPage {...commonProps} />;
-      case ROUTES.CREATE_PERIOD:
-        return <CreatePeriodPage {...commonProps} />;
-      case ROUTES.UPLOAD_RESULTS:
-        return <UploadResultsPage {...commonProps} />;
-      case ROUTES.CONTACT_FORM:
-        return <ContactFormPage t={t} setCurrentPage={setCurrentPage} />;
-      case ROUTES.EMAIL_TEST:
-        return <EmailTestPage t={t} setCurrentPage={setCurrentPage} />;
-      case ROUTES.ADMIN_DEBUG:
-        return <AdminDebugPage t={t} setCurrentPage={setCurrentPage} />;
-      case ROUTES.CURRENT_TOTAL_EVENT:
-        return <CurrentTotalEventPage {...commonProps} clanData={exampleClanData} />;
-      case ROUTES.STANDARDS_EVALUATION:
-        return <ComingSoonPage {...commonProps} backPage={ROUTES.NAVIGATION} title={t.standardsEvaluationTitle} />;
-      case ROUTES.EVENT_ARCHIVE:
-        return <ComingSoonPage {...commonProps} backPage={ROUTES.NAVIGATION} title={t.eventArchiveTitle} />;
-      case ROUTES.TOP_TEN:
-        return <TopTen {...commonProps} />;
-      case ROUTES.TOP_TEN_ARENA:
-        return <TopTenCategory {...commonProps} category="Arena Total" categoryInfo={{ label: 'Arena Chests', icon: '⚔️', color: '#7C3AED' }} />;
-      case ROUTES.TOP_TEN_COMMON:
-        return <TopTenCategory {...commonProps} category="Common Total" categoryInfo={{ label: 'Common Chests', icon: '📦', color: '#10B981' }} />;
-      case ROUTES.TOP_TEN_RARE:
-        return <TopTenCategory {...commonProps} category="Rare Total" categoryInfo={{ label: 'Rare Chests', icon: '💎', color: '#3B82F6' }} />;
-      case ROUTES.TOP_TEN_EPIC:
-        return <TopTenCategory {...commonProps} category="Epic Total" categoryInfo={{ label: 'Epic Chests', icon: '👑', color: '#8B5CF6' }} />;
-      case ROUTES.TOP_TEN_TARTAROS:
-        return <TopTenCategory {...commonProps} category="Tartaros Total" categoryInfo={{ label: 'Tartaros Chests', icon: '🔥', color: '#DC2626' }} />;
-      case ROUTES.TOP_TEN_ELVEN:
-        return <TopTenCategory {...commonProps} category="Elven Total" categoryInfo={{ label: 'Elven Chests', icon: '🧝', color: '#059669' }} />;
-      case ROUTES.TOP_TEN_CURSED:
-        return <TopTenCategory {...commonProps} category="Cursed Total" categoryInfo={{ label: 'Cursed Chests', icon: '🌙', color: '#6B46C1' }} />;
-      case ROUTES.TOP_TEN_BANK:
-        return <TopTenCategory {...commonProps} category="Bank Total" categoryInfo={{ label: 'Bank Chests', icon: '💰', color: '#D97706' }} />;
-      case ROUTES.TOP_TEN_RUNIC:
-        return <TopTenCategory {...commonProps} category="Runic Total" categoryInfo={{ label: 'Runic Chests', icon: '🔮', color: '#F97316' }} />;
-      case ROUTES.TOP_TEN_HEROIC:
-        return <TopTenCategory {...commonProps} category="Heroic Total" categoryInfo={{ label: 'Heroic Chests', icon: '🏆', color: '#EF4444' }} />;
-      case ROUTES.TOP_TEN_VOTA:
-        return <TopTenCategory {...commonProps} category="VotA Total" categoryInfo={{ label: 'Vault of the Ancients', icon: '🏛️', color: '#8B5CF6' }} />;
-      case ROUTES.TOP_TEN_ROTA:
-        return <TopTenCategory {...commonProps} category="ROTA Total" categoryInfo={{ label: 'Rise of the Ancients', icon: '🌟', color: '#EC4899' }} />;
-      case ROUTES.TOP_TEN_EAS:
-        return <TopTenCategory {...commonProps} category="EAs Total" categoryInfo={{ label: 'Epic Ancient Squad', icon: '⚡', color: '#F59E0B' }} />;
-      case ROUTES.TOP_TEN_UNION:
-        return <TopTenCategory {...commonProps} category="Union Total" categoryInfo={{ label: 'Union Chests', icon: '🤝', color: '#6366F1' }} />;
-      case ROUTES.TOP_TEN_JORMUNGANDR:
-        return <TopTenCategory {...commonProps} category="Jormungandr Total" categoryInfo={{ label: 'Jormungandr Chests', icon: '🐉', color: '#059669' }} />;
-      case ROUTES.HALL_OF_CHAMPIONS:
-        return <ComingSoonPage {...commonProps} backPage={ROUTES.NAVIGATION} title={t.hallOfChampionsTitle} />;
-      case ROUTES.CURRENT_TOTAL_EVENT_ADMIN:
-        return <ComingSoonPage {...commonProps} backPage={ROUTES.ADMIN_PANEL} title={t.currentTotalEventTitle} />;
-      case ROUTES.EVENT_ARCHIVE_ADMIN:
-        return <ComingSoonPage {...commonProps} backPage={ROUTES.ADMIN_PANEL} title={t.eventArchiveTitle} />;
+      case 'home':
+        return <HomePage t={t} language={language} setLanguage={this.setLanguage} setCurrentPage={this.setCurrentPage} />;
+      case 'info':
+        return <InfoPage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'navigation':
+        return <NavigationPage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'adminDashboard':
+        return <AdminDashboard setCurrentPage={this.setCurrentPage} />;
+      case 'adminDashboard2':
+        return <AdminDashboard2 setCurrentPage={this.setCurrentPage} />;
+      case 'adminPanel':
+        return <AdminPanelPage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'managePlayers':
+        return <ManagePlayersPage setCurrentPage={this.setCurrentPage} />;
+      case 'manageRanks':
+        return <ManageRanksPage setCurrentPage={this.setCurrentPage} />;
+      case 'manageTroopStrengths':
+        return <ManageTroopStrengthsPage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'manageNorms':
+        return <ManageNormsPage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'manageChestMapping':
+        return <ManageChestMappingPage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'adminRegistration':
+        return <AdminRegistrationPage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'manageAdminRequests':
+        return <ManageAdminRequestsPage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'manageAdministrators':
+        return <ManageAdministratorsPage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'createPeriod':
+        return <CreatePeriodPage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'uploadResults':
+        return <UploadResultsPage setCurrentPage={this.setCurrentPage} />;
+      case 'contactForm':
+        return <ContactFormPage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'emailTest':
+        return <EmailTestPage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'adminLogin':
+        return <AdminLoginPage setCurrentPage={this.setCurrentPage} />;
+      case 'adminDebug':
+        return <AdminDebugPage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'currentTotalEvent':
+        return <CurrentTotalEventPage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'standardsEvaluation':
+        return <ComingSoonPage t={t} setCurrentPage={this.setCurrentPage} title={t.standardsEvaluationTitle} backPage="navigation" />;
+      case 'eventArchive':
+        return <ComingSoonPage t={t} setCurrentPage={this.setCurrentPage} title={t.eventArchiveTitle} backPage="navigation" />;
+      case 'topTen':
+        return <TopTen t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'topTenArena':
+        return <TopTenCategory setCurrentPage={this.setCurrentPage} category="Arena Total" categoryInfo={{ label: 'Arena Chests', icon: '⚔️', color: '#7C3AED' }} />;
+      case 'topTenCommon':
+        return <TopTenCategory setCurrentPage={this.setCurrentPage} category="Common Total" categoryInfo={{ label: 'Common Chests', icon: '📦', color: '#10B981' }} />;
+      case 'topTenRare':
+        return <TopTenCategory setCurrentPage={this.setCurrentPage} category="Rare Total" categoryInfo={{ label: 'Rare Chests', icon: '💎', color: '#3B82F6' }} />;
+      case 'topTenEpic':
+        return <TopTenCategory setCurrentPage={this.setCurrentPage} category="Epic Total" categoryInfo={{ label: 'Epic Chests', icon: '👑', color: '#8B5CF6' }} />;
+      case 'topTenTartaros':
+        return <TopTenCategory setCurrentPage={this.setCurrentPage} category="Tartaros Total" categoryInfo={{ label: 'Tartaros Chests', icon: '🔥', color: '#DC2626' }} />;
+      case 'topTenElven':
+        return <TopTenCategory setCurrentPage={this.setCurrentPage} category="Elven Total" categoryInfo={{ label: 'Elven Chests', icon: '🧝', color: '#059669' }} />;
+      case 'topTenCursed':
+        return <TopTenCategory setCurrentPage={this.setCurrentPage} category="Cursed Total" categoryInfo={{ label: 'Cursed Chests', icon: '🌙', color: '#6B46C1' }} />;
+      case 'topTenBank':
+        return <TopTenCategory setCurrentPage={this.setCurrentPage} category="Bank Total" categoryInfo={{ label: 'Bank Chests', icon: '💰', color: '#D97706' }} />;
+      case 'topTenRunic':
+        return <TopTenCategory setCurrentPage={this.setCurrentPage} category="Runic Total" categoryInfo={{ label: 'Runic Chests', icon: '🔮', color: '#F97316' }} />;
+      case 'topTenHeroic':
+        return <TopTenCategory setCurrentPage={this.setCurrentPage} category="Heroic Total" categoryInfo={{ label: 'Heroic Chests', icon: '🏆', color: '#EF4444' }} />;
+      case 'topTenVota':
+        return <TopTenCategory setCurrentPage={this.setCurrentPage} category="VotA Total" categoryInfo={{ label: 'Vault of the Ancients', icon: '🏛️', color: '#8B5CF6' }} />;
+      case 'topTenRota':
+        return <TopTenCategory setCurrentPage={this.setCurrentPage} category="ROTA Total" categoryInfo={{ label: 'Rise of the Ancients', icon: '🌟', color: '#EC4899' }} />;
+      case 'topTenEas':
+        return <TopTenCategory setCurrentPage={this.setCurrentPage} category="EAs Total" categoryInfo={{ label: 'Epic Ancient Squad', icon: '⚡', color: '#F59E0B' }} />;
+      case 'topTenUnion':
+        return <TopTenCategory setCurrentPage={this.setCurrentPage} category="Union Total" categoryInfo={{ label: 'Union Chests', icon: '🤝', color: '#6366F1' }} />;
+      case 'topTenJormungandr':
+        return <TopTenCategory setCurrentPage={this.setCurrentPage} category="Jormungandr Total" categoryInfo={{ label: 'Jormungandr Chests', icon: '🐉', color: '#059669' }} />;
+      case 'hallOfChampions':
+        return <ComingSoonPage t={t} setCurrentPage={this.setCurrentPage} title={t.hallOfChampionsTitle} backPage="navigation" />;
+      case 'currentTotalEventAdmin':
+        return <ComingSoonPage t={t} setCurrentPage={this.setCurrentPage} title={t.currentTotalEventTitle} backPage="adminPanel" />;
+      case 'eventArchiveAdmin':
+        return <ComingSoonPage t={t} setCurrentPage={this.setCurrentPage} title={t.eventArchiveTitle} backPage="adminPanel" />;
       default:
-        return <HomePage {...commonProps} />;
+        return <HomePage t={t} language={language} setLanguage={this.setLanguage} setCurrentPage={this.setCurrentPage} />;
     }
-  };
-
-  return (
-    <div className="App">
-      {renderPage()}
-    </div>
-  );
+  }
 }
+
 
 function App() {
   return (

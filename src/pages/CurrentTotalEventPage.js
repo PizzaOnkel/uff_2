@@ -4,17 +4,17 @@ import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 
 const chestCategories = [
-  { name: "Arena Chests", levels: [] },
-  { name: "Common Chests", levels: [5, 10, 15, 20, 25] },
+  { name: "Arena Chests", levels: [10, 15, 20, 25, 30] },
+  { name: "Common Chests", levels: [10, 15, 20, 25, 30] },
   { name: "Rare Chests", levels: [10, 15, 20, 25, 30] },
   { name: "Epic Chests", levels: [15, 20, 25, 30, 35] },
-  { name: "Chests of Tartaros", levels: [15, 20, 25, 30, 35] },
-  { name: "Elven Chests", levels: [10, 15, 20, 25, 30] },
-  { name: "Cursed Chests", levels: [20, 25] },
-  { name: "Bank Chests", levels: ["Wooden", "Bronze", "Silver", "Golden", "Precious", "Magic"] },
-  { name: "Runic Chests", levels: ["20-24", "25-29", "30-34", "35-39", "40-44", "45"] },
-  { name: "Heroic Chests", levels: Array.from({ length: 30 }, (_, i) => 16 + i) }, // 16-45
-  { name: "Vault of the Ancients", levels: ["10-14", "15-19", "20-24", "25-29", "30-34", "35-39", "40-44"] },
+  { name: "Chests of Tartaros", levels: [10, 15, 20, 25, 30] },
+  { name: "Citadel Chests", levels: [10, 15, 20, 25, 30] },
+  { name: "Citadel cursed Chests", levels: [10, 15, 20, 25, 30] },
+  { name: "Bank Chests", levels: [10, 15, 20, 25, 30] },
+  { name: "Runic Chests", levels: [10, 15, 20, 25, 30] },
+  { name: "Heroic Chests", levels: [10, 15, 20, 25, 30] },
+  { name: "Vault of the Ancients", levels: [10, 15, 20, 25, 30, 35] },
   { name: "Quick March Chest", levels: [] },
   { name: "Ancients Chest", levels: [] },
   { name: "ROTA Total", levels: [] },
@@ -58,7 +58,7 @@ export default function CurrentTotalEventPage({ t, setCurrentPage }) {
       const [playersSnap, troopSnap, resultsSnap] = await Promise.all([
         getDocs(collection(db, "players")),
         getDocs(collection(db, "troopStrengths")),
-        getDocs(collection(db, "results")),
+        getDocs(collection(db, "publishedResults")),
       ]);
       setPlayers(playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       setTroopStrengths(troopSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -114,47 +114,29 @@ export default function CurrentTotalEventPage({ t, setCurrentPage }) {
     const player = findPlayer(result.Clanmate);
     const rank = player?.rank || "";
     let troopStrength = player?.troopStrength || "";
-    
     // Fallback für leere Truppenstärken
     if (!troopStrength || troopStrength.trim() === '') {
       troopStrength = 'nicht definiert';
     }
-    
     const normPoints = getNormPoints(troopStrength);
-    const ist = result.Points || 0;
+    // Filtere Truhen nach erlaubten Kategorien
+    const allowedCategories = chestCategories.map(cat => cat.name);
+    const filteredChests = Array.isArray(result.chests)
+      ? result.chests.filter(chest => allowedCategories.includes(chest.category))
+      : [];
+    // Aggregiere die Punkte nur für erlaubte Kategorien
+    const ist = filteredChests.reduce((sum, chest) => sum + (chest.points || 0), 0);
+    const chestsCount = filteredChests.length;
     const soll = normPoints;
     totalIst += ist;
     totalSoll += soll;
     const differenz = ist - soll;
     const percent = soll > 0 ? Math.round((ist / soll) * 100) : 0;
-    
-    // Konvertiere die neue Chest-Struktur in das erwartete Format
-    const chestDetails = [];
-    if (result.chests && typeof result.chests === 'object') {
-      Object.entries(result.chests).forEach(([category, levels]) => {
-        if (typeof levels === 'object') {
-          Object.entries(levels).forEach(([level, count]) => {
-            if (count > 0) {
-              chestDetails.push({
-                category,
-                level: level === 'total' ? '' : level,
-                count,
-                points: 0 // TODO: Punkte basierend auf Mapping berechnen
-              });
-            }
-          });
-        }
-      });
-    }
-    
-    // Berechne Gesamtanzahl der Chests
-    const totalChests = chestDetails.reduce((sum, chest) => sum + chest.count, 0);
-    
     return {
       name: result.Clanmate,
       rank,
       troopStrength,
-      chests: totalChests,
+      chests: chestsCount,
       ist,
       soll,
       differenz,
@@ -162,7 +144,7 @@ export default function CurrentTotalEventPage({ t, setCurrentPage }) {
       timestamp: result.timestamp
         ? new Date(result.timestamp).toLocaleString("de-DE", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" })
         : "",
-      chestDetails,
+      chestDetails: filteredChests,
     };
   });
 
@@ -218,8 +200,7 @@ export default function CurrentTotalEventPage({ t, setCurrentPage }) {
               <ul className="list-disc ml-5">
                 {playerRow.chestDetails.map((chest, idx) => (
                   <li key={idx}>
-                    {chest.category} {chest.level ? `LV ${chest.level}` : ""}: {chest.count}x
-                    {chest.points > 0 ? `, ${chest.points} Punkte` : ""}
+                    {chest.category} {chest.level ? `LV ${chest.level}` : ""}: {chest.count}x, {chest.points} Punkte
                   </li>
                 ))}
               </ul>
@@ -396,40 +377,36 @@ export default function CurrentTotalEventPage({ t, setCurrentPage }) {
                         <span className="ml-2">{row.percent}%</span>
                       </td>
                       <td className="p-2">{row.timestamp}</td>
-                      {chestCategories.map(cat => {
-                        if (cat.levels.length > 0) {
-                          // Kategorien mit Levels (z.B. Common Chests, Rare Chests, etc.)
-                          return cat.levels.map(level => [
-                            <td
-                              key={row.name + cat.name + level + 'count'}
-                              className="p-2"
-                            >
-                              {row.chestDetails
-                                .filter(chest => chest.category === cat.name && chest.level === String(level))
-                                .reduce((sum, chest) => sum + (chest.count || 0), 0)}
-                            </td>,
-                            <td
-                              key={row.name + cat.name + level + 'points'}
-                              className="p-2"
-                            >
-                              {row.chestDetails
-                                .filter(chest => chest.category === cat.name && chest.level === String(level))
-                                .reduce((sum, chest) => sum + (chest.points || 0), 0)}
-                            </td>
-                          ]).flat().concat(
-                            <td
-                              key={row.name + cat.name + 'sum'}
-                              className="p-2"
-                            >
-                              {row.chestDetails
-                                .filter(chest => chest.category === cat.name)
-                                .reduce((sum, chest) => sum + (chest.count || 0), 0)}
-                            </td>
-                          );
-                        } else {
-                          // Kategorien ohne Levels (z.B. Quick March Chest, etc.)
-                          return (
-                            <td
+                      {chestCategories.map(cat =>
+                        cat.levels.length > 0
+                          ? cat.levels.map(level => [
+                              <td
+                                key={row.name + cat.name + level + 'count'}
+                                className="p-2"
+                              >
+                                {row.chestDetails
+                                  .filter(chest => chest.category === cat.name && chest.level === level)
+                                  .reduce((sum, chest) => sum + (chest.count || 0), 0)}
+                              </td>,
+                              <td
+                                key={row.name + cat.name + level + 'points'}
+                                className="p-2"
+                              >
+                                {row.chestDetails
+                                  .filter(chest => chest.category === cat.name && chest.level === level)
+                                  .reduce((sum, chest) => sum + (chest.points || 0), 0)}
+                              </td>
+                            ]).flat().concat(
+                              <td
+                                key={row.name + cat.name + 'sum'}
+                                className="p-2"
+                              >
+                                {row.chestDetails
+                                  .filter(chest => chest.category === cat.name)
+                                  .reduce((sum, chest) => sum + (chest.count || 0), 0)}
+                              </td>
+                            )
+                          : <td
                               key={row.name + cat.name + 'single'}
                               className="p-2"
                             >
@@ -437,9 +414,7 @@ export default function CurrentTotalEventPage({ t, setCurrentPage }) {
                                 .filter(chest => chest.category === cat.name)
                                 .reduce((sum, chest) => sum + (chest.count || 0), 0)}
                             </td>
-                          );
-                        }
-                      })}
+                      )}
                     </tr>
                   ))}
                 </tbody>

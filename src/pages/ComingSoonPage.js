@@ -1,6 +1,7 @@
 import React from "react";
+// import entfernt, da kein Router mehr verwendet wird
 
-export default function ComingSoonPage({ t, setCurrentPage, backPage, title }) {
+export default function ComingSoonPage({ t, backPage, title, setCurrentPage }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-between bg-gray-900 text-white p-4 pb-8">
       <h2 className="text-4xl font-bold mb-6 text-center text-blue-400">{title}</h2>

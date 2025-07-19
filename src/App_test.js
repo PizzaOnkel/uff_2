@@ -33,11 +33,14 @@ function App() {
   return (
     <AuthProvider>
       <div className="App">
-        <HomePage {...commonProps} />
-        <div>
-          <h2>Alle Komponenten erfolgreich importiert!</h2>
-          <p>HomePage, InfoPage, NavigationPage, AdminPanelPage, ManagePlayersPage, ManageRanksPage, ManageTroopStrengthsPage, ManageNormsPage, ManageChestMappingPage, AdminRegistrationPage, ManageAdminRequestsPage, CreatePeriodPage, UploadResultsPage, ContactFormPage, ComingSoonPage, AdminLoginPage, CurrentTotalEventPage</p>
-        </div>
+        {/* BrowserRouter Wrapper hinzugefügt */}
+        <BrowserRouter>
+          <HomePage {...commonProps} />
+          <div>
+            <h2>Alle Komponenten erfolgreich importiert!</h2>
+            <p>HomePage, InfoPage, NavigationPage, AdminPanelPage, ManagePlayersPage, ManageRanksPage, ManageTroopStrengthsPage, ManageNormsPage, ManageChestMappingPage, AdminRegistrationPage, ManageAdminRequestsPage, CreatePeriodPage, UploadResultsPage, ContactFormPage, ComingSoonPage, AdminLoginPage, CurrentTotalEventPage</p>
+          </div>
+        </BrowserRouter>
       </div>
     </AuthProvider>
   );

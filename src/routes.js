@@ -1,4 +1,6 @@
 export const ROUTES = {
+  ADMIN_DASHBOARD: 'adminDashboard',
+  ADMIN_DASHBOARD2: 'adminDashboard2',
   HOME: 'home',
   INFO: 'info',
   NAVIGATION: 'navigation',

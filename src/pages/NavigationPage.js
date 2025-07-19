@@ -1,5 +1,5 @@
 import React from "react";
-import { ROUTES } from "../routes";
+// import entfernt, da kein Router mehr verwendet wird
 
 export default function NavigationPage({ t, setCurrentPage }) {
   // Hilfsfunktion für Button-Styles
@@ -37,42 +37,42 @@ export default function NavigationPage({ t, setCurrentPage }) {
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl w-full mb-12">
         {/* Buttons */}
-        <button onClick={() => setCurrentPage(ROUTES.CURRENT_TOTAL_EVENT)} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("green")}`}>
+        <button onClick={() => setCurrentPage("currentTotalEvent")} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("green")}`}> 
           {icons.Calendar}
           <span className="text-xl font-semibold text-white text-center mb-1">{t.currentEventPeriod}</span>
           <span className="text-sm text-gray-400 text-center">{t.currentEventPeriodDesc}</span>
         </button>
-        <button onClick={() => setCurrentPage(ROUTES.STANDARDS_EVALUATION)} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("yellow")}`}>
+        <button onClick={() => setCurrentPage("standardsEvaluation")} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("yellow")}`}> 
           {icons.ListTodo}
           <span className="text-xl font-semibold text-white text-center mb-1">{t.standardsEvaluation}</span>
           <span className="text-sm text-gray-400 text-center">{t.standardsEvaluationDesc}</span>
         </button>
-        <button onClick={() => setCurrentPage(ROUTES.EVENT_ARCHIVE)} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("blue")}`}>
+        <button onClick={() => setCurrentPage("eventArchive")} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("blue")}`}> 
           {icons.Archive}
           <span className="text-xl font-semibold text-white text-center mb-1">{t.eventArchive}</span>
           <span className="text-sm text-gray-400 text-center">{t.eventArchiveDesc}</span>
         </button>
-        <button onClick={() => setCurrentPage(ROUTES.TOP_TEN)} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("red")}`}>
+        <button onClick={() => setCurrentPage("topTen")} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("red")}`}> 
           {icons.Award}
           <span className="text-xl font-semibold text-white text-center mb-1">{t.topTen}</span>
           <span className="text-sm text-gray-400 text-center">{t.topTenDesc}</span>
         </button>
-        <button onClick={() => setCurrentPage(ROUTES.HALL_OF_CHAMPIONS)} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("purple")}`}>
+        <button onClick={() => setCurrentPage("hallOfChampions")} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("purple")}`}> 
           {icons.Trophy}
           <span className="text-xl font-semibold text-white text-center mb-1">{t.hallOfChampions}</span>
           <span className="text-sm text-gray-400 text-center">{t.hallOfChampionsDesc}</span>
         </button>
-        <button onClick={() => setCurrentPage(ROUTES.CONTACT_FORM)} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("orange")}`}>
+        <button onClick={() => setCurrentPage("contactForm")} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("orange")}`}> 
           {icons.Mail}
           <span className="text-xl font-semibold text-white text-center mb-1">{t.contactForm}</span>
           <span className="text-sm text-gray-400 text-center">{t.contactFormDesc}</span>
         </button>
-        <button onClick={() => setCurrentPage(ROUTES.ADMIN_PANEL)} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("white", true)}`}>
+        <button onClick={() => setCurrentPage("adminPanel")} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("white", true)}`}> 
           {icons.Shield}
           <span className="text-xl font-semibold text-white text-center mb-1">{t.adminPanel}</span>
           <span className="text-sm text-gray-200 text-center">{t.adminPanelDesc}</span>
         </button>
-        <button onClick={() => setCurrentPage(ROUTES.ADMIN_REGISTRATION)} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("green")}`}>
+        <button onClick={() => setCurrentPage("adminRegistration")} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("green")}`}> 
           <svg className="w-12 h-12 text-green-400 mb-2" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
             <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
             <circle cx="8.5" cy="7" r="4" />
@@ -84,7 +84,7 @@ export default function NavigationPage({ t, setCurrentPage }) {
         </button>
       </div>
       {/* Zurück zur Info-Seite Button */}
-      <button onClick={() => setCurrentPage(ROUTES.INFO)} className="flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white text-xl font-semibold rounded-full shadow-lg hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 mb-12">
+      <button onClick={() => setCurrentPage("info")} className="flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white text-xl font-semibold rounded-full shadow-lg hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 mb-12">
         {icons.ArrowLeft} {t.backToInfo}
       </button>
       <footer className="mt-auto text-gray-500 text-sm">{t.copyright}</footer>

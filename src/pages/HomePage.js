@@ -1,4 +1,5 @@
 import React from "react";
+// import entfernt, da kein Router mehr verwendet wird
 
 export default function HomePage({ t, language, setLanguage, setCurrentPage }) {
   const langs = [
