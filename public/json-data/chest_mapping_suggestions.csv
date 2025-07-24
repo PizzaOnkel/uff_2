@@ -1,0 +1,138 @@
+Original Name;Original Type;Original Source;Original Level;SUGGESTED Category;SUGGESTED Subcategory;SUGGESTED Level;Confidence;Manual Review Required;Notes
+;;;;;;;;;
+;;;;;;;;;
+;;;;;;;;;
+;;;;;;;;;
+;;;;;;;;;
+Tartaros Chest;Tartaros Crypt level 30;Tartaros Crypt level 30;0;tartaros;lv30;30;HIGH;🟡 YELLOW;Level aus Source extrahieren
+Tartaros Chest;Tartaros Crypt level 25;Tartaros Crypt level 25;0;tartaros;lv25;25;HIGH;🟡 YELLOW;Level aus Source extrahieren
+Tartaros Chest;Tartaros Crypt level 15;Tartaros Crypt level 15;0;tartaros;lv15;15;HIGH;🟡 YELLOW;Level aus Source extrahieren
+Tartaros Chest;Tartaros Crypt level 10;Tartaros Crypt level 10;0;tartaros;INVALID_LEVEL;10;LOW;🔴 RED;Level 10 nicht in Tartaros Range (15-35)
+Tartaros Chest;Tartaros Crypt level 20;Tartaros Crypt level 20;0;tartaros;lv20;20;HIGH;🟡 YELLOW;Level aus Source extrahieren
+Tartaros Chest;Tartaros Crypt level 35;Tartaros Crypt level 35;0;tartaros;lv35;35;HIGH;🟡 YELLOW;Level aus Source extrahieren
+Runic Chest;Raid Runic sguad;Lvl 25-29 Raid Runic sguad;25;runic;lv25_29;25-29;HIGH;🟡 YELLOW;Level-Bereich aus Source extrahieren
+Runic Chest;Lvl 40-44 Raid Runic squad;Lvl 40-44 Raid Runic squad;0;runic;lv40_44;40-44;HIGH;🟡 YELLOW;Level-Bereich aus Source extrahieren
+Runic Chest;Lvl 25-29 Raid Runic squad;Lvl 25-29 Raid Runic squad;0;runic;lv25_29;25-29;HIGH;🟡 YELLOW;Level-Bereich aus Source extrahieren
+Runic Chest;Lvl 20-24 Raid Runic squad;Lvl 20-24 Raid Runic squad;0;runic;lv20_24;20-24;HIGH;🟡 YELLOW;Level-Bereich aus Source extrahieren
+Runic Chest;Lvl 30-34 Raid Runic squad;Lvl 30-34 Raid Runic squad;0;runic;lv30_34;30-34;HIGH;🟡 YELLOW;Level-Bereich aus Source extrahieren
+Runic Chest;Lvl 35-39 Raid Runic squad;Lvl 35-39 Raid Runic squad;0;runic;lv35_39;35-39;HIGH;🟡 YELLOW;Level-Bereich aus Source extrahieren
+Gnome Workshop Chest;Level 10 Crypt;Level 10 Crypt;10;common;lv10;10;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Infernal Chest;Level 15 Crypt;Level 15 Crypt;15;common;lv15;15;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Bone Chest;Level 15 Crypt;Level 15 Crypt;15;common;lv15;15;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Mayan Chest;Level 20 Crypt;Level 20 Crypt;20;common;lv20;20;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Forgotten Chest;Level 20 Crypt;Level 20 Crypt;20;common;lv20;20;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Orc Chest;Level 20 Crypt;Level 20 Crypt;20;common;lv20;20;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Orc Chest;Level 15 Crypt;Level 15 Crypt;15;common;lv15;15;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Forgotten Chest;Level 15 Crypt;Level 15 Crypt;15;common;lv15;15;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Stone Chest;Level 20 Crypt;Level 20 Crypt;20;common;lv20;20;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Elegant Chest;Level 15 Crypt;Level 15 Crypt;15;common;lv15;15;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Cobra Chest;Level 15 Crypt;Level 15 Crypt;15;common;lv15;15;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Barbarian Chest;Level 15 Crypt;Level 15 Crypt;15;common;lv15;15;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Sand Chest;Level 15 Crypt;Level 15 Crypt;15;common;lv15;15;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Fire Chest;Level 25 Crypt;Level 25 Crypt;25;common;lv25;25;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Barbarian Chest;Level 25 Crypt;Level 25 Crypt;25;common;lv25;25;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Bone Chest;Level 25 Crypt;Level 25 Crypt;25;common;lv25;25;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Cobra Chest;Level 25 Crypt;Level 25 Crypt;25;common;lv25;25;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Sand Chest;Level 25 Crypt;Level 25 Crypt;25;common;lv25;25;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Mayan Chest;Level 25 Crypt;Level 25 Crypt;25;common;lv25;25;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Elegant Chest;Level 25 Crypt;Level 25 Crypt;25;common;lv25;25;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Gnome Workshop Chest;Level 25 Crypt;Level 25 Crypt;25;common;lv25;25;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Forgotten Chest;Level 10 Crypt;Level 10 Crypt;10;common;lv10;10;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Gnome Workshop Chest;Level 15 Crypt;Level 15 Crypt;15;common;lv15;15;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Stone Chest;Level 15 Crypt;Level 15 Crypt;15;common;lv15;15;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Bone Chest;Level 5 Crypt;Level 5 Crypt;5;common;lv5;5;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Orc Chest;Level 5 Crypt;Level 5 Crypt;5;common;lv5;5;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Barbarian Chest;Level 5 Crypt;Level 5 Crypt;5;common;lv5;5;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Sand Chest;Level 5 Crypt;Level 5 Crypt;5;common;lv5;5;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Fire Chest;Level 5 Crypt;Level 5 Crypt;5;common;lv5;5;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Cobra Chest;Level 5 Crypt;Level 5 Crypt;5;common;lv5;5;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Infernal Chest;Level 5 Crypt;Level 5 Crypt;5;common;lv5;5;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Mayan Chest;Level 5 Crypt;Level 5 Crypt;5;common;lv5;5;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Stone Chest;Level 5 Crypt;Level 5 Crypt;5;common;lv5;5;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Gnome Workshop Chest;Level 5 Crypt;Level 5 Crypt;5;common;lv5;5;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Sand Chest;Level 20 Crypt;Level 20 Crypt;20;common;lv20;20;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Infernal Chest;Level 25 Crypt;Level 25 Crypt;25;common;lv25;25;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Barbarian Chest;Level 20 Crypt;Level 20 Crypt;20;common;lv20;20;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Forgotten Chest;Level 5 Crypt;Level 5 Crypt;5;common;lv5;5;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Infernal Chest;Level 10 Crypt;Level 10 Crypt;10;common;lv10;10;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Fire Chest;Level 20 Crypt;Level 20 Crypt;20;common;lv20;20;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Forgotten Chest;Level 25 Crypt;Level 25 Crypt;25;common;lv25;25;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Elegant Chest;Level 20 Crypt;Level 20 Crypt;20;common;lv20;20;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Cobra Chest;Level 20 Crypt;Level 20 Crypt;20;common;lv20;20;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Bone Chest;Level 10 Crypt;Level 10 Crypt;10;common;lv10;10;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Gnome Workshop Chest;Level 20 Crypt;Level 20 Crypt;20;common;lv20;20;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Stone Chest;Level 25 Crypt;Level 25 Crypt;25;common;lv25;25;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Orc Chest;Level 25 Crypt;Level 25 Crypt;25;common;lv25;25;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Bone Chest;Level 20 Crypt;Level 20 Crypt;20;common;lv20;20;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Infernal Chest;Level 20 Crypt;Level 20 Crypt;20;common;lv20;20;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Mayan Chest;Level 15 Crypt;Level 15 Crypt;15;common;lv15;15;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Stone Chest;Level 10 Crypt;Level 10 Crypt;10;common;lv10;10;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Cobra Chest;Level 10 Crypt;Level 10 Crypt;10;common;lv10;10;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Fire Chest;Level 15 Crypt;Level 15 Crypt;15;common;lv15;15;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Sand Chest;Level 10 Crypt;Level 10 Crypt;10;common;lv10;10;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Fire Chest;Level 10 Crypt;Level 10 Crypt;10;common;lv10;10;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Elegant Chest;Level 10 Crypt;Level 10 Crypt;10;common;lv10;10;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Barbarian Chest;Level 10 Crypt;Level 10 Crypt;10;common;lv10;10;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Mayan Chest;Level 10 Crypt;Level 10 Crypt;10;common;lv10;10;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Elegant Chest;Level 5 Crypt;Level 5 Crypt;5;common;lv5;5;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Orc Chest;Level 10 Crypt;Level 10 Crypt;10;common;lv10;10;HIGH;🟡 YELLOW;Level X Crypt ohne Type → Common
+Rare Dragon Chest;Level 15 rare Crypt;Level 15 rare Crypt;15;rare;lv15;15;HIGH;🟢 GREEN;Level X rare Crypt → Rare
+Rare Dragon Chest;Level 25 rare Crypt;Level 25 rare Crypt;25;rare;lv25;25;HIGH;🟢 GREEN;Level X rare Crypt → Rare
+Rare Dragon Chest;Level 20 rare Crypt;Level 20 rare Crypt;20;rare;lv20;20;HIGH;🟢 GREEN;Level X rare Crypt → Rare
+Rare Dragon Chest;Level 10 rare Crypt;Level 10 rare Crypt;10;rare;lv10;10;HIGH;🟢 GREEN;Level X rare Crypt → Rare
+Rare Dragon Chest;Level 30 rare Crypt;Level 30 rare Crypt;30;rare;lv30;30;HIGH;🟢 GREEN;Level X rare Crypt → Rare
+White Wood Chest;Level 15 epic Crypt;Level 15 epic Crypt;15;epic;lv15;15;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+House of Horrors Chest;Level 15 epic Crypt;Level 15 epic Crypt;15;epic;lv15;15;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Abandoned Chest;Level 15 epic Crypt;Level 15 epic Crypt;15;epic;lv15;15;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Ancient Bastion Chest;Level 15 epic Crypt;Level 15 epic Crypt;15;epic;lv15;15;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Titansteel Chest;Level 15 epic Crypt;Level 15 epic Crypt;15;epic;lv15;15;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Ancient Warrior's Chest;Level 25 epic Crypt;Level 25 epic Crypt;25;epic;lv25;25;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Harpy Chest;Level 25 epic Crypt;Level 25 epic Crypt;25;epic;lv25;25;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+White Wood Chest;Level 25 epic Crypt;Level 25 epic Crypt;25;epic;lv25;25;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Ancient Bastion Chest;Level 25 epic Crypt;Level 25 epic Crypt;25;epic;lv25;25;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Turtle Chest;Level 25 epic Crypt;Level 25 epic Crypt;25;epic;lv25;25;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Priest's Chest;Level 20 epic Crypt;Level 20 epic Crypt;20;epic;lv20;20;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Titansteel Chest;Level 20 epic Crypt;Level 20 epic Crypt;20;epic;lv20;20;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Cobalt Chest;Level 15 epic Crypt;Level 15 epic Crypt;15;epic;lv15;15;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Ancient Warrior's Chest;Level 15 epic Crypt;Level 15 epic Crypt;15;epic;lv15;15;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Chest of the Cursed;Level 20 epic Crypt;Level 20 epic Crypt;20;epic;lv20;20;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Chest of the Cursed;Level 15 epic Crypt;Level 15 epic Crypt;15;epic;lv15;15;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Braided Chest;Level 25 epic Crypt;Level 25 epic Crypt;25;epic;lv25;25;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Scarab Chest;Level 25 epic Crypt;Level 25 epic Crypt;25;epic;lv25;25;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Cobalt Chest;Level 25 epic Crypt;Level 25 epic Crypt;25;epic;lv25;25;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Scorpion Chest;Level 25 epic Crypt;Level 25 epic Crypt;25;epic;lv25;25;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Scarab Chest;Level 20 epic Crypt;Level 20 epic Crypt;20;epic;lv20;20;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Trillium Chest;Level 20 epic Crypt;Level 20 epic Crypt;20;epic;lv20;20;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Turtle Chest;Level 20 epic Crypt;Level 20 epic Crypt;20;epic;lv20;20;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Harpy Chest;Level 15 epic Crypt;Level 15 epic Crypt;15;epic;lv15;15;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Trillium Chest;Level 15 epic Crypt;Level 15 epic Crypt;15;epic;lv15;15;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Scorpion Chest;Level 20 epic Crypt;Level 20 epic Crypt;20;epic;lv20;20;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Minotaur Chest;Level 20 epic Crypt;Level 20 epic Crypt;20;epic;lv20;20;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Braided Chest;Level 15 epic Crypt;Level 15 epic Crypt;15;epic;lv15;15;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Priest's Chest;Level 15 epic Crypt;Level 15 epic Crypt;15;epic;lv15;15;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+House of Horrors Chest;Level 20 epic Crypt;Level 20 epic Crypt;20;epic;lv20;20;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Barbarian Chest;Level 15 epic Crypt;Level 15 epic Crypt;15;epic;lv15;15;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Turtle Chest;Level 30 epic Crypt;Level 30 epic Crypt;30;epic;lv30;30;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Chest of the Cursed;Level 25 epic Crypt;Level 25 epic Crypt;25;epic;lv25;25;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Braided Chest;Level 20 epic Crypt;Level 20 epic Crypt;20;epic;lv20;20;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Barbarian Chest;Level 20 epic Crypt;Level 20 epic Crypt;20;epic;lv20;20;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Ancient Warrior's Chest;Level 20 epic Crypt;Level 20 epic Crypt;20;epic;lv20;20;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+White Wood Chest;Level 20 epic Crypt;Level 20 epic Crypt;20;epic;lv20;20;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Ancient Bastion Chest;Level 20 epic Crypt;Level 20 epic Crypt;20;epic;lv20;20;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Abandoned Chest;Level 20 epic Crypt;Level 20 epic Crypt;20;epic;lv20;20;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Ancient Bastion Chest;Level 30 epic Crypt;Level 30 epic Crypt;30;epic;lv30;30;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Harpy Chest;Level 30 epic Crypt;Level 30 epic Crypt;30;epic;lv30;30;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+White Wood Chest;Level 30 epic Crypt;Level 30 epic Crypt;30;epic;lv30;30;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Cobalt Chest;Level 30 epic Crypt;Level 30 epic Crypt;30;epic;lv30;30;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Cobalt Chest;Level 20 epic Crypt;Level 20 epic Crypt;20;epic;lv20;20;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Scarab Chest;Level 15 epic Crypt;Level 15 epic Crypt;15;epic;lv15;15;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Harpy Chest;Level 20 epic Crypt;Level 20 epic Crypt;20;epic;lv20;20;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Scorpion Chest;Level 15 epic Crypt;Level 15 epic Crypt;15;epic;lv15;15;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Trillium Chest;Level 25 epic Crypt;Level 25 epic Crypt;25;epic;lv25;25;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Priest's Chest;Level 25 epic Crypt;Level 25 epic Crypt;25;epic;lv25;25;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Turtle Chest;Level 15 epic Crypt;Level 15 epic Crypt;15;epic;lv15;15;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Barbarian Chest;Level 25 epic Crypt;Level 25 epic Crypt;25;epic;lv25;25;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Ancient Warrior's Chest;Level 30 epic Crypt;Level 30 epic Crypt;30;epic;lv30;30;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Ancient Warrior's Chest;Level 35 epic Crypt;Level 35 epic Crypt;35;epic;lv35;35;HIGH;🔵 BLUE;Level X epic Crypt → Epic
+Sapphire Chest;Vault of the Ancients;Level 45 Vault of the Ancients;45;vota;lv40_44;45;MEDIUM;🟠 ORANGE;Level 45 → 40-44 Kategorie (nächstliegend)
+sapphire Chest;Vault of the Ancients;Level 45 Vault of the Ancients;45;vota;lv40_44;45;MEDIUM;🟠 ORANGE;Level 45 → 40-44 Kategorie (nächstliegend)
