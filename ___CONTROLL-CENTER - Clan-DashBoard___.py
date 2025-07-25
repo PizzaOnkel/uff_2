@@ -6,6 +6,7 @@ def git_commit_and_push_ghpages():
 
 
 import tkinter as tk
+import tkinter.messagebox
 import subprocess
 import os
 import shutil
@@ -17,13 +18,13 @@ BACKUP_DIR = r"K:\B A C K U P - TOTAL BATTLE"
 
 def backup_project():
     now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    backup_name = f"uff_2_backup_{now}"
+    backup_name = f"B A C K U P - Clan-Dashboard_uff_2_{now}"
     dest = os.path.join(BACKUP_DIR, backup_name)
     try:
         shutil.copytree(UFF2_PATH, dest)
-        tk.messagebox.showinfo("Backup erfolgreich", f"Backup wurde erstellt: {dest}")
+        tkinter.messagebox.showinfo("Backup erfolgreich", f"Backup wurde erstellt: {dest}")
     except Exception as e:
-        tk.messagebox.showerror("Backup fehlgeschlagen", f"Fehler: {e}")
+        tkinter.messagebox.showerror("Backup fehlgeschlagen", f"Fehler: {e}")
 
 def start_node_server():
     subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && node server.js"', shell=True)
