@@ -102,19 +102,26 @@ const verticalHeaders = [
       // Perioden laden
       const periodsArr = periodsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setPeriods(periodsArr);
-      // Aktuelle Periode bestimmen (über periodId aus results)
+      // Aktuelle Periode bestimmen: Laufende Periode (start <= jetzt <= end), sonst die mit dem neuesten Enddatum
       let periodName = "";
       let periodStart = "";
       let periodEnd = "";
-      if (resultsArr.length > 0) {
-        const periodId = resultsArr[0].periodId;
-        if (periodId) {
-          const found = periodsArr.find(p => p.id === periodId);
-          if (found) {
-            if (found.name) periodName = found.name;
-            if (found.start) periodStart = found.start;
-            if (found.end) periodEnd = found.end;
-          }
+      if (periodsArr.length > 0) {
+        const now = new Date();
+        // Finde laufende Periode
+        let current = periodsArr.find(p => {
+          const start = new Date(p.start);
+          const end = new Date(p.end);
+          return start <= now && now <= end;
+        });
+        // Falls keine läuft, nimm die mit dem neuesten Enddatum
+        if (!current) {
+          current = periodsArr.reduce((a, b) => new Date(a.end) > new Date(b.end) ? a : b);
+        }
+        if (current) {
+          if (current.name) periodName = current.name;
+          if (current.start) periodStart = current.start;
+          if (current.end) periodEnd = current.end;
         }
       }
       setCurrentPeriodName(periodName);
