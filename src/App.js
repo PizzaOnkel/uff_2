@@ -28,6 +28,8 @@ import TopTen from './pages/TopTen';
 import TopTenCategory from './pages/TopTenCategory';
 import AdminDebugPage from './pages/AdminDebugPage';
 
+import HallOfChampionsPage from './pages/HallOfChampionsPage';
+
 // ...existing code...
 
 class AppContent extends React.Component {
@@ -130,7 +132,7 @@ class AppContent extends React.Component {
       case 'topTenJormungandr':
         return <TopTenCategory setCurrentPage={this.setCurrentPage} category="Jormungandr Total" categoryInfo={{ label: 'Jormungandr Chests', icon: '🐉', color: '#059669' }} />;
       case 'hallOfChampions':
-        return <ComingSoonPage t={t} setCurrentPage={this.setCurrentPage} title={t.hallOfChampionsTitle} backPage="navigation" />;
+        return <HallOfChampionsPage t={t} setCurrentPage={this.setCurrentPage} />;
       case 'currentTotalEventAdmin':
         return <ComingSoonPage t={t} setCurrentPage={this.setCurrentPage} title={t.currentTotalEventTitle} backPage="adminPanel" />;
       case 'eventArchiveAdmin':

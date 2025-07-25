@@ -1,7 +1,26 @@
 def git_checkout_ghpages():
     subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git checkout gh-pages"', shell=True)
+def build_react():
+    # Hinweis: Node-Server sollte vorher laufen
+    if not is_node_server_running():
+        tkinter.messagebox.showwarning("Achtung", "Starte zuerst den Node-Server (Backend), bevor du den Build ausführst!")
+        return
+    subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && npm run build"', shell=True)
+
+def git_commit_and_push():
+    # Hinweis: Build sollte vorher ausgeführt werden
+    build_path = os.path.join(UFF2_PATH, "build")
+    if not os.path.exists(build_path):
+        tkinter.messagebox.showwarning("Achtung", "Bitte führe zuerst den Build aus (npm run build), bevor du committest und pushst!")
+        return
+    subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git add . && git commit -m \"Deploy build\" && git push"', shell=True)
 
 def git_commit_and_push_ghpages():
+    # Hinweis: Build sollte vorher ausgeführt werden
+    build_path = os.path.join(UFF2_PATH, "build")
+    if not os.path.exists(build_path):
+        tkinter.messagebox.showwarning("Achtung", "Bitte führe zuerst den Build aus (npm run build), bevor du committest und pushst!")
+        return
     subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git add . && git commit -m \"Publish to gh-pages\" && git push"', shell=True)
 
 
@@ -12,8 +31,54 @@ import os
 import shutil
 import datetime
 
+# --- GIT-TOOLS ---
+def git_status():
+    try:
+        result = subprocess.run(f'cd /d {UFF2_PATH} && git status', shell=True, capture_output=True, text=True)
+        tkinter.messagebox.showinfo("Git Status", result.stdout)
+    except Exception as e:
+        tkinter.messagebox.showerror("Fehler bei git status", str(e))
 
-UFF2_PATH = r"c:\Users\user\Desktop\clan-dashboard\uff_2_clean\uff_2"
+def git_pull():
+    try:
+        # Vorher Status anzeigen und ggf. warnen
+        result = subprocess.run(f'cd /d {UFF2_PATH} && git status', shell=True, capture_output=True, text=True)
+        if "Unmerged paths" in result.stdout or "both modified" in result.stdout:
+            tkinter.messagebox.showwarning("Merge-Konflikt", "Achtung: Es gibt ungelöste Merge-Konflikte! Bitte löse diese zuerst.")
+            return
+        if "Changes not staged for commit" in result.stdout or "Untracked files" in result.stdout:
+            if not tkinter.messagebox.askyesno("Warnung", "Es gibt ungespeicherte Änderungen! Trotzdem Pull ausführen?"):
+                return
+        pull_result = subprocess.run(f'cd /d {UFF2_PATH} && git pull', shell=True, capture_output=True, text=True)
+        tkinter.messagebox.showinfo("Git Pull", pull_result.stdout + "\n" + pull_result.stderr)
+    except Exception as e:
+        tkinter.messagebox.showerror("Fehler bei git pull", str(e))
+
+def git_diff():
+    try:
+        result = subprocess.run(f'cd /d {UFF2_PATH} && git diff', shell=True, capture_output=True, text=True)
+        if not result.stdout.strip():
+            tkinter.messagebox.showinfo("Git Diff", "Keine Änderungen zum Anzeigen.")
+        else:
+            # Zeige Diff in eigenem Fenster, falls zu lang
+            diff_win = tk.Toplevel()
+            diff_win.title("Git Diff")
+            text = tk.Text(diff_win, wrap="none", font=("Consolas", 10))
+            text.insert("1.0", result.stdout)
+            text.pack(expand=True, fill="both")
+            diff_win.geometry("900x600")
+    except Exception as e:
+        tkinter.messagebox.showerror("Fehler bei git diff", str(e))
+
+def git_log():
+    try:
+        result = subprocess.run(f'cd /d {UFF2_PATH} && git log --oneline -n 15', shell=True, capture_output=True, text=True)
+        tkinter.messagebox.showinfo("Git Log (letzte 15)", result.stdout)
+    except Exception as e:
+        tkinter.messagebox.showerror("Fehler bei git log", str(e))
+
+
+UFF2_PATH = r"c:\Users\user\Desktop\clan_dashboard_clean"
 BACKUP_DIR = r"K:\B A C K U P - TOTAL BATTLE"
 
 def backup_project():
@@ -55,12 +120,25 @@ root = tk.Tk()
 root.title("Clan-Dashboard Control Panel")
 root.configure(bg="#232946")
 
+
 # Breiteres Fenster
 root.geometry("1200x900")
 
 
 main_frame = tk.Frame(root, bg="#232946", padx=24, pady=24)
 main_frame.pack(fill="both", expand=True)
+
+# --- GIT STATUS & SICHERHEIT ---
+git_frame = tk.LabelFrame(main_frame, text="Git-Status & Sicherheit", fg="#ff595e", bg="#232946", font=("Segoe UI", 12, "bold"), bd=2, relief="ridge", padx=16, pady=12, labelanchor="n")
+git_frame.pack(fill="x", pady=(10, 10))
+tk.Label(git_frame, text="Git-Status prüfen, Änderungen vergleichen, Pull ausführen und letzte Commits anzeigen. Hilft, Konflikte und Datenverlust zu vermeiden!", anchor="w", fg="#ff595e", bg="#232946", font=("Segoe UI", 10)).pack(fill="x")
+btnrow = tk.Frame(git_frame, bg="#232946")
+btnrow.pack(fill="x", pady=4)
+tk.Button(btnrow, text="Git Status anzeigen", width=22, bg="#ff595e", fg="white", font=("Segoe UI", 10, "bold"), command=git_status).pack(side="left", padx=4)
+tk.Button(btnrow, text="Git Pull (aktualisieren)", width=22, bg="#ff595e", fg="white", font=("Segoe UI", 10, "bold"), command=git_pull).pack(side="left", padx=4)
+tk.Button(btnrow, text="Git Diff (Änderungen)", width=22, bg="#ff595e", fg="white", font=("Segoe UI", 10, "bold"), command=git_diff).pack(side="left", padx=4)
+tk.Button(btnrow, text="Git Log (Commits)", width=22, bg="#ff595e", fg="white", font=("Segoe UI", 10, "bold"), command=git_log).pack(side="left", padx=4)
+tk.Label(git_frame, text="Tipp: Vor jedem Push immer erst Pull & Status prüfen!", fg="#ff595e", bg="#232946", font=("Segoe UI", 9, "italic"), anchor="w").pack(fill="x", pady=(4,0))
 
 # --- Backup-Bereich ---
 backup_frame = tk.LabelFrame(main_frame, text="Backup & Sicherheit", fg="#eebc1d", bg="#232946", font=("Segoe UI", 12, "bold"), bd=2, relief="ridge", padx=16, pady=12, labelanchor="n")
