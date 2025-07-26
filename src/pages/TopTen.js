@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+// import { collection, getDocs } from 'firebase/firestore';
+import { mapToMainName } from '../utils/aliasMapping';
 import { translations } from '../translations/translations';
 import { ROUTES } from '../routes';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement, RadialLinearScale, Filler } from 'chart.js';
@@ -12,11 +14,38 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 const TopTen = ({ t, setCurrentPage }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [players, setPlayers] = useState([]); // Spieler für Alias-Mapping
+  const [ignoreChests, setIgnoreChests] = useState([]); // Ignore-Liste aus Firestore
   // Startseite zeigt Gesamtsumme aller Kategorien
   const [selectedCategory, setSelectedCategory] = useState('ALL_CATEGORIES');
   const [topPlayers, setTopPlayers] = useState([]);
 
   const headerStyle = { fontSize: '2.2em', fontWeight: 'bold', color: '#ff3b3b', marginBottom: '12px', letterSpacing: '2px' };
+
+  // Spieler laden (für Alias-Mapping)
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      try {
+        const playersSnap = await getDocs(collection(db, "players"));
+        const list = playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setPlayers(list);
+      } catch (e) {
+        setPlayers([]);
+      }
+    };
+    // Ignore-Liste aus Firestore laden
+    const fetchIgnoreList = async () => {
+      try {
+        const ignoreSnap = await getDocs(collection(db, "chestMappingIgnore"));
+        const ignoreList = ignoreSnap.docs.map(doc => doc.data());
+        setIgnoreChests(ignoreList);
+      } catch (e) {
+        setIgnoreChests([]);
+      }
+    };
+    fetchPlayers();
+    fetchIgnoreList();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,19 +63,43 @@ const TopTen = ({ t, setCurrentPage }) => {
     fetchData();
   }, []);
 
+  // Ignore-Logik wie in StandardsEvaluationPage.js
+  function isIgnoredChest(chest) {
+    for (const ignore of ignoreChests) {
+      if (ignore.Name && ignore.Name.trim().toLowerCase() !== (chest.Name || "").trim().toLowerCase()) continue;
+      if (ignore.Level && ignore.Level.trim() !== "" && String(ignore.Level).trim() !== String(chest.level ?? chest.Level ?? "").trim()) continue;
+      if (ignore.Type && ignore.Type.trim() !== "") {
+        if (!chest.Type) continue;
+        const t1 = ignore.Type.trim().toLowerCase();
+        const t2 = (chest.Type || "").trim().toLowerCase();
+        if (!(t2.includes(t1))) continue;
+      }
+      if (ignore.Source && ignore.Source.trim() !== "") {
+        if (!chest.Source) continue;
+        const s1 = ignore.Source.trim().toLowerCase();
+        const s2 = (chest.Source || "").trim().toLowerCase();
+        if (!(s2.includes(s1))) continue;
+      }
+      return true;
+    }
+    return false;
+  }
+
   // Noch robustere Aggregation: Spielernamen werden normalisiert (trim, lowercase), nur gewählte Kategorie, Top 10
   useEffect(() => {
     if (data.length > 0) {
       const playerMap = new Map();
       data.forEach(row => {
         if (!row.Clanmate || row.Clanmate.trim() === '') return;
+        // Hauptnamen-Mapping anwenden
+        const mainName = mapToMainName(players, row.Clanmate);
         const key = (row.playerId && String(row.playerId).trim() !== '')
           ? String(row.playerId).trim()
-          : (row.Clanmate || '').trim().normalize('NFKC').toLowerCase();
+          : (mainName || '').trim().normalize('NFKC').toLowerCase();
         // Initialisiere alle Kategorien
         if (!playerMap.has(key)) {
           playerMap.set(key, {
-            Clanmate: (row.Clanmate || '').trim(),
+            Clanmate: mainName,
             _aggKey: key,
             'Arena Total': 0,
             'Common Total': 0,
@@ -68,7 +121,7 @@ const TopTen = ({ t, setCurrentPage }) => {
         }
         const entry = playerMap.get(key);
         if (Array.isArray(row.chests)) {
-          row.chests.forEach(chest => {
+          row.chests.filter(chest => !isIgnoredChest(chest)).forEach(chest => {
             let cat = '';
             const name = (chest.Name || '').toLowerCase();
             const type = (chest.Type || chest.Kategorie || chest.Category || '').toLowerCase();
@@ -142,7 +195,7 @@ const TopTen = ({ t, setCurrentPage }) => {
     } else {
       setTopPlayers([]);
     }
-  }, [data, selectedCategory]);
+  }, [data, selectedCategory, ignoreChests]);
 
   // Kategorien mit Routing-Information
   const categories = [
@@ -168,7 +221,7 @@ const TopTen = ({ t, setCurrentPage }) => {
     const categoryInfo = categories.find(cat => cat.key === selectedCategory);
     const label = categoryInfo ? `${categoryInfo.label} (Anzahl Chests)` : selectedCategory;
     return {
-      labels: topPlayers.map((player, idx) => `${player.Clanmate} (${player[selectedCategory]}) [${selectedCategory}] #${idx + 1}`),
+      labels: topPlayers.map((player, idx) => `${mapToMainName(players, player.Clanmate)} (${player[selectedCategory]}) [${selectedCategory}] #${idx + 1}`),
       datasets: [{
         label: label,
         data: topPlayers.map(player => player[selectedCategory]),
@@ -189,7 +242,7 @@ const TopTen = ({ t, setCurrentPage }) => {
     const categoryInfo = categories.find(cat => cat.key === selectedCategory);
     const label = categoryInfo ? `${categoryInfo.label} (Anzahl Chests)` : selectedCategory;
     return {
-      labels: top5.map((player, idx) => `${player.Clanmate} (${player[selectedCategory]}) [${selectedCategory}] #${idx + 1}`),
+      labels: top5.map((player, idx) => `${mapToMainName(players, player.Clanmate)} (${player[selectedCategory]}) [${selectedCategory}] #${idx + 1}`),
       datasets: [{
         label: label,
         data: top5.map(player => player[selectedCategory]),
@@ -207,7 +260,7 @@ const TopTen = ({ t, setCurrentPage }) => {
     return {
       labels: radarCategories.map(cat => categories.find(c => c.key === cat)?.label || cat),
       datasets: top5.map((player, index) => ({
-        label: `${player.Clanmate} (${player[selectedCategory]}) [${selectedCategory}] #${index + 1}`,
+        label: `${mapToMainName(players, player.Clanmate)} (${player[selectedCategory]}) [${selectedCategory}] #${index + 1}`,
         data: radarCategories.map(cat => player[cat] || 0),
         backgroundColor: [`#FFD700`, `#C0C0C0`, `#CD7F32`, `#8B5CF6`, `#3B82F6`][index] + '40',
         borderColor: [`#FFD700`, `#C0C0C0`, `#CD7F32`, `#8B5CF6`, `#3B82F6`][index],

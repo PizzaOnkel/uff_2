@@ -4,6 +4,7 @@ import Papa from "papaparse";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
+import { mapToMainName } from "../utils/aliasMapping";
 
 export default function CurrentTotalEventPage({ t, setCurrentPage }) {
 // ...existing code...
@@ -72,7 +73,7 @@ const verticalHeaders = [
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-      const [playersSnap, troopSnap, resultsSnap, chestMappingsSnap, normsSnap, uploadTimesSnap, periodsSnap] = await Promise.all([
+      const [playersSnap, troopSnap, resultsSnap, chestMappingsSnap, normsSnap, uploadTimesSnap, periodsSnap, ignoreSnap] = await Promise.all([
         getDocs(collection(db, "players")),
         getDocs(collection(db, "troopStrengths")),
         getDocs(collection(db, "results")),
@@ -80,11 +81,11 @@ const verticalHeaders = [
         getDocs(collection(db, "norms")),
         getDocs(collection(db, "uploadtime")),
         getDocs(collection(db, "periods")),
+        getDocs(collection(db, "chestMappingIgnore")),
       ]);
       setPlayers(playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       setTroopStrengths(troopSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       const resultsArr = resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setResults(resultsArr);
       setChestMappings(chestMappingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       setNorms(normsSnap.docs.map(doc => ({ troopStrength: doc.data().troopStrength, value: doc.data().value })));
       // Map: periodId -> uploadtime (neueste)
@@ -92,7 +93,6 @@ const verticalHeaders = [
       uploadTimesSnap.docs.forEach(doc => {
         const data = doc.data();
         if (data.periodId && data.uploadtime) {
-          // Nur die neueste uploadtime pro Periode speichern
           if (!uploadMap[data.periodId] || uploadMap[data.periodId] < data.uploadtime) {
             uploadMap[data.periodId] = data.uploadtime;
           }
@@ -102,49 +102,35 @@ const verticalHeaders = [
       // Perioden laden
       const periodsArr = periodsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setPeriods(periodsArr);
-      // Aktuelle Periode bestimmen: Laufende Periode (start <= jetzt <= end), sonst die mit dem neuesten Enddatum
-      let periodName = "";
-      let periodStart = "";
-      let periodEnd = "";
-      if (periodsArr.length > 0) {
-        const now = new Date();
-        // Finde laufende Periode
-        let current = periodsArr.find(p => {
-          const start = new Date(p.start);
-          const end = new Date(p.end);
-          return start <= now && now <= end;
-        });
-        // Falls keine läuft, nimm die mit dem neuesten Enddatum
-        if (!current) {
-          current = periodsArr.reduce((a, b) => new Date(a.end) > new Date(b.end) ? a : b);
-        }
-        if (current) {
-          if (current.name) periodName = current.name;
-          if (current.start) periodStart = current.start;
-          if (current.end) periodEnd = current.end;
+      // Aktuelle Periode bestimmen (neueste mit start <= jetzt und end >= jetzt oder end leer)
+      let now = new Date();
+      let currentPeriod = null;
+      let currentPeriodId = null;
+      // Finde die Periode, die aktuell ist (start <= jetzt && (end >= jetzt || end leer))
+      for (const p of periodsArr) {
+        if (p.start && new Date(p.start) <= now && (!p.end || new Date(p.end) >= now)) {
+          currentPeriod = p;
+          currentPeriodId = p.id;
+          break;
         }
       }
-      setCurrentPeriodName(periodName);
-      setCurrentPeriodStart(periodStart);
-      setCurrentPeriodEnd(periodEnd);
+      // Fallback: falls keine laufende Periode, nimm die mit dem neuesten start
+      if (!currentPeriod && periodsArr.length > 0) {
+        currentPeriod = periodsArr.reduce((a, b) => (!a.start || (b.start && new Date(b.start) > new Date(a.start))) ? b : a);
+        currentPeriodId = currentPeriod.id;
+      }
+      setCurrentPeriodName(currentPeriod?.name || "");
+      setCurrentPeriodStart(currentPeriod?.start || "");
+      setCurrentPeriodEnd(currentPeriod?.end || "");
+      // Filtere results auf aktuelle Periode
+      const filteredResults = resultsArr.filter(r => r.periodId === currentPeriodId);
+      setResults(filteredResults);
+      // Ignore-Liste aus Firestore
+      const ignoreList = ignoreSnap.docs.map(doc => doc.data());
+      setIgnoreChests(ignoreList);
       setLoading(false);
     }
-    // Ignore-Liste aus public/json-data laden
-    async function loadIgnoreList() {
-      try {
-        const resp = await fetch(process.env.PUBLIC_URL + "/json-data/chest-mapping-ignore.csv");
-        if (!resp.ok) throw new Error("CSV nicht gefunden");
-        const csvText = await resp.text();
-        const parsed = Papa.parse(csvText, { header: true, delimiter: ";", skipEmptyLines: true });
-        setIgnoreChests(parsed.data);
-        console.log("Geladene Ignore-Liste:", parsed.data);
-      } catch (e) {
-        console.error("Fehler beim Laden der Ignore-CSV:", e);
-        setIgnoreChests([]);
-      }
-    }
     fetchData();
-    loadIgnoreList();
   }, []);
 
   useEffect(() => {
@@ -163,11 +149,9 @@ const verticalHeaders = [
   }
 
   function findPlayer(clanmate) {
-    return players.find(
-      p =>
-        p.name === clanmate ||
-        (Array.isArray(p.aliases) && p.aliases.includes(clanmate))
-    );
+    // Gibt das ganze Spielerobjekt zurück, aber mapToMainName gibt nur den Namen
+    const mainName = mapToMainName(players, clanmate);
+    return players.find(p => p.name === mainName);
   }
 
   function getNormPoints(troopStrengthName) {
@@ -206,8 +190,9 @@ function fallbackLevel(chest) {
 
 // Ursprüngliche Aggregation: pro Spieler (nicht pro Kategorie)
 results.forEach(result => {
-  const playerName = result.Clanmate;
-  const player = findPlayer(playerName);
+  const playerNameRaw = result.Clanmate;
+  const playerName = mapToMainName(players, playerNameRaw);
+  const player = findPlayer(playerNameRaw); // findPlayer nutzt mapToMainName intern
   const rank = player?.rank || "";
   let troopStrength = player?.troopStrength || "";
   if (!troopStrength || troopStrength.trim() === '') {
@@ -226,8 +211,6 @@ results.forEach(result => {
 
   function isIgnoredChest(chest) {
     if (isArenaChest(chest)) return false;
-    let ignored = false;
-    let reason = "";
     for (const ignore of ignoreChests) {
       if (ignore.Name && ignore.Name.trim().toLowerCase() !== (chest.Name || "").trim().toLowerCase()) continue;
       if (ignore.Level && ignore.Level.trim() !== "" && String(ignore.Level).trim() !== String(chest.level ?? chest.Level ?? "").trim()) continue;
@@ -243,11 +226,9 @@ results.forEach(result => {
         const s2 = (chest.Source || "").trim().toLowerCase();
         if (!(s2.includes(s1))) continue;
       }
-      ignored = true;
-      reason = JSON.stringify(ignore);
-      break;
+      return true;
     }
-    return ignored;
+    return false;
   }
 
   // Mapping-Logik: Weist jeder Truhe die exakte Tabellenspalte (category+level) zu
@@ -418,13 +399,14 @@ results.forEach(result => {
 
   // Erzeuge die aggregierten Zeilen
   const tableRows = Array.from(playerMap.values()).map(row => {
+    row.name = mapToMainName(players, row.name); // Anzeige immer Hauptname
     row.differenz = row.ist - row.soll;
     row.percent = row.soll > 0 ? Math.round((row.ist / row.soll) * 100) : 0;
     // Zeige den Upload-Timestamp aus uploadTimes (nach Periode)
     let uploadTimestamp = "";
     if (results.length > 0) {
       // Finde die Periode für diesen Spieler (über result.periodId)
-      const resultEntry = results.find(r => r.Clanmate === row.name);
+      const resultEntry = results.find(r => mapToMainName(players, r.Clanmate) === row.name);
       if (resultEntry && resultEntry.periodId && uploadTimes[resultEntry.periodId]) {
         const d = new Date(uploadTimes[resultEntry.periodId]);
         const yyyy = d.getFullYear();
@@ -542,6 +524,7 @@ results.forEach(result => {
             ) : (
               <div className="text-gray-400">Keine Truhen-Daten vorhanden.</div>
             )}
+            {/* ... */}
           </div>
         </div>
       </div>
@@ -611,6 +594,9 @@ results.forEach(result => {
                   style={{ width: `${totalSoll > 0 ? Math.min(200, (totalIst / totalSoll) * 100) : 0}%` }}
                 />
               </div>
+        <div className="mt-2 text-center" style={{ color: '#ff6666', fontWeight: 500, fontSize: '1.1em' }}>
+          {`Anzahl Spieler: ${tableRows.length}`}
+        </div>
             </div>
             {/* Slider über der Tabelle */}
             <div className="w-full max-w-6xl mb-2">

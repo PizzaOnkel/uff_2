@@ -11,6 +11,8 @@
 
 
 import React, { useState, useEffect } from "react";
+import ChestMappingSuggestions from "./ChestMappingSuggestions";
+import ChestMappingIgnoreList from "./ChestMappingIgnoreList";
 import { CHEST_NAMES, CHEST_TYPES, CHEST_SOURCES } from "./chestDropdownData";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
@@ -34,6 +36,14 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
   const [editingMapping, setEditingMapping] = useState({});
   const [usedChestMappings, setUsedChestMappings] = useState([]);
   const [importing, setImporting] = useState(false);
+  // UI-Steuerung für ausgelagerte Komponenten
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showIgnoreList, setShowIgnoreList] = useState(false);
+  // Ignore-Liste für Mapping-Vorschläge (Firestore)
+  const [ignoreChests, setIgnoreChests] = useState([]);
+  const [newIgnore, setNewIgnore] = useState({ Name: '', Level: '', Type: '', Source: '' });
+  const [editingIgnoreId, setEditingIgnoreId] = useState(null);
+  const [editingIgnore, setEditingIgnore] = useState({});
   const categories = [
     "Arena", "Common", "Rare", "Epic", "Tartaros",
     "Elven", "Cursed", "Bank", "Runic", "Heroic",
@@ -51,11 +61,45 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
     const unsub2 = onSnapshot(collection(db, "usedChestMappings"), snapshot => {
       setUsedChestMappings(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
     });
+    // Ignore-Liste abonnieren
+    const unsub3 = onSnapshot(collection(db, "chestMappingIgnore"), snapshot => {
+      setIgnoreChests(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
     return () => {
       unsub1();
       unsub2();
+      unsub3();
     };
   }, []);
+  // Ignore-Eintrag hinzufügen
+  async function handleAddIgnore(e) {
+    e.preventDefault();
+    if (!newIgnore.Name && !newIgnore.Level && !newIgnore.Type && !newIgnore.Source) return;
+    await addDoc(collection(db, "chestMappingIgnore"), {
+      ...newIgnore,
+      timestamp: new Date().toISOString()
+    });
+    setNewIgnore({ Name: '', Level: '', Type: '', Source: '' });
+  }
+
+  // Ignore-Eintrag bearbeiten
+  function handleEditIgnore(ignore) {
+    setEditingIgnoreId(ignore.id);
+    setEditingIgnore({ ...ignore });
+  }
+
+  async function handleSaveEditIgnore() {
+    if (!editingIgnoreId) return;
+    await updateDoc(doc(db, "chestMappingIgnore", editingIgnoreId), {
+      ...editingIgnore
+    });
+    setEditingIgnoreId(null);
+    setEditingIgnore({});
+  }
+
+  async function handleDeleteIgnore(id) {
+    await deleteDoc(doc(db, "chestMappingIgnore", id));
+  }
   // Importiere einen Mapping-Vorschlag in die chestMappings
   async function importUsedMapping(mapping) {
     setImporting(true);
@@ -84,7 +128,7 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
     "Chests of Tartaros": ["default"],
     "Elven Chests": ["default", "Elven Citadel Chest"],
     "Cursed Chests": ["default", "Cursed Citadel Chest"],
-    "Runic Chests": ["default"],
+    "Runic Chests": ["default", "Runic Chest"],
     "Heroic Chests": ["default"],
     "Vault of the Ancients": ["default"],
     "Bank Chests": [
@@ -170,86 +214,49 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white p-4 pb-8">
-      {/* Automatisch erkannte, noch nicht gepflegte Truhen-Mappings */}
-      <div className="w-full max-w-4xl bg-yellow-900 bg-opacity-30 rounded-lg p-6 mb-8">
-        <h3 className="text-2xl font-semibold mb-4 text-yellow-300">Automatisch erkannte, noch nicht gepflegte Truhen-Mappings</h3>
-        {/* Sortier-Buttons für Vorschlagsliste */}
-        <div className="flex gap-4 mb-4">
-          <button
-            onClick={() => setSortField('category')}
-            className={`px-4 py-2 rounded-lg font-bold shadow ${sortField === 'category' ? 'bg-yellow-500 text-white' : 'bg-yellow-800 text-yellow-200'}`}
-          >
-            Sortiere nach Kategorie
-          </button>
-          <button
-            onClick={() => setSortField('chestName')}
-            className={`px-4 py-2 rounded-lg font-bold shadow ${sortField === 'chestName' ? 'bg-yellow-500 text-white' : 'bg-yellow-800 text-yellow-200'}`}
-          >
-            Sortiere nach Name
-          </button>
-          <button
-            onClick={() => setSortField('level')}
-            className={`px-4 py-2 rounded-lg font-bold shadow ${sortField === 'level' ? 'bg-yellow-500 text-white' : 'bg-yellow-800 text-yellow-200'}`}
-          >
-            Sortiere nach Level
-          </button>
-          <button
-            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className={`px-4 py-2 rounded-lg font-bold shadow ${sortOrder === 'asc' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}
-          >
-            {sortOrder === 'asc' ? 'A → Z' : 'Z → A'}
-          </button>
-        </div>
-        {usedChestMappings.length === 0 ? (
-          <p className="text-gray-400">Keine neuen Vorschläge gefunden.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full table-auto">
-              <thead>
-                <tr className="bg-yellow-800">
-                  <th className="px-4 py-2 text-left">Truhen-Name</th>
-                  <th className="px-4 py-2 text-left">Kategorie</th>
-                  <th className="px-4 py-2 text-left">Level</th>
-                  <th className="px-4 py-2 text-left">Aktion</th>
-                </tr>
-              </thead>
-              <tbody>
-                {usedChestMappings
-                  .slice() // Kopie für Sortierung
-                  .sort((a, b) => {
-                    let cmp = 0;
-                    if (sortField === 'category') {
-                      cmp = (a.category || '').localeCompare(b.category || '', 'de', { sensitivity: 'base' });
-                      if (cmp === 0) cmp = (a.chestName || '').localeCompare(b.chestName || '', 'de', { sensitivity: 'base' });
-                    } else if (sortField === 'chestName') {
-                      cmp = (a.chestName || '').localeCompare(b.chestName || '', 'de', { sensitivity: 'base' });
-                      if (cmp === 0) cmp = (a.category || '').localeCompare(b.category || '', 'de', { sensitivity: 'base' });
-                    } else if (sortField === 'level') {
-                      cmp = (a.level || '').toString().localeCompare((b.level || '').toString(), 'de', { sensitivity: 'base', numeric: true });
-                    }
-                    return sortOrder === 'asc' ? cmp : -cmp;
-                  })
-                  .map((mapping) => (
-                    <tr key={mapping.id} className="border-b border-yellow-700">
-                      <td className="px-4 py-2">{mapping.chestName}</td>
-                      <td className="px-4 py-2">{mapping.category}</td>
-                      <td className="px-4 py-2">{mapping.level}</td>
-                      <td className="px-4 py-2">
-                        <button
-                          disabled={importing}
-                          className="px-3 py-1 bg-yellow-600 rounded text-white text-sm hover:bg-yellow-700 transition"
-                          onClick={() => importUsedMapping(mapping)}
-                        >
-                          Ins Mapping übernehmen
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+      {/* Zusätzlicher Zurück-Button oben links */}
+      <div style={{ position: 'absolute', top: 16, left: 16, zIndex: 20 }}>
+        <button
+          onClick={() => setCurrentPage(ROUTES.ADMIN_PANEL)}
+          className="px-6 py-2 bg-blue-600 rounded text-white font-semibold text-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transition"
+          style={{ minWidth: 120 }}
+        >
+          &larr; Zurück
+        </button>
       </div>
+      {/* Button für Vorschlagsliste */}
+      <div className="w-full max-w-4xl flex flex-row gap-4 mb-4">
+        <button onClick={() => setShowSuggestions(v => !v)} className="px-4 py-2 bg-yellow-700 rounded text-white font-semibold hover:bg-yellow-800 transition">{showSuggestions ? 'Vorschlagsliste ausblenden' : 'Vorschlagsliste anzeigen'}</button>
+        <button onClick={() => setShowIgnoreList(v => !v)} className="px-4 py-2 bg-red-700 rounded text-white font-semibold hover:bg-red-800 transition">{showIgnoreList ? 'Ignorierliste ausblenden' : 'Ignorierliste anzeigen'}</button>
+      </div>
+      {/* Ausgelagerte Komponenten */}
+      {showSuggestions && (
+        <ChestMappingSuggestions
+          usedChestMappings={usedChestMappings}
+          importUsedMapping={importUsedMapping}
+          importing={importing}
+          sortField={sortField}
+          setSortField={setSortField}
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
+        />
+      )}
+      {showIgnoreList && (
+        <ChestMappingIgnoreList
+          ignoreChests={ignoreChests}
+          newIgnore={newIgnore}
+          setNewIgnore={setNewIgnore}
+          handleAddIgnore={handleAddIgnore}
+          editingIgnoreId={editingIgnoreId}
+          editingIgnore={editingIgnore}
+          setEditingIgnoreId={setEditingIgnoreId}
+          setEditingIgnore={setEditingIgnore}
+          handleSaveEditIgnore={handleSaveEditIgnore}
+          handleDeleteIgnore={handleDeleteIgnore}
+          handleEditIgnore={handleEditIgnore}
+        />
+      )}
+
       <h2 className="text-4xl font-bold mb-6 text-center text-purple-400">Truhen-Zuordnungen verwalten</h2>
       {/* Formular für neue Zuordnung */}
       <form onSubmit={handleAddMapping} className="mb-8 w-full max-w-4xl bg-gray-800 rounded-lg p-6">

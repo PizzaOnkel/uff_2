@@ -4,6 +4,7 @@ import Papa from "papaparse";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
+import { mapToMainName } from "../utils/aliasMapping";
 
 export default function EventArchivePage({ t, setCurrentPage }) {
   // --- wie CurrentTotalEventPage, aber mit Perioden-Auswahl ---
@@ -92,12 +93,25 @@ export default function EventArchivePage({ t, setCurrentPage }) {
       setUploadTimes(uploadMap);
       // Perioden laden
       const periodsArr = periodsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setPeriods(periodsArr);
-      // Archiv-Perioden: nur abgeschlossene Perioden
-      const archivePeriods = periodsArr.filter(p => p.end && new Date(p.end) < new Date());
-      // Periode setzen, falls noch nicht gesetzt
-      if (!selectedPeriodId && archivePeriods.length > 0) {
-        setSelectedPeriodId(archivePeriods[archivePeriods.length - 1].id);
+      // Finde aktuelle Periode (start <= jetzt && (end >= jetzt || end leer))
+      let now = new Date();
+      let currentPeriodId = null;
+      for (const p of periodsArr) {
+        if (p.start && new Date(p.start) <= now && (!p.end || new Date(p.end) >= now)) {
+          currentPeriodId = p.id;
+          break;
+        }
+      }
+      // Archiv-Perioden: nur vergangene Perioden (end < jetzt), aber nicht die aktuelle
+      const archivePeriods = periodsArr.filter(p => p.end && new Date(p.end) < now && p.id !== currentPeriodId);
+      setPeriods(archivePeriods);
+      // Periode setzen, falls noch nicht gesetzt oder nicht mehr gültig
+      if (!selectedPeriodId || !archivePeriods.some(p => p.id === selectedPeriodId)) {
+        if (archivePeriods.length > 0) {
+          setSelectedPeriodId(archivePeriods[archivePeriods.length - 1].id);
+        } else {
+          setSelectedPeriodId("");
+        }
       }
       // Periodeninfo für Anzeige
       const selectedPeriod = archivePeriods.find(p => p.id === selectedPeriodId);
@@ -130,11 +144,9 @@ export default function EventArchivePage({ t, setCurrentPage }) {
   // --- Hilfsfunktionen und Aggregation wie CurrentTotalEventPage, aber alle Daten laufen über results (bereits gefiltert) ---
 
   function findPlayer(clanmate) {
-    return players.find(
-      p =>
-        p.name === clanmate ||
-        (Array.isArray(p.aliases) && p.aliases.includes(clanmate))
-    );
+    // Gibt das ganze Spielerobjekt zurück, aber mapToMainName gibt nur den Namen
+    const mainName = mapToMainName(players, clanmate);
+    return players.find(p => p.name === mainName);
   }
 
   function getNormPoints(troopStrengthName) {
@@ -577,6 +589,9 @@ export default function EventArchivePage({ t, setCurrentPage }) {
                 className={`h-6 ${totalSoll > 0 && (totalIst / totalSoll) >= 1 ? 'bg-green-500' : 'bg-blue-500'}`}
                 style={{ width: `${totalSoll > 0 ? Math.min(200, (totalIst / totalSoll) * 100) : 0}%` }}
               />
+            </div>
+            <div className="mt-2 text-center" style={{ color: '#ff6666', fontWeight: 500, fontSize: '1.1em' }}>
+              {`Anzahl Spieler: ${tableRows.length}`}
             </div>
           </div>
           {/* Slider über der Tabelle */}

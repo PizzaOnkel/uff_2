@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+// import { collection, getDocs } from "firebase/firestore";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
@@ -23,33 +24,24 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
   const [categoryCounts, setCategoryCounts] = useState([]);
   const [categorizedPlayers, setCategorizedPlayers] = useState([]);
 
+  const [ignoreChests, setIgnoreChests] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       // Spieler, Normen, Ergebnisse, ChestMappings, Ignore-Liste laden
-      const [playersSnap, normsSnap, resultsSnap, chestMappingsSnap] = await Promise.all([
+      const [playersSnap, normsSnap, resultsSnap, chestMappingsSnap, ignoreSnap] = await Promise.all([
         getDocs(collection(db, "players")),
         getDocs(collection(db, "norms")),
         getDocs(collection(db, "results")),
         getDocs(collection(db, "chestMappings")),
+        getDocs(collection(db, "chestMappingIgnore")),
       ]);
       const playersArr = playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const normsArr = normsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const resultsArr = resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const chestMappings = chestMappingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-      // Ignore-Liste laden (aus public/json-data/chest_mapping_ignore.csv)
-      let ignoreChests = [];
-      try {
-        const resp = await fetch("/json-data/chest-mapping-ignore.csv");
-        if (resp.ok) {
-          const text = await resp.text();
-          ignoreChests = text.split("\n").map(line => {
-            const [Name, Level, Type, Source] = line.split(",");
-            return { Name: Name?.trim(), Level: Level?.trim(), Type: Type?.trim(), Source: Source?.trim() };
-          }).filter(x => x.Name || x.Type || x.Source);
-        }
-      } catch (e) {}
+      const ignoreList = ignoreSnap.docs.map(doc => doc.data());
+      setIgnoreChests(ignoreList);
 
       // Aktuelle Veranstaltungsperiode bestimmen (letztes Ergebnis mit periodId)
       let aktuellePeriode = null;
@@ -79,8 +71,7 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
       }
       function isIgnoredChest(chest) {
         if (isArenaChest(chest)) return false;
-        let ignored = false;
-        for (const ignore of ignoreChests) {
+        for (const ignore of ignoreList) {
           if (ignore.Name && ignore.Name.trim().toLowerCase() !== (chest.Name || "").trim().toLowerCase()) continue;
           if (ignore.Level && ignore.Level.trim() !== "" && String(ignore.Level).trim() !== String(chest.level ?? chest.Level ?? "").trim()) continue;
           if (ignore.Type && ignore.Type.trim() !== "") {
@@ -95,10 +86,9 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
             const s2 = (chest.Source || "").trim().toLowerCase();
             if (!(s2.includes(s1))) continue;
           }
-          ignored = true;
-          break;
+          return true;
         }
-        return ignored;
+        return false;
       }
 
       // Spieler-Aggregation wie in CurrentTotalEventPage.js

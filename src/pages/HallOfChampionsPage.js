@@ -32,6 +32,7 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
   const [top3ByCategory, setTop3ByCategory] = useState({});
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [currentCategoryIdx, setCurrentCategoryIdx] = useState(0);
+  const [ignoreChests, setIgnoreChests] = useState([]);
   const audioRef = useRef(null);
   const intervalRef = useRef(null);
   // Kategorie automatisch wechseln wie ein Spielautomat
@@ -47,17 +48,21 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [resultsSnap, playersSnap] = await Promise.all([
+        const [resultsSnap, playersSnap, ignoreSnap] = await Promise.all([
           getDocs(collection(db, "results")),
           getDocs(collection(db, "players")),
+          getDocs(collection(db, "chestMappingIgnore")),
         ]);
         const resultsArr = resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const playersArr = playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const ignoreList = ignoreSnap.docs.map(doc => doc.data());
         setData(resultsArr);
         setPlayers(playersArr);
+        setIgnoreChests(ignoreList);
       } catch (error) {
         setData([]);
         setPlayers([]);
+        setIgnoreChests([]);
       }
       setLoading(false);
     };
@@ -65,6 +70,28 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
   }, []);
 
   // Aggregiere für jede Kategorie die Top 3 Spieler (über alle Daten)
+  // Ignore-Logik wie in StandardsEvaluationPage.js
+  function isIgnoredChest(chest) {
+    for (const ignore of ignoreChests) {
+      if (ignore.Name && ignore.Name.trim().toLowerCase() !== (chest.Name || "").trim().toLowerCase()) continue;
+      if (ignore.Level && ignore.Level.trim() !== "" && String(ignore.Level).trim() !== String(chest.level ?? chest.Level ?? "").trim()) continue;
+      if (ignore.Type && ignore.Type.trim() !== "") {
+        if (!chest.Type) continue;
+        const t1 = ignore.Type.trim().toLowerCase();
+        const t2 = (chest.Type || "").trim().toLowerCase();
+        if (!(t2.includes(t1))) continue;
+      }
+      if (ignore.Source && ignore.Source.trim() !== "") {
+        if (!chest.Source) continue;
+        const s1 = ignore.Source.trim().toLowerCase();
+        const s2 = (chest.Source || "").trim().toLowerCase();
+        if (!(s2.includes(s1))) continue;
+      }
+      return true;
+    }
+    return false;
+  }
+
   useEffect(() => {
     if (data.length === 0 || players.length === 0) return;
     const playerMap = new Map();
@@ -81,7 +108,7 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
       }
       const entry = playerMap.get(key);
       if (Array.isArray(row.chests)) {
-        row.chests.forEach(chest => {
+        row.chests.filter(chest => !isIgnoredChest(chest)).forEach(chest => {
           let cat = '';
           const name = (chest.Name || '').toLowerCase();
           const type = (chest.Type || chest.Kategorie || chest.Category || '').toLowerCase();
@@ -122,7 +149,7 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
       result[cat.key] = arr.sort((a, b) => b[cat.key] - a[cat.key]).slice(0, 3);
     });
     setTop3ByCategory(result);
-  }, [data, players]);
+  }, [data, players, ignoreChests]);
 
   // Musikplayer-Logik
   const handleAudio = () => {

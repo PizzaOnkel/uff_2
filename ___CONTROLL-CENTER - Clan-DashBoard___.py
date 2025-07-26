@@ -1,3 +1,17 @@
+import psutil
+
+def is_node_server_running():
+    # Prüft, ob ein Node.js-Prozess läuft
+    for proc in psutil.process_iter(['name', 'cmdline']):
+        try:
+            if proc.info['name'] and 'node' in proc.info['name'].lower():
+                # Optional: nach server.js im cmdline filtern
+                if proc.info['cmdline'] and any('server.js' in str(arg) for arg in proc.info['cmdline']):
+                    return True
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+    return False
+
 def git_checkout_ghpages():
     subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git checkout gh-pages"', shell=True)
 def build_react():
@@ -21,9 +35,12 @@ def git_commit_and_push_ghpages():
     if not os.path.exists(build_path):
         tkinter.messagebox.showwarning("Achtung", "Bitte führe zuerst den Build aus (npm run build), bevor du committest und pushst!")
         return
+
     subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git add . && git commit -m \"Publish to gh-pages\" && git push"', shell=True)
 
 
+
+# --- Imports ---
 import tkinter as tk
 import tkinter.messagebox
 import subprocess
@@ -74,13 +91,15 @@ def git_log():
     try:
         result = subprocess.run(f'cd /d {UFF2_PATH} && git log --oneline -n 15', shell=True, capture_output=True, text=True)
         tkinter.messagebox.showinfo("Git Log (letzte 15)", result.stdout)
+
     except Exception as e:
         tkinter.messagebox.showerror("Fehler bei git log", str(e))
 
-
+# --- Projektpfade ---
 UFF2_PATH = r"c:\Users\user\Desktop\clan_dashboard_clean"
 BACKUP_DIR = r"K:\B A C K U P - TOTAL BATTLE"
 
+# --- Backup & Entwicklung ---
 def backup_project():
     now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     backup_name = f"B A C K U P - Clan-Dashboard_uff_2_{now}"
@@ -97,15 +116,8 @@ def start_node_server():
 def start_react():
     subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && npm start"', shell=True)
 
-
 def git_checkout_deploy():
     subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git checkout deploy"', shell=True)
-
-def build_react():
-    subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && npm run build"', shell=True)
-
-def git_commit_and_push():
-    subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git add . && git commit -m \"Deploy build\" && git push"', shell=True)
 
 def git_checkout_main():
     subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git checkout main"', shell=True)
@@ -114,16 +126,13 @@ def open_build_folder():
     os.startfile(os.path.join(UFF2_PATH, "build"))
 
 
-
-
+# --- GUI-Initialisierung und Layout ---
 root = tk.Tk()
 root.title("Clan-Dashboard Control Panel")
 root.configure(bg="#232946")
 
-
 # Breiteres Fenster
 root.geometry("1200x900")
-
 
 main_frame = tk.Frame(root, bg="#232946", padx=24, pady=24)
 main_frame.pack(fill="both", expand=True)
