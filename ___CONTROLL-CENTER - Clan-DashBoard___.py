@@ -38,8 +38,6 @@ def git_commit_and_push_ghpages():
 
     subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git add . && git commit -m \"Publish to gh-pages\" && git push"', shell=True)
 
-
-
 # --- Imports ---
 import tkinter as tk
 import tkinter.messagebox
@@ -125,7 +123,6 @@ def git_checkout_main():
 def open_build_folder():
     os.startfile(os.path.join(UFF2_PATH, "build"))
 
-
 # --- GUI-Initialisierung und Layout ---
 root = tk.Tk()
 root.title("Clan-Dashboard Control Panel")
@@ -166,7 +163,8 @@ tk.Label(dev_frame, text="2. React starten (Frontend für Entwicklung, öffnet B
 tk.Button(dev_frame, text="2. React starten (Entwicklung)", width=36, bg="#3fa7d6", fg="white", font=("Segoe UI", 10, "bold"), command=start_react).pack(pady=4)
 
 
-# --- Projekt-Veröffentlichung (GitHub Pages) mit Scrollbar ---
+# --- Build-Ordner öffnen ---
+### --- Projekt-Veröffentlichung (GitHub Pages) mit Scrollbar ---
 publish_canvas = tk.Canvas(main_frame, bg="#232946", highlightthickness=0, height=380)
 publish_scrollbar = tk.Scrollbar(main_frame, orient="vertical", command=publish_canvas.yview)
 publish_canvas.configure(yscrollcommand=publish_scrollbar.set)
@@ -184,16 +182,14 @@ tk.Label(publish_frame, text="Schritt-für-Schritt Veröffentlichung deiner App 
 
 # Änderungen sichern (commit)
 def commit_local_changes():
-    subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git add . && git commit -m \"Lokale Änderungen sichern\""', shell=True)
+    subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git add . && git commit -m "Lokale Änderungen sichern""', shell=True)
 tk.Button(publish_frame, text="Änderungen sichern (commit)", width=36, bg="#ff595e", fg="white", font=("Segoe UI", 10, "bold"), command=commit_local_changes).pack(pady=2)
 
 # Änderungen stashen (zwischenparken)
 def stash_local_changes():
-    subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git stash push -m \"Zwischenablage durch Control Center\""', shell=True)
+    subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git stash push -m "Zwischenablage durch Control Center""', shell=True)
 tk.Button(publish_frame, text="Änderungen zwischenparken (stash)", width=36, bg="#eebc1d", fg="#232946", font=("Segoe UI", 10, "bold"), command=stash_local_changes).pack(pady=2)
 
-
-# Schritt-für-Schritt: Veröffentlichungs-Buttons in logischer Reihenfolge
 tk.Label(publish_frame, text="Danach kannst du mit Schritt 1 weitermachen!", fg="#a259d9", bg="#232946", font=("Segoe UI", 9, "italic"), anchor="w").pack(fill="x", pady=(2,6))
 
 # 1. Zu gh-pages wechseln
@@ -207,8 +203,6 @@ tk.Button(publish_frame, text="4. Änderungen committen & pushen (gh-pages)", wi
 # 5. Zurück zu main wechseln
 tk.Button(publish_frame, text="5. Zurück zu 'main' wechseln", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=git_checkout_main).pack(pady=3)
 tk.Label(publish_frame, text="Nach Schritt 4 ist deine App sofort unter https://<username>.github.io/<repo> online!", fg="#a259d9", bg="#232946", font=("Segoe UI", 9), anchor="w").pack(fill="x", pady=(4,0))
-
-# --- Build-Ordner öffnen ---
 build_frame = tk.LabelFrame(main_frame, text="Build-Ordner", fg="#eebc1d", bg="#232946", font=("Segoe UI", 12, "bold"), bd=2, relief="ridge", padx=16, pady=12, labelanchor="n")
 build_frame.pack(fill="x", pady=(18, 10))
 tk.Button(build_frame, text="Build-Ordner öffnen", width=36, bg="#eebc1d", fg="#232946", font=("Segoe UI", 10, "bold"), command=open_build_folder).pack(pady=3)
