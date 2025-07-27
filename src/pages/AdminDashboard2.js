@@ -349,8 +349,24 @@ function AdminDashboard2({ setCurrentPage }) {
     async function fetchPeriods() {
       try {
         const periodSnap = await getDocs(collection(db, "periods"));
-        const periodList = periodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        console.log('[DEBUG] Geladene Perioden aus Firestore:', periodList);
+        let periodList = periodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        // Versuche das Veranstaltungsdatum aus dem Namen zu extrahieren (Format: "Beschreibung ... (dd.mm.yyyy)")
+        function extractDateFromName(name) {
+          if (!name) return null;
+          const match = name.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+          if (match) {
+            // dd.mm.yyyy
+            return new Date(`${match[3]}-${match[2]}-${match[1]}`);
+          }
+          return null;
+        }
+        periodList = periodList.sort((a, b) => {
+          // 1. Versuche Datum aus Name zu extrahieren
+          const aDate = extractDateFromName(a.name) || (a.start ? new Date(a.start) : new Date(0));
+          const bDate = extractDateFromName(b.name) || (b.start ? new Date(b.start) : new Date(0));
+          return bDate - aDate;
+        });
+        console.log('[DEBUG] Geladene Perioden aus Firestore (sortiert nach Name/Datum):', periodList);
         setPeriods(periodList);
       } catch (e) {
         console.error('[DEBUG] Fehler beim Laden der Perioden:', e);

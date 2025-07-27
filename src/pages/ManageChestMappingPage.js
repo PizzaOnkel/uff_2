@@ -1,3 +1,126 @@
+
+import React, { useState, useEffect } from "react";
+import ChestMappingSuggestions from "./ChestMappingSuggestions";
+import ChestMappingIgnoreList from "./ChestMappingIgnoreList";
+import { CHEST_NAMES, CHEST_TYPES, CHEST_SOURCES } from "./chestDropdownData";
+import { ROUTES } from "../routes";
+import { db } from "../firebase";
+import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDocs, query } from "firebase/firestore";
+
+// Hilfsfunktion: Vorschlagsliste aus allen Ergebnissen neu generieren
+async function refreshUsedChestMappings(db) {
+  // Alle existierenden Mappings und Vorschläge laden
+  const [resultsSnap, mappingsSnap, usedSnap] = await Promise.all([
+    getDocs(collection(db, 'results')),
+    getDocs(collection(db, 'chestMappings')),
+    getDocs(collection(db, 'usedChestMappings'))
+  ]);
+  const mappedChests = new Set();
+  mappingsSnap.forEach(doc => {
+    const d = doc.data();
+    if (d.chestName && d.category) mappedChests.add(`${d.chestName}__${d.category}__${d.levelStart||''}`);
+  });
+  usedSnap.forEach(doc => {
+    const d = doc.data();
+    if (d.chestName && d.category) mappedChests.add(`${d.chestName}__${d.category}__${d.level||''}`);
+  });
+  // Mapping-Logik aus CurrentTotalEventPage.js für Vorschläge
+  function mapChestFields(chest) {
+    let chestName = chest.chestName || chest.Name || chest.name || chest.type || chest.Type || chest.id || '';
+    let type = chest.type || chest.Type || '';
+    let source = chest.source || chest.Source || '';
+    let level = chest.level || chest.Level || '';
+    let category = chest.category || chest.Category || '';
+    // --- Mapping-Logik ---
+    if (!category && type) category = type;
+    if ((type||"").toLowerCase().includes("arena") || (source||"").toLowerCase().includes("arena") || (chestName||"").toLowerCase().includes("arena")) {
+      category = "Arena Chests";
+      level = "total";
+    } else if ((chestName||"").toLowerCase().includes("orc") || (type||"").toLowerCase().includes("common crypt")) {
+      category = "Common Chests";
+    } else if ((chestName||"").toLowerCase().includes("elven citadel chest")) {
+      category = "Elven Chests";
+    } else if ((chestName||"").toLowerCase().includes("cursed citadel chest")) {
+      category = "Cursed Chests";
+    } else if (((type||chest.Kategorie||chest.Category||"").toLowerCase().includes("heroic monster"))) {
+      category = "Heroic Chests";
+    } else if ((chestName||"").toLowerCase().includes("rare dragon") || (type||"").toLowerCase().includes("rare crypt")) {
+      category = "Rare Chests";
+    } else if ((chestName||"").toLowerCase().includes("epic") || (type||"").toLowerCase().includes("epic") || (chestName||"").toLowerCase().includes("undead")) {
+      category = "Epic Chests";
+    } else if ((chestName||"").toLowerCase().includes("bank") || (type||"").toLowerCase().includes("bank") || (source||"").toLowerCase().includes("bank") || ["wooden","bronze","silver","golden","precious","magic"].some(lvl => (chestName||"").toLowerCase().includes(lvl) || (type||"").toLowerCase().includes(lvl))) {
+      category = "Bank Chests";
+      const bankLevels = ["Wooden","Bronze","Silver","Golden","Precious","Magic"];
+      let foundLevel = bankLevels.find(lvl =>
+        (chestName||"").toLowerCase().includes(lvl.toLowerCase()) ||
+        (type||"").toLowerCase().includes(lvl.toLowerCase()) ||
+        (level||"").toString().toLowerCase() === lvl.toLowerCase()
+      );
+      if (!foundLevel && level) {
+        const num = Number(level);
+        if (!isNaN(num) && num >= 1 && num <= 6) {
+          foundLevel = bankLevels[num-1];
+        }
+      }
+      if (!foundLevel) foundLevel = "Unbekannt";
+      level = foundLevel;
+    } else if ((chestName||"").toLowerCase().includes("jormungandr") || (type||"").toLowerCase().includes("jormungandr") || (source||"").toLowerCase().includes("jormungandr")) {
+      category = "Jormungandr Chests";
+      level = "total";
+    } else if ((chestName||"").toLowerCase().includes("authority") || (type||"").toLowerCase().includes("authority") || (source||"").toLowerCase().includes("authority")) {
+      category = "Union Chest";
+      level = "total";
+    } else if ((chestName||"").toLowerCase().includes("runic") || (type||"").toLowerCase().includes("runic") || (source||"").toLowerCase().includes("runic")) {
+      category = "Runic Chests";
+    } else if ((chestName||"").toLowerCase().includes("vault") || (type||"").toLowerCase().includes("vault") || (source||"").toLowerCase().includes("vault")) {
+      category = "Vault of the Ancients";
+    } else if ((chestName||"").toLowerCase().includes("quick march") || (type||"").toLowerCase().includes("quick march") || (source||"").toLowerCase().includes("quick march")) {
+      category = "Quick March Chest";
+    } else if ((chestName||"").toLowerCase().includes("ancients chest") || (type||"").toLowerCase().includes("ancients chest") || (source||"").toLowerCase().includes("ancients chest")) {
+      category = "Ancients Chest";
+    } else if ((chestName||"").toLowerCase().includes("rota") || (type||"").toLowerCase().includes("rota") || (source||"").toLowerCase().includes("rota")) {
+      category = "ROTA Total";
+    } else if ((chestName||"").toLowerCase().includes("epic ancient squad") || (type||"").toLowerCase().includes("epic ancient squad") || (source||"").toLowerCase().includes("epic ancient squad")) {
+      category = "Epic Ancient squad";
+    } else if ((chestName||"").toLowerCase().includes("eas total") || (type||"").toLowerCase().includes("eas total") || (source||"").toLowerCase().includes("eas total")) {
+      category = "EAs Total";
+    } else if ((chestName||"").toLowerCase().includes("union total") || (type||"").toLowerCase().includes("union total") || (source||"").toLowerCase().includes("union total")) {
+      category = "Union Total";
+    }
+    if (!category) category = chest.category || chest.Category || type || 'Unbekannt';
+    return {
+      chestName,
+      category,
+      type,
+      source,
+      level,
+      createdAt: new Date().toISOString()
+    };
+  }
+  // Alle neuen Truhen aus allen Ergebnissen extrahieren
+  const newSuggestions = [];
+  resultsSnap.forEach(entryDoc => {
+    const entry = entryDoc.data();
+    if (!Array.isArray(entry.chests)) return;
+    entry.chests.forEach(chest => {
+      const mapped = mapChestFields(chest);
+      const key = `${mapped.chestName}__${mapped.category}__${mapped.level}`;
+      if (!mappedChests.has(key) && mapped.chestName) {
+        newSuggestions.push(mapped);
+        mappedChests.add(key);
+      }
+    });
+  });
+  // Bestehende Vorschläge löschen (um Duplikate zu vermeiden)
+  for (const docSnap of usedSnap.docs) {
+    await deleteDoc(docSnap.ref);
+  }
+  // Neue Vorschläge speichern
+  for (const suggestion of newSuggestions) {
+    await addDoc(collection(db, 'usedChestMappings'), suggestion);
+  }
+  return newSuggestions.length;
+}
 // Alle zuordenbaren Kategorien:
 // Arena, Common, Rare, Epic, Tartaros, Elven, Cursed, Bank, Runic, Heroic, Vota, Quick March, Ancients, ROTA, Epic Ancient, Union, Jormungandr
 
@@ -10,15 +133,51 @@
 // "default", "Event", "Shop", "Quest", "Drop", "Common", ...
 
 
-import React, { useState, useEffect } from "react";
-import ChestMappingSuggestions from "./ChestMappingSuggestions";
-import ChestMappingIgnoreList from "./ChestMappingIgnoreList";
-import { CHEST_NAMES, CHEST_TYPES, CHEST_SOURCES } from "./chestDropdownData";
-import { ROUTES } from "../routes";
-import { db } from "../firebase";
-import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDocs, query } from "firebase/firestore";
 
 function ManageChestMappingPage({ t, setCurrentPage }) {
+  // Vorschlagsliste beim Öffnen automatisch aktualisieren
+  useEffect(() => {
+    (async () => {
+      await refreshUsedChestMappings(db);
+    })();
+  }, []);
+  // Dynamisch alle Werte aus Rohdaten, Mappings und Vorschlägen sammeln
+  const [allChestNames, setAllChestNames] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
+  const [allTypes, setAllTypes] = useState([]);
+  const [allSources, setAllSources] = useState([]);
+  const [allLevels, setAllLevels] = useState([]);
+  useEffect(() => {
+    async function fetchAllChestData() {
+      const [resultsSnap, mappingsSnap, usedSnap] = await Promise.all([
+        getDocs(collection(db, "results")),
+        getDocs(collection(db, "chestMappings")),
+        getDocs(collection(db, "usedChestMappings"))
+      ]);
+      const allChests = [];
+      resultsSnap.docs.forEach(doc => {
+        const data = doc.data();
+        if (Array.isArray(data.chests)) {
+          allChests.push(...data.chests);
+        }
+      });
+      // Alle Felder aus Rohdaten, Mappings und Vorschlägen aggregieren
+      const allMappingData = [
+        ...allChests,
+        ...mappingsSnap.docs.map(d => d.data()),
+        ...usedSnap.docs.map(d => d.data())
+      ];
+      setAllChestNames(Array.from(new Set(allMappingData.map(c => c.chestName || c.Name || c.name || c.type || c.Type || c.id || "").filter(Boolean))).sort());
+      setAllCategories(Array.from(new Set(allMappingData.map(c => c.category || c.Category || c.type || c.Type || "").filter(Boolean))).sort());
+      setAllTypes(Array.from(new Set(allMappingData.map(c => c.type || c.Type || "").filter(Boolean))).sort());
+      setAllSources(Array.from(new Set(allMappingData.map(c => c.source || c.Source || "").filter(Boolean))).sort());
+      setAllLevels(Array.from(new Set(allMappingData.map(c => c.level || c.Level || c.levelStart || c.levelEnd || "").filter(Boolean))).sort((a,b)=>{
+        if(!isNaN(a)&&!isNaN(b)) return Number(a)-Number(b);
+        return String(a).localeCompare(String(b), 'de', {numeric:true});
+      }));
+    }
+    fetchAllChestData();
+  }, []);
   // Sortier-Optionen für Vorschlagsliste
   const [sortField, setSortField] = useState('category'); // 'category' oder 'chestName' oder 'level'
   const [sortOrder, setSortOrder] = useState('asc'); // 'asc' oder 'desc'
@@ -44,7 +203,8 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
   const [newIgnore, setNewIgnore] = useState({ Name: '', Level: '', Type: '', Source: '' });
   const [editingIgnoreId, setEditingIgnoreId] = useState(null);
   const [editingIgnore, setEditingIgnore] = useState({});
-  const categories = [
+  // Dynamisch generierte Kategorien (Fallback auf statisch falls leer)
+  const categories = allCategories.length > 0 ? allCategories : [
     "Arena", "Common", "Rare", "Epic", "Tartaros",
     "Elven", "Cursed", "Bank", "Runic", "Heroic",
     "Vota", "Quick March", "Ancients", "ROTA", "Epic Ancient",
@@ -270,10 +430,13 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
               className="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-purple-500 focus:outline-none"
             >
               <option value="">Bitte wählen...</option>
-              {newMapping.category && [
+              {Array.from(new Set([
+                ...allChestNames,
                 ...getChestNamesForCategory(newMapping.category),
-                ...(newMapping.category === "Bank" ? [] : ["Wooden Chest", "Bronze Chest", "Silver Chest", "Golden Chest", "Precious Chest", "Magic Chest"])
-              ].map(chestName => (
+                ...(newMapping.category === "Bank" ? [
+                  "Wooden Chest", "Bronze Chest", "Silver Chest", "Golden Chest", "Precious Chest", "Magic Chest"
+                ] : [])
+              ].filter(Boolean))).sort((a,b)=>String(a).localeCompare(String(b),'de',{numeric:true})).map(chestName => (
                 <option key={chestName} value={chestName}>{chestName}</option>
               ))}
             </select>
@@ -311,19 +474,23 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
               className="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-purple-500 focus:outline-none"
             >
               <option value="">Bitte wählen...</option>
-            {Array.from(new Set([
-              ...CHEST_TYPES,
-              "Elven Citadel",
-              "Cursed Citadel",
-              "Wooden",
-              "Bronze",
-              "Silver",
-              "Golden",
-              "Precious",
-              "Magic"
-            ])).map(type => (
-              <option key={type} value={type}>{type}</option>
-            ))}
+            {allTypes.length > 0
+              ? allTypes.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))
+              : Array.from(new Set([
+                  ...CHEST_TYPES,
+                  "Elven Citadel",
+                  "Cursed Citadel",
+                  "Wooden",
+                  "Bronze",
+                  "Silver",
+                  "Golden",
+                  "Precious",
+                  "Magic"
+                ])).map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
             </select>
           </div>
           <div>
@@ -334,14 +501,18 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
               className="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-purple-500 focus:outline-none"
             >
               <option value="">Bitte wählen...</option>
-              {Array.from(new Set([
-                ...CHEST_SOURCES,
-                ...usedChestMappings.map(m => m.source),
-                ...chestMappings.map(m => m.source),
-                newMapping.source
-              ].filter(Boolean))).map(source => (
-                <option key={source} value={source}>{source}</option>
-              ))}
+              {allSources.length > 0
+                ? allSources.map(source => (
+                    <option key={source} value={source}>{source}</option>
+                  ))
+                : Array.from(new Set([
+                    ...CHEST_SOURCES,
+                    ...usedChestMappings.map(m => m.source),
+                    ...chestMappings.map(m => m.source),
+                    newMapping.source
+                  ].filter(Boolean))).map(source => (
+                    <option key={source} value={source}>{source}</option>
+                  ))}
             </select>
           </div>
           <div>
@@ -444,22 +615,23 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
                             className="w-full px-2 py-1 rounded bg-gray-700 text-white border border-gray-600"
                           >
                             <option value="">Bitte wählen...</option>
-                            {Array.from(new Set([
-                              ...(editingMapping.category ? getChestNamesForCategory(editingMapping.category) : []),
-                              ...(editingMapping.category === "Bank" ? [
-                                "Wooden Chest",
-                                "Bronze Chest",
-                                "Silver Chest",
-                                "Golden Chest",
-                                "Precious Chest",
-                                "Magic Chest"
-                              ] : []),
-                              ...usedChestMappings.map(m => m.chestName),
-                              ...chestMappings.map(m => m.chestName),
-                              editingMapping.chestName
-                            ].filter(Boolean))).map(chestName => (
-                              <option key={chestName} value={chestName}>{chestName}</option>
-                            ))}
+            {Array.from(new Set([
+                ...allChestNames,
+                ...(editingMapping.category ? getChestNamesForCategory(editingMapping.category) : []),
+                ...(editingMapping.category === "Bank" ? [
+                  "Wooden Chest",
+                  "Bronze Chest",
+                  "Silver Chest",
+                  "Golden Chest",
+                  "Precious Chest",
+                  "Magic Chest"
+                ] : []),
+                ...usedChestMappings.map(m => m.chestName),
+                ...chestMappings.map(m => m.chestName),
+                editingMapping.chestName
+              ].filter(Boolean))).sort((a,b)=>String(a).localeCompare(String(b),'de',{numeric:true})).map(chestName => (
+                <option key={chestName} value={chestName}>{chestName}</option>
+              ))}
                           </select>
                         ) : (
                           mapping.chestName
@@ -579,23 +751,21 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
                             </div>
                           ) : (
                             <div className="flex gap-2">
-                              <select
+                              <input
+                                type="number"
                                 value={editingMapping.levelStart}
-                                onChange={e => setEditingMapping({...editingMapping, levelStart: e.target.value})}
+                                onChange={e => setEditingMapping({ ...editingMapping, levelStart: e.target.value })}
                                 className="w-20 px-2 py-1 rounded bg-gray-700 text-white border border-gray-600"
-                              >
-                                <option value="">Bitte wählen...</option>
-                                <option value="Level 30 Citadel">Level 30 Citadel</option>
-                              </select>
+                                placeholder="Start"
+                              />
                               <span className="text-gray-400">-</span>
-                              <select
+                              <input
+                                type="number"
                                 value={editingMapping.levelEnd}
-                                onChange={e => setEditingMapping({...editingMapping, levelEnd: e.target.value})}
+                                onChange={e => setEditingMapping({ ...editingMapping, levelEnd: e.target.value })}
                                 className="w-20 px-2 py-1 rounded bg-gray-700 text-white border border-gray-600"
-                              >
-                                <option value="">Bitte wählen...</option>
-                                <option value="Level 30 Citadel">Level 30 Citadel</option>
-                              </select>
+                                placeholder="Ende"
+                              />
                             </div>
                           )
                         ) : (

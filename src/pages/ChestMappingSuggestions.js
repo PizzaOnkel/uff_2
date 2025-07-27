@@ -18,6 +18,8 @@ const ChestMappingSuggestions = ({ usedChestMappings, importUsedMapping, importi
             <tr className="bg-yellow-800">
               <th className="px-4 py-2 text-left">Truhen-Name</th>
               <th className="px-4 py-2 text-left">Kategorie</th>
+              <th className="px-4 py-2 text-left">Type</th>
+              <th className="px-4 py-2 text-left">Source</th>
               <th className="px-4 py-2 text-left">Level</th>
               <th className="px-4 py-2 text-left">Aktion</th>
             </tr>
@@ -42,6 +44,8 @@ const ChestMappingSuggestions = ({ usedChestMappings, importUsedMapping, importi
                 <tr key={mapping.id} className="border-b border-yellow-700">
                   <td className="px-4 py-2">{mapping.chestName}</td>
                   <td className="px-4 py-2">{mapping.category}</td>
+                  <td className="px-4 py-2">{mapping.type}</td>
+                  <td className="px-4 py-2">{mapping.source}</td>
                   <td className="px-4 py-2">{mapping.level}</td>
                   <td className="px-4 py-2">
                     <button

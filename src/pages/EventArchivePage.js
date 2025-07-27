@@ -6,6 +6,34 @@ import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { mapToMainName } from "../utils/aliasMapping";
 
+// --- Tartaros-Logik aus CurrentTotalEventPage.js ---
+function tartarosLevelFromChest(chest) {
+  let tartarosMatch = (chest.Name||"").match(/tartaros crypt level (\d+)/i);
+  if (!tartarosMatch && chest.Type) {
+    tartarosMatch = (chest.Type||"").match(/tartaros crypt level (\d+)/i);
+  }
+  if (!tartarosMatch && chest.Source) {
+    tartarosMatch = (chest.Source||"").match(/tartaros crypt level (\d+)/i);
+  }
+  if (tartarosMatch) {
+    return Number(tartarosMatch[1]);
+  } else if ([15,20,25,30,35].includes(Number(chest.level ?? chest.Level))) {
+    return Number(chest.level ?? chest.Level);
+  } else {
+    return Number(chest.level ?? chest.Level ?? 0);
+  }
+}
+
+function isTartarosChest(chest) {
+  return (
+    (chest.category === "Chests of Tartaros") ||
+    (chest.Name||"").toLowerCase().includes("tartaros") ||
+    (chest.Type||"").toLowerCase().includes("tartaros") ||
+    (chest.Source||"").toLowerCase().includes("tartaros")
+  );
+}
+// --- Ende Tartaros-Logik ---
+
 export default function EventArchivePage({ t, setCurrentPage }) {
   // --- wie CurrentTotalEventPage, aber mit Perioden-Auswahl ---
   const chestCategories = [
@@ -359,7 +387,14 @@ export default function EventArchivePage({ t, setCurrentPage }) {
           };
         })
       : [];
-    const filteredChests = mappedChests.filter(chest => !isIgnoredChest(chest));
+    const filteredChests = mappedChests.filter(chest => {
+      if (isIgnoredChest(chest)) return false;
+      if (isTartarosChest(chest)) {
+        const lvl = tartarosLevelFromChest(chest);
+        if (lvl < 11) return false;
+      }
+      return true;
+    });
     const chestsCount = filteredChests.reduce((sum, chest) => sum + (chest.count || 0), 0);
     const ist = filteredChests.reduce((sum, chest) => sum + (chest.points || 0), 0);
     const timestamp = result.timestamp

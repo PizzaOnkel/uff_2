@@ -1,9 +1,46 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { mapToMainName } from "../utils/aliasMapping";
 import "./TopTen.css";
+
+// --- Tartaros-Logik aus CurrentTotalEventPage.js ---
+function tartarosLevelFromChest(chest) {
+  let tartarosMatch = (chest.Name||"").match(/tartaros crypt level (\d+)/i);
+  if (!tartarosMatch && chest.Type) {
+    tartarosMatch = (chest.Type||"").match(/tartaros crypt level (\d+)/i);
+  }
+  if (!tartarosMatch && chest.Source) {
+    tartarosMatch = (chest.Source||"").match(/tartaros crypt level (\d+)/i);
+  }
+  if (tartarosMatch) {
+    return Number(tartarosMatch[1]);
+  } else if ([15,20,25,30,35].includes(Number(chest.level ?? chest.Level))) {
+    return Number(chest.level ?? chest.Level);
+  } else {
+    return Number(chest.level ?? chest.Level ?? 0);
+  }
+}
+
+function isTartarosChest(chest) {
+  return (
+    (chest.category === "Chests of Tartaros") ||
+    (chest.Name||"").toLowerCase().includes("tartaros") ||
+    (chest.Type||"").toLowerCase().includes("tartaros") ||
+    (chest.Source||"").toLowerCase().includes("tartaros")
+  );
+}
+
+function isArenaChest(chest) {
+  return (
+    (chest.category && chest.category === "Arena Chests") ||
+    chest.Type === "Arena" ||
+    chest.Source === "Arena"
+  );
+}
+// --- Ende Tartaros-Logik ---
 
 // Kategorien wie in TopTen.js
 const categories = [
@@ -30,7 +67,7 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [top3ByCategory, setTop3ByCategory] = useState({});
-  const [audioPlaying, setAudioPlaying] = useState(false);
+  const [audioPlaying, setAudioPlaying] = useState(true);
   const [currentCategoryIdx, setCurrentCategoryIdx] = useState(0);
   const [ignoreChests, setIgnoreChests] = useState([]);
   const audioRef = useRef(null);
@@ -123,7 +160,10 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
               else if (name.includes('orc') || type.includes('common crypt')) cat = 'Common Total';
               else if (name.includes('rare dragon') || type.includes('rare crypt')) cat = 'Rare Total';
               else if ((name.includes('epic') && !name.includes('ancient squad')) || type.includes('epic') || name.includes('undead')) cat = 'Epic Total';
-              else if (name.includes('tartaros') || type.includes('tartaros')) cat = 'Tartaros Total';
+              else if (isTartarosChest(chest)) {
+                const lvl = tartarosLevelFromChest(chest);
+                if (lvl >= 11) cat = 'Tartaros Total';
+              }
               else if (name.includes('bank') || type.includes('bank') || source.includes('bank')) cat = 'Bank Total';
               else if (name.includes('jormungandr') || type.includes('jormungandr') || source.includes('jormungandr')) cat = 'Jormungandr Total';
               else if (name.includes('runic') || type.includes('runic') || source.includes('runic')) cat = 'Runic Total';
@@ -152,19 +192,18 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
   }, [data, players, ignoreChests]);
 
   // Musikplayer-Logik
+  // Audio nur stoppen
   const handleAudio = () => {
     if (!audioRef.current) return;
-    if (audioPlaying) {
-      audioRef.current.pause();
-      setAudioPlaying(false);
-    } else {
-      audioRef.current.play();
-      setAudioPlaying(true);
-    }
+    audioRef.current.pause();
+    setAudioPlaying(false);
   };
 
+  // Audio beim Laden automatisch abspielen
   useEffect(() => {
     if (!audioRef.current) return;
+    audioRef.current.play();
+    setAudioPlaying(true);
     const onEnded = () => setAudioPlaying(false);
     audioRef.current.addEventListener('ended', onEnded);
     return () => audioRef.current.removeEventListener('ended', onEnded);
@@ -246,10 +285,10 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
         </h1>
         <p className="top-ten-subtitle" style={{ fontSize: '1.5rem', marginBottom: 0, textShadow: 'none', color: '#b0b0b0' }}>Die ewigen Legenden unseres Clans – Kategorie für 10 Sekunden im Rampenlicht!</p>
         <div style={{ marginTop: 24, marginBottom: 0 }}>
-          <button onClick={handleAudio} className="category-btn" style={{ fontSize: 22, padding: '12px 32px', background: audioPlaying ? '#FFD700' : '#374151', color: audioPlaying ? '#1a1f2e' : '#FFD700', border: '2px solid #FFD700', borderRadius: 16, marginRight: 12 }}>
-            {audioPlaying ? '⏸️ Fanfare stoppen' : '🎺 Fanfare abspielen'}
+          <button onClick={handleAudio} className="category-btn" style={{ fontSize: 22, padding: '12px 32px', background: audioPlaying ? '#FFD700' : '#374151', color: audioPlaying ? '#1a1f2e' : '#FFD700', border: '2px solid #FFD700', borderRadius: 16, marginRight: 12 }} disabled={!audioPlaying}>
+            {'⏸️ Fanfare stoppen'}
           </button>
-          <audio ref={audioRef} src="/fanfare.mp3" preload="auto" />
+          <audio ref={audioRef} src="/fanfare.mp3" preload="auto" autoPlay />
         </div>
       </div>
 

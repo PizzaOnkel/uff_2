@@ -1,5 +1,5 @@
+
 import React, { useState, useEffect } from 'react';
-// import { collection, getDocs } from 'firebase/firestore';
 import { mapToMainName } from '../utils/aliasMapping';
 import { translations } from '../translations/translations';
 import { ROUTES } from '../routes';
@@ -8,6 +8,45 @@ import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
 import { db } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import './TopTen.css';
+
+// --- Tartaros-Logik aus CurrentTotalEventPage.js ---
+function tartarosLevelFromChest(chest) {
+  // Level explizit aus Name, Type oder Source extrahieren
+  let tartarosMatch = (chest.Name||"").match(/tartaros crypt level (\d+)/i);
+  if (!tartarosMatch && chest.Type) {
+    tartarosMatch = (chest.Type||"").match(/tartaros crypt level (\d+)/i);
+  }
+  if (!tartarosMatch && chest.Source) {
+    tartarosMatch = (chest.Source||"").match(/tartaros crypt level (\d+)/i);
+  }
+  if (tartarosMatch) {
+    return Number(tartarosMatch[1]);
+  } else if ([15,20,25,30,35].includes(Number(chest.level ?? chest.Level))) {
+    return Number(chest.level ?? chest.Level);
+  } else {
+    return Number(chest.level ?? chest.Level ?? 0);
+  }
+}
+
+function isTartarosChest(chest) {
+  return (
+    (chest.category === "Chests of Tartaros") ||
+    (chest.Name||"").toLowerCase().includes("tartaros") ||
+    (chest.Type||"").toLowerCase().includes("tartaros") ||
+    (chest.Source||"").toLowerCase().includes("tartaros")
+  );
+}
+
+function isArenaChest(chest) {
+  return (
+    (chest.category && chest.category === "Arena Chests") ||
+    chest.Type === "Arena" ||
+    chest.Source === "Arena"
+  );
+}
+
+
+// --- Ende Tartaros-Logik ---
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement, RadialLinearScale, Filler);
 
