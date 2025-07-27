@@ -192,17 +192,19 @@ def stash_local_changes():
     subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git stash push -m \"Zwischenablage durch Control Center\""', shell=True)
 tk.Button(publish_frame, text="Änderungen zwischenparken (stash)", width=36, bg="#eebc1d", fg="#232946", font=("Segoe UI", 10, "bold"), command=stash_local_changes).pack(pady=2)
 
-tk.Label(publish_frame, text="Danach kannst du mit Schritt 2 weitermachen!", fg="#a259d9", bg="#232946", font=("Segoe UI", 9, "italic"), anchor="w").pack(fill="x", pady=(2,6))
 
-# 1. Node-Server starten
-tk.Button(publish_frame, text="1. Node Server starten (Backend)", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=start_node_server).pack(pady=3)
-# 2. Zu gh-pages wechseln
-tk.Button(publish_frame, text="2. Zu 'gh-pages' Branch wechseln", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=git_checkout_ghpages).pack(pady=3)
+# Schritt-für-Schritt: Veröffentlichungs-Buttons in logischer Reihenfolge
+tk.Label(publish_frame, text="Danach kannst du mit Schritt 1 weitermachen!", fg="#a259d9", bg="#232946", font=("Segoe UI", 9, "italic"), anchor="w").pack(fill="x", pady=(2,6))
+
+# 1. Zu gh-pages wechseln
+tk.Button(publish_frame, text="1. Zu 'gh-pages' Branch wechseln", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=git_checkout_ghpages).pack(pady=3)
+# 2. Node Server starten (optional)
+tk.Button(publish_frame, text="2. Node Server starten (Backend, optional)", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=start_node_server).pack(pady=3)
 # 3. Build ausführen
 tk.Button(publish_frame, text="3. Build ausführen (npm run build)", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=build_react).pack(pady=3)
-# 4. Commit & Push
+# 4. Änderungen committen & pushen (gh-pages)
 tk.Button(publish_frame, text="4. Änderungen committen & pushen (gh-pages)", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=git_commit_and_push_ghpages).pack(pady=3)
-# 5. Zurück zu main
+# 5. Zurück zu main wechseln
 tk.Button(publish_frame, text="5. Zurück zu 'main' wechseln", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=git_checkout_main).pack(pady=3)
 tk.Label(publish_frame, text="Nach Schritt 4 ist deine App sofort unter https://<username>.github.io/<repo> online!", fg="#a259d9", bg="#232946", font=("Segoe UI", 9), anchor="w").pack(fill="x", pady=(4,0))
 
