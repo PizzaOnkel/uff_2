@@ -119,12 +119,7 @@ const verticalHeaders = [
         currentPeriod = periodsArr.reduce((a, b) => (!a.start || (b.start && new Date(b.start) > new Date(a.start))) ? b : a);
         currentPeriodId = currentPeriod.id;
       }
-      // Debug-Ausgabe
-      console.log('[DEBUG] Aktuelle Periode:', currentPeriod);
-      console.log('[DEBUG] currentPeriodId:', currentPeriodId);
       const filteredResults = resultsArr.filter(r => r.periodId === currentPeriodId);
-      console.log('[DEBUG] Gefilterte Ergebnisse für aktuelle Periode:', filteredResults);
-      console.log('[DEBUG] Alle periodId in resultsArr:', resultsArr.map(r => r.periodId));
       setCurrentPeriodName(currentPeriod?.name || "");
       setCurrentPeriodStart(currentPeriod?.start || "");
       setCurrentPeriodEnd(currentPeriod?.end || "");
@@ -601,7 +596,7 @@ const verticalHeaders = [
               <div className="text-gray-400">Keine Truhen-Daten vorhanden.</div>
             )}
             <hr className="my-3 border-gray-700" />
-            <h4 className="font-semibold mb-2 text-blue-200">Rohdaten aller Truhen (Debug-Vergleich mit Sheet)</h4>
+            {/* <h4 className="font-semibold mb-2 text-blue-200">Rohdaten aller Truhen (Debug-Vergleich mit Sheet)</h4> */}
             <div className="overflow-x-auto max-h-64">
               <table className="text-xs w-full border border-gray-700">
                 <thead>
