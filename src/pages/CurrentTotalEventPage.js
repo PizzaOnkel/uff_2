@@ -431,18 +431,22 @@ const verticalHeaders = [
     }
   });
 
-  // Erzeuge die aggregierten Zeilen
-  const tableRows = Array.from(playerMap.values()).map(row => {
-    row.name = mapToMainName(players, row.name); // Anzeige immer Hauptname
-    row.differenz = row.ist - row.soll;
-    row.percent = row.soll > 0 ? Math.round((row.ist / row.soll) * 100) : 0;
-    // Zeige den Upload-Timestamp aus uploadTimes (nach Periode)
-    let uploadTimestamp = "";
-    if (results.length > 0) {
-      // Finde die Periode für diesen Spieler (über result.periodId)
-      const resultEntry = results.find(r => mapToMainName(players, r.Clanmate) === row.name);
-      if (resultEntry && resultEntry.periodId && uploadTimes[resultEntry.periodId]) {
-        const d = new Date(uploadTimes[resultEntry.periodId]);
+  // Aliase berücksichtigen: Jeder Hauptname (mapToMainName) erscheint nur einmal, egal wie viele Aliase in results stehen
+  const seenMainNames = new Set();
+  const tableRows = results
+    .map(r => {
+      const mainName = mapToMainName(players, r.Clanmate);
+      if (seenMainNames.has(mainName)) return null;
+      seenMainNames.add(mainName);
+      const row = playerMap.get(mainName);
+      if (!row) return null;
+      row.name = mainName; // Hauptname anzeigen
+      row.differenz = row.ist - row.soll;
+      row.percent = row.soll > 0 ? Math.round((row.ist / row.soll) * 100) : 0;
+      // Upload-Timestamp (erstes Vorkommen nehmen)
+      let uploadTimestamp = "";
+      if (r.periodId && uploadTimes[r.periodId]) {
+        const d = new Date(uploadTimes[r.periodId]);
         const yyyy = d.getFullYear();
         const mm = String(d.getMonth() + 1).padStart(2, '0');
         const dd = String(d.getDate()).padStart(2, '0');
@@ -450,10 +454,10 @@ const verticalHeaders = [
         const min = String(d.getMinutes()).padStart(2, '0');
         uploadTimestamp = `${yyyy}/${mm}/${dd}-${hh}:${min}`;
       }
-    }
-    row.timestamp = uploadTimestamp;
-    return row;
-  });
+      row.timestamp = uploadTimestamp;
+      return row;
+    })
+    .filter(Boolean);
 
   // Summen für Gesamtergebnis berechnen
   totalIst = tableRows.reduce((sum, row) => sum + row.ist, 0);

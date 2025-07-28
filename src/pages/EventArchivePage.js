@@ -422,25 +422,29 @@ export default function EventArchivePage({ t, setCurrentPage }) {
     }
   });
 
-  const tableRows = Array.from(playerMap.values()).map(row => {
-    row.differenz = row.ist - row.soll;
-    row.percent = row.soll > 0 ? Math.round((row.ist / row.soll) * 100) : 0;
-    let uploadTimestamp = "";
-    if (results.length > 0) {
-      const resultEntry = results.find(r => r.Clanmate === row.name);
-      if (resultEntry && resultEntry.periodId && uploadTimes[resultEntry.periodId]) {
-        const d = new Date(uploadTimes[resultEntry.periodId]);
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        const hh = String(d.getHours()).padStart(2, '0');
-        const min = String(d.getMinutes()).padStart(2, '0');
-        uploadTimestamp = `${yyyy}/${mm}/${dd}-${hh}:${min}`;
+  // Nur Spieler anzeigen, die als Clanmate in den results der gewählten Periode enthalten sind
+  const clanmatesInResults = new Set(results.map(r => mapToMainName(players, r.Clanmate)));
+  const tableRows = Array.from(playerMap.values())
+    .filter(row => clanmatesInResults.has(mapToMainName(players, row.name)))
+    .map(row => {
+      row.differenz = row.ist - row.soll;
+      row.percent = row.soll > 0 ? Math.round((row.ist / row.soll) * 100) : 0;
+      let uploadTimestamp = "";
+      if (results.length > 0) {
+        const resultEntry = results.find(r => mapToMainName(players, r.Clanmate) === mapToMainName(players, row.name));
+        if (resultEntry && resultEntry.periodId && uploadTimes[resultEntry.periodId]) {
+          const d = new Date(uploadTimes[resultEntry.periodId]);
+          const yyyy = d.getFullYear();
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          const hh = String(d.getHours()).padStart(2, '0');
+          const min = String(d.getMinutes()).padStart(2, '0');
+          uploadTimestamp = `${yyyy}/${mm}/${dd}-${hh}:${min}`;
+        }
       }
-    }
-    row.timestamp = uploadTimestamp;
-    return row;
-  });
+      row.timestamp = uploadTimestamp;
+      return row;
+    });
 
   totalIst = tableRows.reduce((sum, row) => sum + row.ist, 0);
   totalSoll = tableRows.reduce((sum, row) => sum + row.soll, 0);
