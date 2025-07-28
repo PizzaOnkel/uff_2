@@ -596,39 +596,7 @@ const verticalHeaders = [
               <div className="text-gray-400">Keine Truhen-Daten vorhanden.</div>
             )}
             <hr className="my-3 border-gray-700" />
-            {/* <h4 className="font-semibold mb-2 text-blue-200">Rohdaten aller Truhen (Debug-Vergleich mit Sheet)</h4> */}
-            <div className="overflow-x-auto max-h-64">
-              <table className="text-xs w-full border border-gray-700">
-                <thead>
-                  <tr className="bg-gray-800">
-                    <th className="border border-gray-700">Name</th>
-                    <th className="border border-gray-700">Type</th>
-                    <th className="border border-gray-700">Source</th>
-                    <th className="border border-gray-700">Level</th>
-                    <th className="border border-gray-700">Kategorie</th>
-                    <th className="border border-gray-700">Punkte</th>
-                    <th className="border border-gray-700">Count</th>
-                    <th className="border border-gray-700">periodId</th>
-                    <th className="border border-gray-700">Vorschlag nötig</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleChests.map((chest, idx) => (
-                    <tr key={idx}>
-                      <td className="border border-gray-700">{chest.Name ?? ''}</td>
-                      <td className="border border-gray-700">{chest.Type ?? ''}</td>
-                      <td className="border border-gray-700">{chest.Source ?? ''}</td>
-                      <td className="border border-gray-700">{chest.level ?? chest.Level ?? ''}</td>
-                      <td className="border border-gray-700">{chest.category ?? ''}</td>
-                      <td className="border border-gray-700">{chest.points ?? 0}</td>
-                      <td className="border border-gray-700">{chest.count ?? 1}</td>
-                      <td className="border border-gray-700">{chest.periodId ?? ''}</td>
-                      <td className="border border-gray-700">{hasMapping(chest) ? '' : '❗'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            {/* Rohdaten-Tabelle entfernt (Debug) */}
           </div>
         </div>
       </div>
