@@ -15,7 +15,10 @@ def is_node_server_running():
 def git_checkout_ghpages():
     subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git checkout gh-pages"', shell=True)
 def build_react():
-    # Build kann jetzt immer ausgeführt werden, egal ob der Node-Server läuft
+    # Hinweis: Node-Server sollte vorher laufen
+    # if not is_node_server_running():
+        # tkinter.messagebox.showwarning("Achtung", "Starte zuerst den Node-Server (Backend), bevor du den Build ausführst!")
+        # return
     subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && npm run build"', shell=True)
 
 def git_commit_and_push():
