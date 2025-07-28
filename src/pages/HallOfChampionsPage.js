@@ -288,7 +288,7 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
           <button onClick={handleAudio} className="category-btn" style={{ fontSize: 22, padding: '12px 32px', background: audioPlaying ? '#FFD700' : '#374151', color: audioPlaying ? '#1a1f2e' : '#FFD700', border: '2px solid #FFD700', borderRadius: 16, marginRight: 12 }} disabled={!audioPlaying}>
             {'⏸️ Fanfare stoppen'}
           </button>
-          <audio ref={audioRef} src="/fanfare.mp3" preload="auto" autoPlay />
+          <audio ref={audioRef} src={process.env.PUBLIC_URL + "/fanfare.mp3"} preload="auto" autoPlay />
         </div>
       </div>
 
