@@ -1,25 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
-import { collection, addDoc, deleteDoc, onSnapshot, doc } from "firebase/firestore";
+import { collection, addDoc, deleteDoc, getDocs, doc } from "firebase/firestore";
 
 export default function ManageTroopStrengthsPage({ t, setCurrentPage }) {
   const [troopStrengths, setTroopStrengths] = useState([]);
   const [newStrength, setNewStrength] = useState("");
 
-  // Firestore: Truppenstärken automatisch laden und nach Erstellungszeit sortieren
+  // (onSnapshot-Block entfernt)
+  // Firestore: Truppenstärken einmalig laden und nach Erstellungszeit sortieren
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "troopStrengths"), (snapshot) => {
+    async function fetchTroopStrengths() {
+      const snapshot = await getDocs(collection(db, "troopStrengths"));
       const list = snapshot.docs
         .map(doc => ({
           id: doc.id,
           name: doc.data().name,
           createdAt: doc.data().createdAt || 0
         }))
-        .sort((a, b) => a.createdAt - b.createdAt); // Sortiere nach Erstellungszeit
+        .sort((a, b) => a.createdAt - b.createdAt);
       setTroopStrengths(list);
-    });
-    return () => unsub();
+    }
+    fetchTroopStrengths();
   }, []);
 
   // Truppenstärke zu Firestore hinzufügen (mit Zeitstempel)

@@ -28,13 +28,14 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      // Spieler, Normen, Ergebnisse, ChestMappings, Ignore-Liste laden
-      const [playersSnap, normsSnap, resultsSnap, chestMappingsSnap, ignoreSnap] = await Promise.all([
+      // Spieler, Normen, Ergebnisse, ChestMappings, Ignore-Liste, Perioden laden
+      const [playersSnap, normsSnap, resultsSnap, chestMappingsSnap, ignoreSnap, periodsSnap] = await Promise.all([
         getDocs(collection(db, "players")),
         getDocs(collection(db, "norms")),
         getDocs(collection(db, "results")),
         getDocs(collection(db, "chestMappings")),
         getDocs(collection(db, "chestMappingIgnore")),
+        getDocs(collection(db, "periods")),
       ]);
       const playersArr = playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const normsArr = normsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -42,18 +43,24 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
       const chestMappings = chestMappingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const ignoreList = ignoreSnap.docs.map(doc => doc.data());
       setIgnoreChests(ignoreList);
-
-      // Aktuelle Veranstaltungsperiode bestimmen (letztes Ergebnis mit periodId)
-      let aktuellePeriode = null;
-      const periodIds = resultsArr.map(r => r.periodId).filter(Boolean);
-      if (periodIds.length > 0) {
-        aktuellePeriode = periodIds.sort().reverse()[0];
+      // Aktuelle Periode bestimmen wie im Dashboard
+      const periodsArr = periodsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      let now = new Date();
+      let currentPeriod = null;
+      let currentPeriodId = null;
+      for (const p of periodsArr) {
+        if (p.start && new Date(p.start) <= now && (!p.end || new Date(p.end) >= now)) {
+          currentPeriod = p;
+          currentPeriodId = p.id;
+          break;
+        }
+      }
+      if (!currentPeriod && periodsArr.length > 0) {
+        currentPeriod = periodsArr.reduce((a, b) => (!a.start || (b.start && new Date(b.start) > new Date(a.start))) ? b : a);
+        currentPeriodId = currentPeriod.id;
       }
       // Nur Ergebnisse der aktuellen Periode berücksichtigen
-      const filteredResults = aktuellePeriode
-        ? resultsArr.filter(r => r.periodId === aktuellePeriode)
-        : resultsArr;
-
+      const filteredResults = resultsArr.filter(r => r.periodId === currentPeriodId);
       // Hilfsfunktionen wie in CurrentTotalEventPage.js
       function getNormPoints(troopStrengthName) {
         if (!troopStrengthName || troopStrengthName.trim() === '') {
@@ -90,7 +97,6 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
         }
         return false;
       }
-
       // Spieler-Aggregation wie in CurrentTotalEventPage.js
       const playerMap = new Map();
       filteredResults.forEach(result => {
@@ -101,7 +107,6 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
           troopStrength = 'nicht definiert';
         }
         const normPoints = getNormPoints(troopStrength);
-
         // Mapping-Logik für Chests
         const mappedChests = Array.isArray(result.chests)
           ? result.chests.map(chest => {
@@ -152,7 +157,6 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
         // Filtere ignorierte Truhen raus (außer Arena)
         const filteredChests = mappedChests.filter(chest => !isIgnoredChest(chest));
         const ist = filteredChests.reduce((sum, chest) => sum + (chest.points || 0), 0);
-
         if (playerMap.has(playerName)) {
           const entry = playerMap.get(playerName);
           entry.ist += ist;
@@ -166,7 +170,6 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
           });
         }
       });
-
       // Normerfüllung berechnen
       playerMap.forEach(entry => {
         entry.normErfuellung = entry.soll > 0 ? Math.round((entry.ist / entry.soll) * 100) : 0;

@@ -52,6 +52,8 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 
 const TopTen = ({ t, setCurrentPage }) => {
   const [data, setData] = useState([]);
+  const [periods, setPeriods] = useState([]);
+  const [currentPeriodId, setCurrentPeriodId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [players, setPlayers] = useState([]); // Spieler für Alias-Mapping
   const [ignoreChests, setIgnoreChests] = useState([]); // Ignore-Liste aus Firestore
@@ -90,9 +92,32 @@ const TopTen = ({ t, setCurrentPage }) => {
     const fetchData = async () => {
       setLoading(true);
       try {
+        // Lade alle Perioden
+        const periodsSnap = await getDocs(collection(db, "periods"));
+        const periodsArr = periodsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setPeriods(periodsArr);
+        // Bestimme aktuelle Periode (wie in CurrentTotalEventPage.js)
+        let now = new Date();
+        let currentPeriod = null;
+        let periodId = null;
+        for (const p of periodsArr) {
+          if (p.start && new Date(p.start) <= now && (!p.end || new Date(p.end) >= now)) {
+            currentPeriod = p;
+            periodId = p.id;
+            break;
+          }
+        }
+        if (!currentPeriod && periodsArr.length > 0) {
+          currentPeriod = periodsArr.reduce((a, b) => (!a.start || (b.start && new Date(b.start) > new Date(a.start))) ? b : a);
+          periodId = currentPeriod.id;
+        }
+        setCurrentPeriodId(periodId);
+        // Lade alle Ergebnisse
         const resultsSnap = await getDocs(collection(db, "results"));
         const resultsArr = resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setData(resultsArr);
+        // Filtere auf aktuelle Periode
+        const filteredResults = resultsArr.filter(r => r.periodId === periodId);
+        setData(filteredResults);
       } catch (error) {
         console.error('[TopTen] Fehler beim Laden der Firestore-Daten:', error);
         setData([]);

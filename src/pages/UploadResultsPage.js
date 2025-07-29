@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
-import { collection, addDoc, onSnapshot, query, where, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { collection, addDoc, query, where, getDocs, doc, deleteDoc } from "firebase/firestore";
 
 export default function UploadResultsPage({ t, setCurrentPage }) {
   
@@ -16,7 +16,6 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0, currentDate: '' });
 
-  // Veranstaltungsperioden aus Firestore laden
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "periods"), (snapshot) => {
       const list = snapshot.docs.map(doc => ({
@@ -38,6 +37,31 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
       setChestMappings(list);
     });
     return () => unsub();
+  }, []);
+  // Veranstaltungsperioden aus Firestore laden (nur einmal beim Laden)
+  useEffect(() => {
+    async function fetchPeriods() {
+      const snapshot = await getDocs(collection(db, "periods"));
+      const list = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setPeriods(list);
+    }
+    fetchPeriods();
+  }, []);
+
+  // Truhen-Zuordnungen aus Firestore laden (nur einmal beim Laden)
+  useEffect(() => {
+    async function fetchChestMappings() {
+      const snapshot = await getDocs(collection(db, "chestMappings"));
+      const list = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setChestMappings(list);
+    }
+    fetchChestMappings();
   }, []);
 
   const handleFileChange = (e) => {

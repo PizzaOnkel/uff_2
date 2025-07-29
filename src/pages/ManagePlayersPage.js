@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../firebase";
-import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
-import { getDocs } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs } from "firebase/firestore";
 
 const rankOrder = [
   "Clanführer",
@@ -42,14 +41,14 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
     troopStrength: ""
   });
 
-  // Spieler laden und sortieren
+  // Spieler laden und sortieren (nur einmal beim Laden)
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "players"), (snapshot) => {
+    async function fetchPlayers() {
+      const snapshot = await getDocs(collection(db, "players"));
       const list = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
-
       list.sort((a, b) => {
         const rankA = rankOrder.indexOf(a.rank);
         const rankB = rankOrder.indexOf(b.rank);
@@ -59,10 +58,9 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
         }
         return 0;
       });
-
       setPlayers(list);
-    });
-    return () => unsub();
+    }
+    fetchPlayers();
   }, []);
 
   // Suche Clanmates aus results, die nicht in players stehen
@@ -99,40 +97,43 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
     findMissingClanmates();
   }, [players]);
 
-  // Ränge laden
+  // Ränge laden (nur einmal beim Laden)
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "ranks"), (snapshot) => {
+    async function fetchRanks() {
+      const snapshot = await getDocs(collection(db, "ranks"));
       setRanks(snapshot.docs.map(doc => doc.data().name));
-    });
-    return () => unsub();
+    }
+    fetchRanks();
   }, []);
 
 
-  // Normen laden
+  // Normen laden (nur einmal beim Laden)
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "norms"), (snapshot) => {
+    async function fetchNorms() {
+      const snapshot = await getDocs(collection(db, "norms"));
       setNorms(snapshot.docs.map(doc => ({
         troopStrength: doc.data().troopStrength,
         value: doc.data().value
       })));
-    });
-    return () => unsub();
+    }
+    fetchNorms();
   }, []);
 
-  // Truppenstärken laden und mit Normen verknüpfen
+  // Truppenstärken laden und mit Normen verknüpfen (nur einmal beim Laden oder wenn Normen sich ändern)
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "troopStrengths"), (snapshot) => {
+    async function fetchTroopStrengths() {
+      const snapshot = await getDocs(collection(db, "troopStrengths"));
       setTroopStrengths(snapshot.docs.map(doc => {
         const name = doc.data().name;
         // Passende Norm suchen
         const normObj = norms.find(n => n.troopStrength === name);
         return {
           name,
-          norm: normObj ? { points: normObj.value } : {} // Nur Punkte, weitere Felder nach Bedarf
+          norm: normObj ? { points: normObj.value } : {}
         };
       }));
-    });
-    return () => unsub();
+    }
+    fetchTroopStrengths();
   }, [norms]);
 
   const handleChange = e => {
