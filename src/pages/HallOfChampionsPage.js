@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { mapToMainName } from "../utils/aliasMapping";
 import "./TopTen.css";
+import StickyBackButton from "../components/StickyBackButton";
 
 // --- Tartaros-Logik aus CurrentTotalEventPage.js ---
 function tartarosLevelFromChest(chest) {
@@ -357,147 +357,140 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
 
   return (
     <div className="top-ten-container" style={{ minHeight: '100vh', paddingBottom: 0 }}>
+      <StickyBackButton onClick={() => setCurrentPage(ROUTES.NAVIGATION)} label={t?.backToNavigation || 'Zurück zur Navigation'} />
       <div className="top-ten-header" style={{ marginBottom: 0 }}>
-        <div style={{
-          position: 'absolute',
-          top: 24,
-          left: 24,
-          zIndex: 20,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-        }}>
-          <button
-            onClick={() => setCurrentPage(ROUTES.NAVIGATION)}
-            className="back-button"
-            style={{
-              width: 54,
-              height: 54,
-              borderRadius: '50%',
-              background: 'radial-gradient(circle at 60% 40%, #23223a 60%, #1a1f2e 100%)',
-              border: '3px solid #8B5CF6',
-              boxShadow: '0 2px 8px #0007',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'background 0.2s, box-shadow 0.2s',
-              padding: 0,
-            }}
-            onMouseOver={e => {
-              e.currentTarget.style.background = 'radial-gradient(circle at 60% 40%, #2d1b69 80%, #23223a 100%)';
-              e.currentTarget.style.boxShadow = '0 4px 16px #8B5CF6aa';
-            }}
-            onMouseOut={e => {
-              e.currentTarget.style.background = 'radial-gradient(circle at 60% 40%, #23223a 60%, #1a1f2e 100%)';
-              e.currentTarget.style.boxShadow = '0 2px 8px #0007';
-            }}
-            aria-label={t.backToNavigation || 'Zurück zur Navigation'}
-          >
-            <svg width="32" height="32" fill="none" stroke="#FFD700" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="11" fill="#23223a" stroke="#8B5CF6" strokeWidth="2" />
-              <path d="M16 12H8M12 16l-4-4 4-4" />
-            </svg>
-          </button>
-          <span style={{
-            color: '#b0b0b0',
-            fontSize: 18,
-            fontWeight: 500,
-            letterSpacing: 0.2,
-            userSelect: 'none',
-            textShadow: 'none',
-            whiteSpace: 'nowrap',
-            paddingLeft: 2,
-            paddingRight: 8,
-          }}>{t.backToNavigation || 'Zurück zur Navigation'}</span>
-        </div>
-        <h1 className="top-ten-title" style={{ fontSize: '3.5rem', marginTop: 30, textShadow: 'none', color: '#e0e0e0' }}>
-          <span className="crown-icon">👑</span> Hall of Champions <span className="crown-icon">👑</span>
-        </h1>
-        <p className="top-ten-subtitle" style={{ fontSize: '1.5rem', marginBottom: 0, textShadow: 'none', color: '#b0b0b0' }}>Die ewigen Legenden unseres Clans – Kategorie für 10 Sekunden im Rampenlicht!</p>
-        <div style={{ marginTop: 24, marginBottom: 0 }}>
-          <button onClick={handleAudio} className="category-btn" style={{ fontSize: 22, padding: '12px 32px', background: audioPlaying ? '#FFD700' : '#374151', color: audioPlaying ? '#1a1f2e' : '#FFD700', border: '2px solid #FFD700', borderRadius: 16, marginRight: 12 }} disabled={!audioPlaying}>
-            {'⏸️ Fanfare stoppen'}
-          </button>
-          <audio ref={audioRef} src={process.env.PUBLIC_URL + "/fanfare.mp3"} preload="auto" autoPlay />
-        </div>
-      </div>
-
-      <div style={{ marginTop: 32, minHeight: 400, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <div className="slot-machine-frame" style={{
-          background: 'radial-gradient(circle at 50% 0%, #1a1f2e 0%, #2d1b69 60%, #0f1419 100%)',
-          border: '8px solid #8B5CF6',
-          borderRadius: 40,
-          boxShadow: '0 0 16px 2px #2d1b69cc',
-          padding: 32,
-          minWidth: 600,
-          maxWidth: '90vw',
-          position: 'relative',
-          overflow: 'hidden',
-          marginBottom: 32,
-          transition: 'box-shadow 0.5s',
-        }}>
-          <div className="slot-machine-lights" style={{
-            position: 'absolute',
-            top: -24,
-            left: 0,
-            width: '100%',
+          <div style={{
             display: 'flex',
-            justifyContent: 'space-between',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            position: 'relative',
             zIndex: 10,
-            pointerEvents: 'none',
           }}>
-            {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} style={{
-                width: 20, height: 20, borderRadius: '50%',
-                background: i % 2 === 0 ? '#bfae5a' : '#6d4bb6',
-                boxShadow: 'none',
-                opacity: 0.5,
-                margin: '0 2px',
-                animation: `slotLightBlink 1.2s linear infinite`,
-                animationDelay: `${i * 0.1}s`,
-              }} />
-            ))}
+            <button
+              onClick={() => {
+                setCurrentPage(ROUTES.NAVIGATION);
+                setTimeout(() => {
+                  const el = document.querySelector('.top-ten-container');
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 50);
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'scale(1.1)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = '0 2px 8px #0007';
+              }}
+              aria-label={t.backToNavigation || 'Zurück zur Navigation'}
+            >
+              <svg width="32" height="32" fill="none" stroke="#FFD700" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="11" fill="#23223a" stroke="#8B5CF6" strokeWidth="2" />
+                <path d="M16 12H8M12 16l-4-4 4-4" />
+              </svg>
+            </button>
+            <span style={{
+              color: '#b0b0b0',
+              fontSize: 18,
+              fontWeight: 500,
+              letterSpacing: 0.2,
+              userSelect: 'none',
+              textShadow: 'none',
+              whiteSpace: 'nowrap',
+              paddingLeft: 2,
+              paddingRight: 8,
+            }}>{t.backToNavigation || 'Zurück zur Navigation'}</span>
           </div>
-          <section key={currentCategory.key} id={`podium-${currentCategory.key}`} style={{ marginBottom: 0, width: '100%', transition: 'all 0.7s cubic-bezier(.4,2,.6,1)' }}>
-            <h2 className="section-title" style={{ fontSize: '2.2rem', color: currentCategory.color, textAlign: 'center', marginBottom: 16, marginTop: 32, letterSpacing: 1, textShadow: 'none' }}>{currentCategory.icon} {currentCategory.label}</h2>
-            <div className="podium-section" style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 32, minHeight: 220, transition: 'all 0.7s cubic-bezier(.4,2,.6,1)' }}>
-              {top3ByCategory[currentCategory.key] && top3ByCategory[currentCategory.key].length > 0 ? (
-                top3ByCategory[currentCategory.key].map((player, idx) => {
-                  // Reduziere Kronen und Glanz
-                  const bg = idx === 0
-                    ? 'linear-gradient(135deg, #e0c770 70%, #2d1b69 100%)'
-                    : idx === 1
-                    ? 'linear-gradient(135deg, #b0b0b0 70%, #23223a 100%)'
-                    : 'linear-gradient(135deg, #a97a50 70%, #23223a 100%)';
-                  const crown = idx === 0 ? '👑' : idx === 1 ? '🥈' : '🥉';
-                  return (
-                    <div key={player._aggKey + '-' + idx} className={`podium-place place-${idx + 1}`} style={{
-                      background: bg,
-                      borderRadius: 20,
-                      boxShadow: '0 2px 4px 0 rgba(0,0,0,0.10)',
-                      minWidth: 150,
-                      minHeight: idx === 0 ? 170 : 120,
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end',
-                      position: 'relative',
-                      transform: idx === 0 ? 'scale(1.04)' : 'scale(1)',
-                      zIndex: 3 - idx,
-                      transition: 'all 0.7s cubic-bezier(.4,2,.6,1)'
-                    }}>
-                      <div style={{ fontSize: 32, marginBottom: 4, filter: 'none' }}>{crown}</div>
-                      <div style={{ fontWeight: 600, fontSize: 20, marginBottom: 2, textShadow: 'none', color: '#e0e0e0' }}>{mapToMainName(players, player.Clanmate)}</div>
-                      <div style={{ fontSize: 18, color: '#bbb', fontWeight: 600, marginBottom: 4 }}>{player[currentCategory.key].toLocaleString()}</div>
-                      <div style={{ fontSize: 14, color: '#666', marginBottom: 8 }}>{currentCategory.label}</div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div style={{ color: '#aaa', fontSize: 20, textAlign: 'center', width: '100%' }}>Noch keine Daten für diese Kategorie.</div>
-              )}
-            </div>
-          </section>
+          <h1 className="top-ten-title" style={{ fontSize: '3.5rem', marginTop: 30, textShadow: 'none', color: '#e0e0e0' }}>
+            <span className="crown-icon">👑</span> Hall of Champions <span className="crown-icon">👑</span>
+          </h1>
+          <p className="top-ten-subtitle" style={{ fontSize: '1.5rem', marginBottom: 0, textShadow: 'none', color: '#b0b0b0' }}>Die ewigen Legenden unseres Clans – Kategorie für 10 Sekunden im Rampenlicht!</p>
+          <div style={{ marginTop: 24, marginBottom: 0 }}>
+            <button onClick={handleAudio} className="category-btn" style={{ fontSize: 22, padding: '12px 32px', background: audioPlaying ? '#FFD700' : '#374151', color: audioPlaying ? '#1a1f2e' : '#FFD700', border: '2px solid #FFD700', borderRadius: 16, marginRight: 12 }} disabled={!audioPlaying}>
+              {'⏸️ Fanfare stoppen'}
+            </button>
+            <audio ref={audioRef} src={process.env.PUBLIC_URL + "/fanfare.mp3"} preload="auto" autoPlay />
+          </div>
         </div>
-      </div>
+
+        <div style={{ marginTop: 32, minHeight: 400, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="slot-machine-frame" style={{
+            background: 'radial-gradient(circle at 50% 0%, #1a1f2e 0%, #2d1b69 60%, #0f1419 100%)',
+            border: '8px solid #8B5CF6',
+            borderRadius: 40,
+            boxShadow: '0 0 16px 2px #2d1b69cc',
+            padding: 32,
+            minWidth: 600,
+            maxWidth: '90vw',
+            position: 'relative',
+            overflow: 'hidden',
+            marginBottom: 32,
+            transition: 'box-shadow 0.5s',
+          }}>
+            <div className="slot-machine-lights" style={{
+              position: 'absolute',
+              top: -24,
+              left: 0,
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'space-between',
+              zIndex: 10,
+              pointerEvents: 'none',
+            }}>
+              {Array.from({ length: 12 }).map((_, i) => (
+                <div key={i} style={{
+                  width: 20, height: 20, borderRadius: '50%',
+                  background: i % 2 === 0 ? '#bfae5a' : '#6d4bb6',
+                  boxShadow: 'none',
+                  opacity: 0.5,
+                  margin: '0 2px',
+                  animation: `slotLightBlink 1.2s linear infinite`,
+                  animationDelay: `${i * 0.1}s`,
+                }} />
+              ))}
+            </div>
+            <section key={currentCategory.key} id={`podium-${currentCategory.key}`} style={{ marginBottom: 0, width: '100%', transition: 'all 0.7s cubic-bezier(.4,2,.6,1)' }}>
+              <h2 className="section-title" style={{ fontSize: '2.2rem', color: currentCategory.color, textAlign: 'center', marginBottom: 16, marginTop: 32, letterSpacing: 1, textShadow: 'none' }}>{currentCategory.icon} {currentCategory.label}</h2>
+              <div className="podium-section" style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 32, minHeight: 220, transition: 'all 0.7s cubic-bezier(.4,2,.6,1)' }}>
+                {top3ByCategory[currentCategory.key] && top3ByCategory[currentCategory.key].length > 0 ? (
+                  top3ByCategory[currentCategory.key].map((player, idx) => {
+                    // Reduziere Kronen und Glanz
+                    const bg = idx === 0
+                      ? 'linear-gradient(135deg, #e0c770 70%, #2d1b69 100%)'
+                      : idx === 1
+                      ? 'linear-gradient(135deg, #b0b0b0 70%, #23223a 100%)'
+                      : 'linear-gradient(135deg, #a97a50 70%, #23223a 100%)';
+                    const crown = idx === 0 ? '👑' : idx === 1 ? '🥈' : '🥉';
+                    return (
+                      <div key={player._aggKey + '-' + idx} className={`podium-place place-${idx + 1}`} style={{
+                        background: bg,
+                        borderRadius: 20,
+                        boxShadow: '0 2px 4px 0 rgba(0,0,0,0.10)',
+                        minWidth: 150,
+                        minHeight: idx === 0 ? 170 : 120,
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end',
+                        position: 'relative',
+                        transform: idx === 0 ? 'scale(1.04)' : 'scale(1)',
+                        zIndex: 3 - idx,
+                        transition: 'all 0.7s cubic-bezier(.4,2,.6,1)'
+                      }}>
+                        <div style={{ fontSize: 32, marginBottom: 4, filter: 'none' }}>{crown}</div>
+                        <div style={{ fontWeight: 600, fontSize: 20, marginBottom: 2, textShadow: 'none', color: '#e0e0e0' }}>{mapToMainName(players, player.Clanmate)}</div>
+                        <div style={{ fontSize: 18, color: '#bbb', fontWeight: 600, marginBottom: 4 }}>{player[currentCategory.key].toLocaleString()}</div>
+                        <div style={{ fontSize: 14, color: '#666', marginBottom: 8 }}>{currentCategory.label}</div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div style={{ color: '#aaa', fontSize: 20, textAlign: 'center', width: '100%' }}>Noch keine Daten für diese Kategorie.</div>
+                )}
+              </div>
+            </section>
+          </div>
+        </div>
 
 
 

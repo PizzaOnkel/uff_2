@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import StickyBackButton from '../components/StickyBackButton';
 import { mapToMainName } from '../utils/aliasMapping';
 import { translations } from '../translations/translations';
 import { ROUTES } from '../routes';
@@ -23,30 +24,9 @@ function tartarosLevelFromChest(chest) {
     return Number(tartarosMatch[1]);
   } else if ([15,20,25,30,35].includes(Number(chest.level ?? chest.Level))) {
     return Number(chest.level ?? chest.Level);
-  } else {
-    return Number(chest.level ?? chest.Level ?? 0);
   }
+  return null;
 }
-
-function isTartarosChest(chest) {
-  return (
-    (chest.category === "Chests of Tartaros") ||
-    (chest.Name||"").toLowerCase().includes("tartaros") ||
-    (chest.Type||"").toLowerCase().includes("tartaros") ||
-    (chest.Source||"").toLowerCase().includes("tartaros")
-  );
-}
-
-function isArenaChest(chest) {
-  return (
-    (chest.category && chest.category === "Arena Chests") ||
-    chest.Type === "Arena" ||
-    chest.Source === "Arena"
-  );
-}
-
-
-// --- Ende Tartaros-Logik ---
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement, RadialLinearScale, Filler);
 
@@ -471,44 +451,9 @@ const TopTen = ({ t, setCurrentPage }) => {
 
   return (
     <div className="top-ten-container">
+      <StickyBackButton onClick={() => setCurrentPage(ROUTES.NAVIGATION)} label={t?.backToNavigation || 'Zurück zur Navigation'} />
       <div style={headerStyle}></div>
       <div className="top-ten-header">
-        <button
-          onClick={() => setCurrentPage(ROUTES.NAVIGATION)}
-          className="back-button"
-          style={{
-            position: 'absolute',
-            top: '20px',
-            left: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '12px 20px',
-            background: 'linear-gradient(135deg, #1F2937 0%, #374151 100%)',
-            color: '#F9FAFB',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            zIndex: 10
-          }}
-          onMouseOver={(e) => {
-            e.target.style.background = 'linear-gradient(135deg, #374151 0%, #4B5563 100%)';
-            e.target.style.transform = 'translateY(-2px)';
-          }}
-          onMouseOut={(e) => {
-            e.target.style.background = 'linear-gradient(135deg, #1F2937 0%, #374151 100%)';
-            e.target.style.transform = 'translateY(0)';
-          }}
-        >
-          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-          </svg>
-          {t.backToNavigation || 'Zurück zur Navigation'}
-        </button>
         <h1 className="top-ten-title">
           <span className="crown-icon">👑</span>
           {t.topTenTitle}
@@ -655,6 +600,6 @@ const TopTen = ({ t, setCurrentPage }) => {
       </div>
     </div>
   );
-};
+}
 
 export default TopTen;

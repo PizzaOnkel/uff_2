@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 // import { collection, getDocs } from "firebase/firestore";
 import { ROUTES } from "../routes";
@@ -6,6 +5,7 @@ import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { Doughnut } from "react-chartjs-2";
 import "./TopTen.css";
+import StickyBackButton from "../components/StickyBackButton";
 
 const normCategories = [
   { min: 0, max: 25, label: "0% - 25%", color: "#ef4444", icon: "❌" },
@@ -208,19 +208,7 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
 
   return (
     <div className="top-ten-container flex flex-col items-center min-h-screen pb-8 relative">
-      {/* Zurück-Button oben links */}
-      <button
-        onClick={() => setCurrentPage(ROUTES.NAVIGATION)}
-        className="absolute top-4 left-4 px-3 py-2 bg-gradient-to-r from-blue-500 to-cyan-600 text-white text-base font-medium rounded-lg shadow-md hover:from-blue-600 hover:to-cyan-700 transition-all duration-200 z-20 flex items-center"
-        style={{ minWidth: 0, minHeight: 0 }}
-        title="Zurück zur Navigation"
-      >
-        <svg className="mr-2 w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-          <line x1="19" y1="12" x2="5" y2="12" />
-          <polyline points="12 19 5 12 12 5" />
-        </svg>
-        {t.backToAdminPanel}
-      </button>
+      <StickyBackButton onClick={() => setCurrentPage(ROUTES.NAVIGATION)} label={t?.backToAdminPanel || "Zurück"} />
 
       <div className="top-ten-header">
         <span className="crown-icon">🏆</span>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import ChestMappingSuggestions from "./ChestMappingSuggestions";
 import ChestMappingIgnoreList from "./ChestMappingIgnoreList";
@@ -6,6 +5,7 @@ import { CHEST_NAMES, CHEST_TYPES, CHEST_SOURCES } from "./chestDropdownData";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
 import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDocs, query } from "firebase/firestore";
+import StickyBackButton from "../components/StickyBackButton";
 
 // Hilfsfunktion: Vorschlagsliste aus allen Ergebnissen neu generieren
 async function refreshUsedChestMappings(db) {
@@ -260,6 +260,7 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
   async function handleDeleteIgnore(id) {
     await deleteDoc(doc(db, "chestMappingIgnore", id));
   }
+
   // Importiere einen Mapping-Vorschlag in die chestMappings
   async function importUsedMapping(mapping) {
     setImporting(true);
@@ -279,6 +280,24 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
     }
     setImporting(false);
   }
+
+  // Filter für Vorschlagsliste: Nur Truhen, die weder gemappt noch ignoriert sind
+  function isChestInMappingsOrIgnore(chest) {
+    const key = `${chest.chestName}__${chest.category}__${chest.level}`;
+    // Check Mapping-Liste
+    const inMappings = chestMappings.some(m => {
+      const mKey = `${m.chestName}__${m.category}__${m.levelStart || m.level || ''}`;
+      return mKey === key;
+    });
+    // Check Ignore-Liste
+    const inIgnore = ignoreChests.some(i => {
+      const iKey = `${i.Name || i.chestName || ''}__${i.Category || i.category || i.Type || ''}__${i.Level || i.level || ''}`;
+      return iKey === key;
+    });
+    return inMappings || inIgnore;
+  }
+
+  const filteredSuggestions = usedChestMappings.filter(chest => !isChestInMappingsOrIgnore(chest));
 
   const chestNames = {
     "Arena Chests": ["default"],
@@ -374,16 +393,7 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white p-4 pb-8">
-      {/* Zusätzlicher Zurück-Button oben links */}
-      <div style={{ position: 'absolute', top: 16, left: 16, zIndex: 20 }}>
-        <button
-          onClick={() => setCurrentPage(ROUTES.ADMIN_PANEL)}
-          className="px-6 py-2 bg-blue-600 rounded text-white font-semibold text-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transition"
-          style={{ minWidth: 120 }}
-        >
-          &larr; Zurück
-        </button>
-      </div>
+      <StickyBackButton onClick={() => setCurrentPage(ROUTES.ADMIN_PANEL)} label={t?.backToAdminPanel || "Zurück"} />
       {/* Button für Vorschlagsliste */}
       <div className="w-full max-w-4xl flex flex-row gap-4 mb-4">
         <button onClick={() => setShowSuggestions(v => !v)} className="px-4 py-2 bg-yellow-700 rounded text-white font-semibold hover:bg-yellow-800 transition">{showSuggestions ? 'Vorschlagsliste ausblenden' : 'Vorschlagsliste anzeigen'}</button>
@@ -392,7 +402,7 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
       {/* Ausgelagerte Komponenten */}
       {showSuggestions && (
         <ChestMappingSuggestions
-          usedChestMappings={usedChestMappings}
+          usedChestMappings={filteredSuggestions}
           importUsedMapping={importUsedMapping}
           importing={importing}
           sortField={sortField}

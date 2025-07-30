@@ -1,5 +1,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
+import StickyBackButton from "../components/StickyBackButton";
 import Papa from "papaparse";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
@@ -562,13 +563,13 @@ const verticalHeaders = [
           >
             &times;
           </button>
-          <h3 className="text-2xl font-bold mb-4 text-blue-300">{playerRow.name}</h3>
-          <div className="mb-2">Rang: <b>{playerRow.rank}</b></div>
-          <div className="mb-2">Truppenstärke: <b>{playerRow.troopStrength}</b></div>
-          <div className="mb-2">Clantruhen: <b>{playerRow.chests}</b></div>
-          <div className="mb-2">Punkte Total (Ist): <b>{playerRow.ist}</b></div>
-          <div className="mb-2">Norm (Soll): <b>{playerRow.soll}</b></div>
-          <div className="mb-2">Differenz: <b>{playerRow.differenz}</b></div>
+          <h3 className="text-2xl font-bold mb-4 text-blue-300" style={{fontSize:'1.25rem'}}>{playerRow.name}</h3>
+          <div className="mb-2" style={{fontSize:'0.95rem'}}>Rang: <b>{playerRow.rank}</b></div>
+          <div className="mb-2" style={{fontSize:'0.95rem'}}>Truppenstärke: <b>{playerRow.troopStrength}</b></div>
+          <div className="mb-2" style={{fontSize:'0.95rem'}}>Clantruhen: <b>{playerRow.chests}</b></div>
+          <div className="mb-2" style={{fontSize:'0.95rem'}}>Punkte Total (Ist): <b>{playerRow.ist}</b></div>
+          <div className="mb-2" style={{fontSize:'0.95rem'}}>Norm (Soll): <b>{playerRow.soll}</b></div>
+          <div className="mb-2" style={{fontSize:'0.95rem'}}>Differenz: <b>{playerRow.differenz}</b></div>
           <div className="mb-2 flex items-center gap-2">
             <span>Normerfüllung:</span>
             <div className="flex-1 min-w-[100px] max-w-[180px] bg-gray-700 rounded h-5 overflow-hidden relative" style={{marginRight:8}}>
@@ -628,16 +629,7 @@ const verticalHeaders = [
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white p-4 pb-32">
-      {/* Zurück-Button ganz oben als echter Button */}
-      <div className="w-full flex justify-start mb-4">
-        <button
-          onClick={() => setCurrentPage(ROUTES.NAVIGATION)}
-          className="px-6 py-2 bg-blue-600 rounded text-white font-semibold text-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transition"
-          style={{ minWidth: 120 }}
-        >
-          &larr; Zurück
-        </button>
-      </div>
+      <StickyBackButton onClick={() => setCurrentPage(ROUTES.NAVIGATION)} label={t?.backToNavigation || "Zurück"} />
       <div className="w-full flex flex-col items-center">
         {/* Name und Zeitraum der aktuellen Veranstaltungsperiode (aus Firestore-Perioden) */}
         {!loading && currentPeriodName && (
@@ -946,16 +938,7 @@ const verticalHeaders = [
           </>
         )}
       </div>
-      {/* Zurück-Button ganz unten als echter Button */}
-      <div className="w-full flex justify-start mt-8 mb-2">
-        <button
-          onClick={() => setCurrentPage(ROUTES.NAVIGATION)}
-          className="px-6 py-2 bg-blue-600 rounded text-white font-semibold text-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transition"
-          style={{ minWidth: 120 }}
-        >
-          &larr; Zurück
-        </button>
-      </div>
+      {/* StickyBackButton übernimmt die Navigation, kein doppelter Button mehr nötig */}
       {selectedPlayer && renderPlayerModal(selectedPlayer)}
       <footer className="mt-auto text-gray-500 text-sm">{t.copyright}</footer>
     </div>
