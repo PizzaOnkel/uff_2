@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../firebase";
-import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { getDocs } from "firebase/firestore";
 
 const rankOrder = [
   "Clanführer",
@@ -14,7 +15,6 @@ const rankOrder = [
 ];
 
 export default function ManagePlayersPage({ t, setCurrentPage }) {
-  const editFormRef = React.useRef(null);
   // Fallback für t, falls nicht übergeben
   const translations = {
     managePlayersTitle: 'Spieler verwalten',
@@ -41,14 +41,14 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
     troopStrength: ""
   });
 
-  // Spieler laden und sortieren (nur einmal beim Laden)
+  // Spieler laden und sortieren
   useEffect(() => {
-    async function fetchPlayers() {
-      const snapshot = await getDocs(collection(db, "players"));
+    const unsub = onSnapshot(collection(db, "players"), (snapshot) => {
       const list = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+
       list.sort((a, b) => {
         const rankA = rankOrder.indexOf(a.rank);
         const rankB = rankOrder.indexOf(b.rank);
@@ -58,9 +58,10 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
         }
         return 0;
       });
+
       setPlayers(list);
-    }
-    fetchPlayers();
+    });
+    return () => unsub();
   }, []);
 
   // Suche Clanmates aus results, die nicht in players stehen
@@ -97,43 +98,40 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
     findMissingClanmates();
   }, [players]);
 
-  // Ränge laden (nur einmal beim Laden)
+  // Ränge laden
   useEffect(() => {
-    async function fetchRanks() {
-      const snapshot = await getDocs(collection(db, "ranks"));
+    const unsub = onSnapshot(collection(db, "ranks"), (snapshot) => {
       setRanks(snapshot.docs.map(doc => doc.data().name));
-    }
-    fetchRanks();
+    });
+    return () => unsub();
   }, []);
 
 
-  // Normen laden (nur einmal beim Laden)
+  // Normen laden
   useEffect(() => {
-    async function fetchNorms() {
-      const snapshot = await getDocs(collection(db, "norms"));
+    const unsub = onSnapshot(collection(db, "norms"), (snapshot) => {
       setNorms(snapshot.docs.map(doc => ({
         troopStrength: doc.data().troopStrength,
         value: doc.data().value
       })));
-    }
-    fetchNorms();
+    });
+    return () => unsub();
   }, []);
 
-  // Truppenstärken laden und mit Normen verknüpfen (nur einmal beim Laden oder wenn Normen sich ändern)
+  // Truppenstärken laden und mit Normen verknüpfen
   useEffect(() => {
-    async function fetchTroopStrengths() {
-      const snapshot = await getDocs(collection(db, "troopStrengths"));
+    const unsub = onSnapshot(collection(db, "troopStrengths"), (snapshot) => {
       setTroopStrengths(snapshot.docs.map(doc => {
         const name = doc.data().name;
         // Passende Norm suchen
         const normObj = norms.find(n => n.troopStrength === name);
         return {
           name,
-          norm: normObj ? { points: normObj.value } : {}
+          norm: normObj ? { points: normObj.value } : {} // Nur Punkte, weitere Felder nach Bedarf
         };
       }));
-    }
-    fetchTroopStrengths();
+    });
+    return () => unsub();
   }, [norms]);
 
   const handleChange = e => {
@@ -185,11 +183,6 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
       rank: player.rank,
       troopStrength: player.troopStrength
     });
-    setTimeout(() => {
-      if (editFormRef.current) {
-        editFormRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }, 100);
   };
 
   const handleEditChange = e => {
@@ -225,11 +218,6 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
     await deleteDoc(doc(db, "players", id));
   };
 
-  // Nur Spieler mit Rang oder Truppenstärke "nicht definiert" filtern
-  const playersMissingRankOrTroop = players.filter(
-    p => p.rank === "nicht definiert" || p.troopStrength === "nicht definiert"
-  );
-
   return (
     <div className="min-h-screen flex flex-col bg-gray-900 text-white p-4 pb-8 relative">
       <div className="w-full flex justify-end mb-4">
@@ -245,20 +233,11 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
         {missingClanmates.length > 0 && (
           <div className="bg-yellow-900 text-yellow-200 rounded-lg p-4 mb-6 mr-8 w-80 self-start">
             <div className="font-bold mb-2">Clanmates in Ergebnissen, aber nicht in der Spieler-Liste:</div>
-            <table className="w-full text-sm bg-yellow-950 rounded">
-              <thead>
-                <tr>
-                  <th className="p-1 text-left">Clanmate</th>
-                </tr>
-              </thead>
-              <tbody>
-                {missingClanmates.map(name => (
-                  <tr key={name}>
-                    <td className="p-1">{name}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <ul className="list-disc pl-6">
+              {missingClanmates.map(name => (
+                <li key={name}>{name}</li>
+              ))}
+            </ul>
           </div>
         )}
         <div className="flex-1 flex flex-col items-center">
@@ -318,7 +297,7 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
         {players.map(player => (
           <li key={player.id} className="flex flex-col bg-gray-800 rounded p-2 mb-2">
             {editId === player.id ? (
-              <div ref={editFormRef}>
+              <>
                 <input
                   type="text"
                   name="name"
@@ -369,7 +348,7 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
                 >
                   Abbrechen
                 </button>
-              </div>
+              </>
             ) : (
               <>
                 <span><b>Name:</b> {player.name}</span>
@@ -399,63 +378,6 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
       </ul>
       {/* Der untere Zurück-Button entfällt, da oben platziert */}
         </div>
-        {/* Spieler ohne Rang oder Truppenstärke rechts */}
-        {playersMissingRankOrTroop.length > 0 && (
-          <div className="relative w-80 self-start">
-            {/* Scroll-to-top Button */}
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="fixed right-12 z-50 bg-blue-700 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-200"
-              style={{ top: '50%', transform: 'translateY(-50%)' }}
-              title="Nach oben scrollen"
-            >
-              ⬆️ Top
-            </button>
-            {/* Spieler-Suchfeld */}
-            <div className="fixed right-12 z-50 bg-gray-900 bg-opacity-90 rounded shadow-lg p-2 mt-2 flex flex-col items-center" style={{ top: 'calc(50% + 60px)', transform: 'translateY(-50%)' }}>
-              <input
-                type="text"
-                placeholder="Spieler suchen..."
-                className="mb-1 px-2 py-1 rounded bg-gray-800 text-white border border-gray-600 w-48 text-sm"
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    const search = e.target.value.trim().toLowerCase();
-                    if (!search) return;
-                    const found = players.find(p => p.name.toLowerCase() === search || (Array.isArray(p.aliases) && p.aliases.map(a => a.toLowerCase()).includes(search)));
-                    if (found) {
-                      handleEditClick(found);
-                      e.target.value = '';
-                    } else {
-                      e.target.classList.add('border-red-500');
-                      setTimeout(() => e.target.classList.remove('border-red-500'), 1200);
-                    }
-                  }
-                }}
-                title="Name oder Alias eingeben und Enter drücken"
-              />
-              <span className="text-xs text-gray-400">Name oder Alias + Enter</span>
-            </div>
-            <div className="bg-red-900 text-red-200 rounded-lg p-4 mb-6 w-full">
-              <div className="font-bold mb-2">Spieler ohne Rang und/oder Truppenstärke:</div>
-              <table className="w-full text-sm bg-red-950 rounded">
-                <thead>
-                  <tr>
-                    <th className="p-1 text-left">Name</th>
-                    <th className="p-1 text-left">Aliase</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {playersMissingRankOrTroop.map(player => (
-                    <tr key={player.id} className="cursor-pointer hover:bg-red-800" onClick={() => handleEditClick(player)}>
-                      <td className="p-1 text-blue-200 underline">{player.name}</td>
-                      <td className="p-1">{player.aliases && player.aliases.join(", ")}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
       </div>
       <footer className="mt-auto text-gray-500 text-sm">{t.copyright}</footer>
     </div>

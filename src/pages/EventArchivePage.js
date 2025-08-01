@@ -1,38 +1,10 @@
+
 import React, { useEffect, useRef, useState } from "react";
 import Papa from "papaparse";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { mapToMainName } from "../utils/aliasMapping";
-import StickyBackButton from "../components/StickyBackButton";
-
-// --- Tartaros-Logik aus CurrentTotalEventPage.js ---
-function tartarosLevelFromChest(chest) {
-  let tartarosMatch = (chest.Name||"").match(/tartaros crypt level (\d+)/i);
-  if (!tartarosMatch && chest.Type) {
-    tartarosMatch = (chest.Type||"").match(/tartaros crypt level (\d+)/i);
-  }
-  if (!tartarosMatch && chest.Source) {
-    tartarosMatch = (chest.Source||"").match(/tartaros crypt level (\d+)/i);
-  }
-  if (tartarosMatch) {
-    return Number(tartarosMatch[1]);
-  } else if ([15,20,25,30,35].includes(Number(chest.level ?? chest.Level))) {
-    return Number(chest.level ?? chest.Level);
-  } else {
-    return Number(chest.level ?? chest.Level ?? 0);
-  }
-}
-
-function isTartarosChest(chest) {
-  return (
-    (chest.category === "Chests of Tartaros") ||
-    (chest.Name||"").toLowerCase().includes("tartaros") ||
-    (chest.Type||"").toLowerCase().includes("tartaros") ||
-    (chest.Source||"").toLowerCase().includes("tartaros")
-  );
-}
-// --- Ende Tartaros-Logik ---
 
 export default function EventArchivePage({ t, setCurrentPage }) {
   // --- wie CurrentTotalEventPage, aber mit Perioden-Auswahl ---
@@ -121,25 +93,12 @@ export default function EventArchivePage({ t, setCurrentPage }) {
       setUploadTimes(uploadMap);
       // Perioden laden
       const periodsArr = periodsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      // Finde aktuelle Periode (start <= jetzt && (end >= jetzt || end leer))
-      let now = new Date();
-      let currentPeriodId = null;
-      for (const p of periodsArr) {
-        if (p.start && new Date(p.start) <= now && (!p.end || new Date(p.end) >= now)) {
-          currentPeriodId = p.id;
-          break;
-        }
-      }
-      // Archiv-Perioden: nur vergangene Perioden (end < jetzt), aber nicht die aktuelle
-      const archivePeriods = periodsArr.filter(p => p.end && new Date(p.end) < now && p.id !== currentPeriodId);
-      setPeriods(archivePeriods);
-      // Periode setzen, falls noch nicht gesetzt oder nicht mehr gültig
-      if (!selectedPeriodId || !archivePeriods.some(p => p.id === selectedPeriodId)) {
-        if (archivePeriods.length > 0) {
-          setSelectedPeriodId(archivePeriods[archivePeriods.length - 1].id);
-        } else {
-          setSelectedPeriodId("");
-        }
+      setPeriods(periodsArr);
+      // Archiv-Perioden: nur abgeschlossene Perioden
+      const archivePeriods = periodsArr.filter(p => p.end && new Date(p.end) < new Date());
+      // Periode setzen, falls noch nicht gesetzt
+      if (!selectedPeriodId && archivePeriods.length > 0) {
+        setSelectedPeriodId(archivePeriods[archivePeriods.length - 1].id);
       }
       // Periodeninfo für Anzeige
       const selectedPeriod = archivePeriods.find(p => p.id === selectedPeriodId);
@@ -387,14 +346,7 @@ export default function EventArchivePage({ t, setCurrentPage }) {
           };
         })
       : [];
-    const filteredChests = mappedChests.filter(chest => {
-      if (isIgnoredChest(chest)) return false;
-      if (isTartarosChest(chest)) {
-        const lvl = tartarosLevelFromChest(chest);
-        if (lvl < 11) return false;
-      }
-      return true;
-    });
+    const filteredChests = mappedChests.filter(chest => !isIgnoredChest(chest));
     const chestsCount = filteredChests.reduce((sum, chest) => sum + (chest.count || 0), 0);
     const ist = filteredChests.reduce((sum, chest) => sum + (chest.points || 0), 0);
     const timestamp = result.timestamp
@@ -422,29 +374,25 @@ export default function EventArchivePage({ t, setCurrentPage }) {
     }
   });
 
-  // Nur Spieler anzeigen, die als Clanmate in den results der gewählten Periode enthalten sind
-  const clanmatesInResults = new Set(results.map(r => mapToMainName(players, r.Clanmate)));
-  const tableRows = Array.from(playerMap.values())
-    .filter(row => clanmatesInResults.has(mapToMainName(players, row.name)))
-    .map(row => {
-      row.differenz = row.ist - row.soll;
-      row.percent = row.soll > 0 ? Math.round((row.ist / row.soll) * 100) : 0;
-      let uploadTimestamp = "";
-      if (results.length > 0) {
-        const resultEntry = results.find(r => mapToMainName(players, r.Clanmate) === mapToMainName(players, row.name));
-        if (resultEntry && resultEntry.periodId && uploadTimes[resultEntry.periodId]) {
-          const d = new Date(uploadTimes[resultEntry.periodId]);
-          const yyyy = d.getFullYear();
-          const mm = String(d.getMonth() + 1).padStart(2, '0');
-          const dd = String(d.getDate()).padStart(2, '0');
-          const hh = String(d.getHours()).padStart(2, '0');
-          const min = String(d.getMinutes()).padStart(2, '0');
-          uploadTimestamp = `${yyyy}/${mm}/${dd}-${hh}:${min}`;
-        }
+  const tableRows = Array.from(playerMap.values()).map(row => {
+    row.differenz = row.ist - row.soll;
+    row.percent = row.soll > 0 ? Math.round((row.ist / row.soll) * 100) : 0;
+    let uploadTimestamp = "";
+    if (results.length > 0) {
+      const resultEntry = results.find(r => r.Clanmate === row.name);
+      if (resultEntry && resultEntry.periodId && uploadTimes[resultEntry.periodId]) {
+        const d = new Date(uploadTimes[resultEntry.periodId]);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const hh = String(d.getHours()).padStart(2, '0');
+        const min = String(d.getMinutes()).padStart(2, '0');
+        uploadTimestamp = `${yyyy}/${mm}/${dd}-${hh}:${min}`;
       }
-      row.timestamp = uploadTimestamp;
-      return row;
-    });
+    }
+    row.timestamp = uploadTimestamp;
+    return row;
+  });
 
   totalIst = tableRows.reduce((sum, row) => sum + row.ist, 0);
   totalSoll = tableRows.reduce((sum, row) => sum + row.soll, 0);
@@ -507,13 +455,13 @@ export default function EventArchivePage({ t, setCurrentPage }) {
           >
             &times;
           </button>
-          <h3 className="text-2xl font-bold mb-4 text-blue-300" style={{fontSize:'1.25rem'}}>{playerRow.name}</h3>
-          <div className="mb-2" style={{fontSize:'0.95rem'}}>Rang: <b>{playerRow.rank}</b></div>
-          <div className="mb-2" style={{fontSize:'0.95rem'}}>Truppenstärke: <b>{playerRow.troopStrength}</b></div>
-          <div className="mb-2" style={{fontSize:'0.95rem'}}>Clantruhen: <b>{playerRow.chests}</b></div>
-          <div className="mb-2" style={{fontSize:'0.95rem'}}>Punkte Total (Ist): <b>{playerRow.ist}</b></div>
-          <div className="mb-2" style={{fontSize:'0.95rem'}}>Norm (Soll): <b>{playerRow.soll}</b></div>
-          <div className="mb-2" style={{fontSize:'0.95rem'}}>Differenz: <b>{playerRow.differenz}</b></div>
+          <h3 className="text-2xl font-bold mb-4 text-blue-300">{playerRow.name}</h3>
+          <div className="mb-2">Rang: <b>{playerRow.rank}</b></div>
+          <div className="mb-2">Truppenstärke: <b>{playerRow.troopStrength}</b></div>
+          <div className="mb-2">Clantruhen: <b>{playerRow.chests}</b></div>
+          <div className="mb-2">Punkte Total (Ist): <b>{playerRow.ist}</b></div>
+          <div className="mb-2">Norm (Soll): <b>{playerRow.soll}</b></div>
+          <div className="mb-2">Differenz: <b>{playerRow.differenz}</b></div>
           <div className="mb-2 flex items-center gap-2">
             <span>Normerfüllung:</span>
             <div className="flex-1 min-w-[100px] max-w-[180px] bg-gray-700 rounded h-5 overflow-hidden relative" style={{marginRight:8}}>
@@ -572,7 +520,17 @@ export default function EventArchivePage({ t, setCurrentPage }) {
   // --- Render-Block: Dropdown GANZ OBEN, dann wie CurrentTotalEventPage ---
   return (
     <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white p-4 pb-32">
-      <StickyBackButton onClick={() => setCurrentPage(ROUTES.NAVIGATION)} label={t?.backToNavigation || "Zurück"} />
+      {/* ...TopTen-Liste entfernt... */}
+      {/* Zurück-Button ganz oben */}
+      <div className="w-full flex justify-start mb-4">
+        <button
+          onClick={() => setCurrentPage(ROUTES.NAVIGATION)}
+          className="px-6 py-2 bg-blue-600 rounded text-white font-semibold text-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transition"
+          style={{ minWidth: 120 }}
+        >
+          &larr; Zurück
+        </button>
+      </div>
       {/* Dropdown für Eventperiode */}
       <div className="mb-4 w-full max-w-2xl flex flex-col items-center">
         <label className="mr-2 text-lg font-semibold text-purple-200">Eventperiode:</label>
@@ -618,9 +576,6 @@ export default function EventArchivePage({ t, setCurrentPage }) {
                 className={`h-6 ${totalSoll > 0 && (totalIst / totalSoll) >= 1 ? 'bg-green-500' : 'bg-blue-500'}`}
                 style={{ width: `${totalSoll > 0 ? Math.min(200, (totalIst / totalSoll) * 100) : 0}%` }}
               />
-            </div>
-            <div className="mt-2 text-center" style={{ color: '#ff6666', fontWeight: 500, fontSize: '1.1em' }}>
-              {`Anzahl Spieler: ${tableRows.length}`}
             </div>
           </div>
           {/* Slider über der Tabelle */}

@@ -39,9 +39,9 @@ async function refreshUsedChestMappings(db) {
     } else if ((chestName||"").toLowerCase().includes("orc") || (type||"").toLowerCase().includes("common crypt")) {
       category = "Common Chests";
     } else if ((chestName||"").toLowerCase().includes("elven citadel chest")) {
-      category = "Elven Chests";
+      category = "Citadel";
     } else if ((chestName||"").toLowerCase().includes("cursed citadel chest")) {
-      category = "Cursed Chests";
+      category = "Citadel";
     } else if (((type||chest.Kategorie||chest.Category||"").toLowerCase().includes("heroic monster"))) {
       category = "Heroic Chests";
     } else if ((chestName||"").toLowerCase().includes("rare dragon") || (type||"").toLowerCase().includes("rare crypt")) {
@@ -373,15 +373,16 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
   const handleSaveEdit = async () => {
     let levelStart = editingMapping.levelStart;
     let levelEnd = editingMapping.levelEnd;
+    // Level als Zahl speichern, außer bei Bank
     if (editingMapping.category !== "Bank") {
-      levelStart = levelStart !== "" ? parseInt(levelStart, 10) : "";
-      levelEnd = levelEnd !== "" ? parseInt(levelEnd, 10) : "";
+      levelStart = levelStart !== "" && levelStart !== null ? Number(levelStart) : "";
+      levelEnd = levelEnd !== "" && levelEnd !== null ? Number(levelEnd) : "";
     }
     await updateDoc(doc(db, "chestMappings", editingId), {
       ...editingMapping,
       levelStart,
       levelEnd,
-      points: editingMapping.points !== "" ? parseInt(editingMapping.points, 10) : ""
+      points: editingMapping.points !== "" && editingMapping.points !== null ? Number(editingMapping.points) : ""
     });
     setEditingId(null);
     setEditingMapping({});
@@ -542,7 +543,7 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
               <input
                 type="number"
                 value={newMapping.levelStart}
-                onChange={(e) => setNewMapping({...newMapping, levelStart: e.target.value})}
+                onChange={e => setNewMapping({ ...newMapping, levelStart: e.target.value === '' ? '' : Number(e.target.value) })}
                 className="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-purple-500 focus:outline-none"
                 placeholder="z.B. 10"
               />
@@ -565,7 +566,7 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
               <input
                 type="number"
                 value={newMapping.levelEnd}
-                onChange={(e) => setNewMapping({...newMapping, levelEnd: e.target.value})}
+                onChange={e => setNewMapping({ ...newMapping, levelEnd: e.target.value === '' ? '' : Number(e.target.value) })}
                 className="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-purple-500 focus:outline-none"
                 placeholder="z.B. 15"
               />
@@ -764,7 +765,7 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
                               <input
                                 type="number"
                                 value={editingMapping.levelStart}
-                                onChange={e => setEditingMapping({ ...editingMapping, levelStart: e.target.value })}
+                                onChange={e => setEditingMapping({ ...editingMapping, levelStart: e.target.value === '' ? '' : Number(e.target.value) })}
                                 className="w-20 px-2 py-1 rounded bg-gray-700 text-white border border-gray-600"
                                 placeholder="Start"
                               />
@@ -772,7 +773,7 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
                               <input
                                 type="number"
                                 value={editingMapping.levelEnd}
-                                onChange={e => setEditingMapping({ ...editingMapping, levelEnd: e.target.value })}
+                                onChange={e => setEditingMapping({ ...editingMapping, levelEnd: e.target.value === '' ? '' : Number(e.target.value) })}
                                 className="w-20 px-2 py-1 rounded bg-gray-700 text-white border border-gray-600"
                                 placeholder="Ende"
                               />

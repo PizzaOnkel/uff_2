@@ -28,7 +28,7 @@ const chestCategories = [
     { name: "ROTA Total" }
   ] },
   { name: "Epic Ancient squad", levels: [] },
-  { name: "EAs Total", levels: [] },
+  { name: "EAs Punkte", levels: [] },
   { name: "Union Chest", levels: [] },
   { name: "Union Total", levels: [] },
   { name: "Jormungandr Chests", levels: [] },
@@ -44,7 +44,7 @@ const verticalHeaders = [
   "Ancients Chest",
   "ROTA Total",
   "Epic Ancient squad",
-  "EAs Total",
+  "EAs Punkte",
   "Union Chest",
   "Union Total",
   "Jormungandr Chests",
@@ -257,17 +257,43 @@ const verticalHeaders = [
               const levelA = String(m.levelStart || m.level || m.Level || m.levelEnd || "").trim().toLowerCase();
               const levelB = String(chest.level ?? chest.Level ?? chest.levelStart ?? chest.levelEnd ?? "").trim().toLowerCase();
               let score = 0;
-              if (nameA && nameA === nameB) score++;
-              if (categoryA && categoryA === categoryB) score++;
-              if (typeA && typeA === typeB) score++;
-              if (sourceA && sourceA === sourceB) score++;
-              if (levelA && (levelA === levelB || m.levelEnd === levelB)) score++;
+              // Für Bank Chests: Mapping auch über Name, falls Level nicht passt
+              const isBankChest = (chest.category === "Bank Chests" || typeB === "bank" || sourceB === "bank");
               let matches = true;
-              if (nameA && nameA !== nameB) matches = false;
-              if (categoryA && categoryA !== categoryB) matches = false;
-              if (typeA && typeA !== typeB) matches = false;
-              if (sourceA && sourceA !== sourceB) matches = false;
-              if (levelA && (levelA !== levelB && m.levelEnd !== levelB)) matches = false;
+              if (isBankChest) {
+                // Name-Mapping: z.B. "Wooden Chest" <-> Level "Wooden"
+                if (nameA && nameB && nameB.includes(levelA)) score += 2;
+                if (nameA && nameA === nameB) score++;
+                if (categoryA && categoryA === categoryB) score++;
+                if (typeA && typeA === typeB) score++;
+                if (sourceA && sourceA === sourceB) score++;
+                // Level-Mapping: Level kann 0 sein, dann Name verwenden
+                if (levelA && (levelA === levelB || nameB.includes(levelA))) score++;
+                // Striktes Matching für Bank Chests
+                matches = (
+                  (!categoryA || categoryA === categoryB) &&
+                  (!typeA || typeA === typeB) &&
+                  (!sourceA || sourceA === sourceB) &&
+                  ((levelA && (levelA === levelB || nameB.includes(levelA))) || (!levelA))
+                );
+              } else {
+                if (nameA && nameA === nameB) score++;
+                // Kategorie-Matching: Für Citadel akzeptiere auch 'Citadel' <-> 'Elven Chests'/'Cursed Chests'
+                let citadelMatch = false;
+                if ((categoryA === 'citadel' && (categoryB === 'elven chests' || categoryB === 'cursed chests')) ||
+                    ((categoryA === 'elven chests' || categoryA === 'cursed chests') && categoryB === 'citadel')) {
+                  citadelMatch = true;
+                }
+                if (categoryA && (categoryA === categoryB || citadelMatch)) score++;
+                if (typeA && typeA === typeB) score++;
+                if (sourceA && sourceA === sourceB) score++;
+                if (levelA && (levelA === levelB || m.levelEnd === levelB)) score++;
+                if (nameA && nameA !== nameB) matches = false;
+                if (categoryA && !(categoryA === categoryB || citadelMatch)) matches = false;
+                if (typeA && typeA !== typeB) matches = false;
+                if (sourceA && sourceA !== sourceB) matches = false;
+                if (levelA && (levelA !== levelB && m.levelEnd !== levelB)) matches = false;
+              }
               if (matches && score > bestScore) {
                 bestScore = score;
                 bestMapping = m;
@@ -279,39 +305,75 @@ const verticalHeaders = [
           }
           let category = "Unbekannt";
           let level = chest.level ?? chest.Level ?? 0;
-          if ((chest.Type||"").toLowerCase().includes("arena") || (chest.Source||"").toLowerCase().includes("arena") || (chest.Name||"").toLowerCase().includes("arena")) {
+          const nameLower = (chest.Name || "").toLowerCase();
+          const typeLower = (chest.Type || "").toLowerCase();
+          const sourceLower = (chest.Source || "").toLowerCase();
+          // Spezialfälle für Rise of the Ancients
+          if (
+            (nameLower.includes("quick march chest") && typeLower.includes("rise of the ancients event")) ||
+            (nameLower.includes("quick march chest") && sourceLower.includes("rise of the ancients event"))
+          ) {
+            category = "Quick March Chest";
+          }
+          else if (
+            (nameLower.includes("ancients' chest") && typeLower.includes("rise of the ancients event")) ||
+            (nameLower.replace("'","").includes("ancients chest") && typeLower.includes("rise of the ancients event")) ||
+            (nameLower.includes("ancients' chest") && sourceLower.includes("rise of the ancients event")) ||
+            (nameLower.replace("'","").includes("ancients chest") && sourceLower.includes("rise of the ancients event"))
+          ) {
+            category = "Ancients Chest";
+          }
+          else if (
+            (chest.Name === "Golden Guardian Epic Chest") &&
+            (chest.Type === "Epic Ancient squad") &&
+            (chest.Source === "Epic Ancient squad")
+          ) {
+            category = "Epic Ancient squad";
+          }
+          else if (typeLower.includes("union of triumph personal reward") || sourceLower.includes("union of triumph personal reward")) {
+            category = "Union Chest";
+            level = "total";
+          }
+          // Standard-Mapping
+          else if (typeLower.includes("arena") || sourceLower.includes("arena") || nameLower.includes("arena")) {
             category = "Arena Chests";
             level = "total";
           }
-          else if ((chest.Name||"").toLowerCase().includes("orc") || (chest.Type||"").toLowerCase().includes("common crypt")) {
-            category = "Common Chests";
-          } else if ((chest.Name||"").toLowerCase().includes("elven citadel chest")) {
+          // Exakte Unterscheidung Elven/Cursed Citadel
+          else if (nameLower.includes("elven citadel chest")) {
             category = "Elven Chests";
-          } else if ((chest.Name||"").toLowerCase().includes("cursed citadel chest")) {
+          } else if (nameLower.includes("cursed citadel chest")) {
             category = "Cursed Chests";
-          } else if (((chest.Type||chest.Kategorie||chest.Category||"").toLowerCase().includes("heroic monster"))) {
+          }
+          // Fallback: Wenn Name "citadel chest" enthält, prüfe auf Elven/Cursed
+          else if (nameLower.includes("citadel chest")) {
+            if (nameLower.includes("elven")) {
+              category = "Elven Chests";
+            } else if (nameLower.includes("cursed")) {
+              category = "Cursed Chests";
+            }
+          }
+          else if (((chest.Type||chest.Kategorie||chest.Category||"").toLowerCase().includes("heroic monster"))) {
             category = "Heroic Chests";
           }
-          else if ((chest.Name||"").toLowerCase().includes("rare dragon") || (chest.Type||"").toLowerCase().includes("rare crypt")) {
+          else if (nameLower.includes("rare dragon") || typeLower.includes("rare crypt")) {
             category = "Rare Chests";
           }
-          else if ((chest.Name||"").toLowerCase().includes("epic") || (chest.Type||"").toLowerCase().includes("epic") || (chest.Name||"").toLowerCase().includes("undead")) {
+          else if (nameLower.includes("epic") || typeLower.includes("epic") || nameLower.includes("undead")) {
             category = "Epic Chests";
           }
-          else if ((chest.Name||"").toLowerCase().includes("elven") || (chest.Name||"").toLowerCase().includes("citadel") || (chest.Type||"").toLowerCase().includes("elven") || (chest.Type||"").toLowerCase().includes("citadel") || (chest.Source||"").toLowerCase().includes("elven") || (chest.Source||"").toLowerCase().includes("citadel")) {
           // entfernt, Mapping jetzt weiter oben
-          }
           else if (
-            (chest.Name||"").toLowerCase().includes("bank") ||
-            (chest.Type||"").toLowerCase().includes("bank") ||
-            (chest.Source||"").toLowerCase().includes("bank") ||
-            ["wooden","bronze","silver","golden","precious","magic"].some(lvl => (chest.Name||"").toLowerCase().includes(lvl) || (chest.Type||"").toLowerCase().includes(lvl))
+            nameLower.includes("bank") ||
+            typeLower.includes("bank") ||
+            sourceLower.includes("bank") ||
+            ["wooden","bronze","silver","golden","precious","magic"].some(lvl => nameLower.includes(lvl) || typeLower.includes(lvl))
           ) {
             category = "Bank Chests";
             const bankLevels = ["Wooden","Bronze","Silver","Golden","Precious","Magic"];
             let foundLevel = bankLevels.find(lvl =>
-              (chest.Name||"").toLowerCase().includes(lvl.toLowerCase()) ||
-              (chest.Type||"").toLowerCase().includes(lvl.toLowerCase()) ||
+              nameLower.includes(lvl.toLowerCase()) ||
+              typeLower.includes(lvl.toLowerCase()) ||
               (chest.level||"").toString().toLowerCase() === lvl.toLowerCase() ||
               (chest.Level||"").toString().toLowerCase() === lvl.toLowerCase()
             );
@@ -324,7 +386,7 @@ const verticalHeaders = [
             if (!foundLevel) foundLevel = "Unbekannt";
             level = foundLevel;
           }
-          else if ((chest.Name||"").toLowerCase().includes("tartaros") || (chest.Type||"").toLowerCase().includes("tartaros") || (chest.Source||"").toLowerCase().includes("tartaros")) {
+          else if (nameLower.includes("tartaros") || typeLower.includes("tartaros") || sourceLower.includes("tartaros")) {
             category = "Chests of Tartaros";
             // Level explizit aus Name, Type oder Source extrahieren
             let tartarosMatch = (chest.Name||"").match(/tartaros crypt level (\d+)/i);
@@ -342,42 +404,42 @@ const verticalHeaders = [
               level = chest.level ?? chest.Level ?? 0;
             }
           }
-          else if ((chest.Name||"").toLowerCase().includes("jormungandr") || (chest.Type||"").toLowerCase().includes("jormungandr") || (chest.Source||"").toLowerCase().includes("jormungandr")) {
+          else if (nameLower.includes("jormungandr") || typeLower.includes("jormungandr") || sourceLower.includes("jormungandr")) {
             category = "Jormungandr Chests";
             level = "total";
           }
-          else if ((chest.Name||"").toLowerCase().includes("cursed") || (chest.Type||"").toLowerCase().includes("cursed") || (chest.Source||"").toLowerCase().includes("cursed")) {
+          else if (nameLower.includes("cursed") || typeLower.includes("cursed") || sourceLower.includes("cursed")) {
           // entfernt, Mapping jetzt weiter oben
           }
-          else if ((chest.Name||"").toLowerCase().includes("authority") || (chest.Type||"").toLowerCase().includes("authority") || (chest.Source||"").toLowerCase().includes("authority")) {
+          else if (nameLower.includes("authority") || typeLower.includes("authority") || sourceLower.includes("authority")) {
             category = "Union Chest";
             level = "total";
           }
-          else if ((chest.Name||"").toLowerCase().includes("runic") || (chest.Type||"").toLowerCase().includes("runic") || (chest.Source||"").toLowerCase().includes("runic")) {
+          else if (nameLower.includes("runic") || typeLower.includes("runic") || sourceLower.includes("runic")) {
             category = "Runic Chests";
           }
-          else if ((chest.Name||"").toLowerCase().includes("heroic") || (chest.Type||"").toLowerCase().includes("heroic") || (chest.Source||"").toLowerCase().includes("heroic")) {
+          else if (nameLower.includes("heroic") || typeLower.includes("heroic") || sourceLower.includes("heroic")) {
           // entfernt, Mapping jetzt weiter oben
           }
-          else if ((chest.Name||"").toLowerCase().includes("vault") || (chest.Type||"").toLowerCase().includes("vault") || (chest.Source||"").toLowerCase().includes("vault")) {
+          else if (nameLower.includes("vault") || typeLower.includes("vault") || sourceLower.includes("vault")) {
             category = "Vault of the Ancients";
           }
-          else if ((chest.Name||"").toLowerCase().includes("quick march") || (chest.Type||"").toLowerCase().includes("quick march") || (chest.Source||"").toLowerCase().includes("quick march")) {
+          else if (nameLower.includes("quick march") || typeLower.includes("quick march") || sourceLower.includes("quick march")) {
             category = "Quick March Chest";
           }
-          else if ((chest.Name||"").toLowerCase().includes("ancients chest") || (chest.Type||"").toLowerCase().includes("ancients chest") || (chest.Source||"").toLowerCase().includes("ancients chest")) {
+          else if (nameLower.includes("ancients chest") || typeLower.includes("ancients chest") || sourceLower.includes("ancients chest")) {
             category = "Ancients Chest";
           }
-          else if ((chest.Name||"").toLowerCase().includes("rota") || (chest.Type||"").toLowerCase().includes("rota") || (chest.Source||"").toLowerCase().includes("rota")) {
+          else if (nameLower.includes("rota") || typeLower.includes("rota") || sourceLower.includes("rota")) {
             category = "ROTA Total";
           }
-          else if ((chest.Name||"").toLowerCase().includes("epic ancient squad") || (chest.Type||"").toLowerCase().includes("epic ancient squad") || (chest.Source||"").toLowerCase().includes("epic ancient squad")) {
+          else if (nameLower.includes("epic ancient squad") || typeLower.includes("epic ancient squad") || sourceLower.includes("epic ancient squad")) {
             category = "Epic Ancient squad";
           }
-          else if ((chest.Name||"").toLowerCase().includes("eas total") || (chest.Type||"").toLowerCase().includes("eas total") || (chest.Source||"").toLowerCase().includes("eas total")) {
+          else if (nameLower.includes("eas total") || typeLower.includes("eas total") || sourceLower.includes("eas total")) {
             category = "EAs Total";
           }
-          else if ((chest.Name||"").toLowerCase().includes("union total") || (chest.Type||"").toLowerCase().includes("union total") || (chest.Source||"").toLowerCase().includes("union total")) {
+          else if (nameLower.includes("union total") || typeLower.includes("union total") || sourceLower.includes("union total")) {
             category = "Union Total";
           }
           if (category === "Unbekannt") {
@@ -865,47 +927,264 @@ const verticalHeaders = [
                               className={`p-2 ${catBg}`}
                             >
                               {row.chestDetails
-                                .filter(chest => chest.category === sub.name)
+                                .filter(chest => {
+                                  if (sub.name === "Quick March Chest") {
+                                    return chest.category === "Quick March Chest";
+                                  }
+                                  if (sub.name === "Ancients Chest") {
+                                    return chest.category === "Ancients Chest";
+                                  }
+                                  if (sub.name === "ROTA Total") {
+                                    return chest.category === "Quick March Chest" || chest.category === "Ancients Chest";
+                                  }
+                                  return false;
+                                })
                                 .reduce((sum, chest) => sum + (chest.count || 0), 0)}
                             </td>
                           ));
                         } else if (Array.isArray(cat.levels) && cat.levels.length > 0) {
-                          return cat.levels.map((level, levelIdx) => [
-                            <td
-                              key={row.name + '-' + idx + '-' + cat.name + '-' + level + '-count-' + levelIdx}
-                              className={`p-2 ${catBg}`}
-                            >
-                              {row.chestDetails
-                                .filter(chest => chest.category === cat.name && chest.level === level)
-                                .reduce((sum, chest) => sum + (chest.count || 0), 0)}
-                            </td>,
-                            <td
-                              key={row.name + '-' + idx + '-' + cat.name + '-' + level + '-points-' + levelIdx}
-                              className={`p-2 ${catBg}`}
-                            >
-                              {row.chestDetails
-                                .filter(chest => chest.category === cat.name && chest.level === level)
-                                .reduce((sum, chest) => sum + (chest.points || 0), 0)}
-                            </td>
-                          ]).flat().concat([
+                          return cat.levels.map((level, levelIdx) => {
+                            // Levelbereich aus Spaltennamen extrahieren (z.B. "20-24")
+                            let start = null, end = null;
+                            if (typeof level === "string" && level.includes("-")) {
+                              const parts = level.split("-");
+                              start = parseInt(parts[0], 10);
+                              end = parseInt(parts[1], 10);
+                            }
+                            const isRunic = cat.name === "Runic Chests" && start !== null && end !== null;
+                            const isVault = cat.name === "Vault of the Ancients" && start !== null && end !== null;
+                            const isBank = cat.name === "Bank Chests";
+                            const isElven = cat.name === "Elven Chests";
+                            const isCursed = cat.name === "Cursed Chests";
+                            return [
+                              <td
+                                key={row.name + '-' + idx + '-' + cat.name + '-' + level + '-count-' + levelIdx}
+                                className={`p-2 ${catBg}`}
+                              >
+                                {cat.name === "Epic Ancient squad" || cat.name === "EAs Total"
+                                  ? row.chestDetails
+                                      .filter(chest => (
+                                        chest.Name === "Golden Guardian Epic Chest" &&
+                                        chest.Type === "Epic Ancient squad" &&
+                                        chest.Source === "Epic Ancient squad"
+                                      ))
+                                      .reduce((sum, chest) => sum + (chest.count || 0), 0)
+                                  : (isVault || isRunic)
+                                    ? row.chestDetails
+                                        .filter(chest => {
+                                          if (chest.category !== cat.name) return false;
+                                          const chestLevel = Number(chest.level ?? chest.Level ?? "");
+                                          return chestLevel >= start && chestLevel <= end;
+                                        })
+                                        .reduce((sum, chest) => sum + (chest.count || 0), 0)
+                                  : isBank
+                                    ? row.chestDetails
+                                        .filter(chest => chest.category === cat.name && String(chest.level ?? chest.Level ?? "").toLowerCase() === String(level).toLowerCase())
+                                        .reduce((sum, chest) => sum + (chest.count || 0), 0)
+                                  : (isElven || isCursed)
+                                    ? row.chestDetails
+                                        .filter(chest => {
+                                          if (chest.category !== cat.name) return false;
+                                          const chestLevel = Number(chest.level ?? chest.Level ?? "");
+                                          // Level exakt oder im Mapping-Range
+                                          if (typeof level === "number") return chestLevel === level;
+                                          if (start !== null && end !== null) return chestLevel >= start && chestLevel <= end;
+                                          return false;
+                                        })
+                                        .reduce((sum, chest) => sum + (chest.count || 0), 0)
+                                  : row.chestDetails
+                                        .filter(chest => chest.category === cat.name && chest.level === level)
+                                        .reduce((sum, chest) => sum + (chest.count || 0), 0)
+                                }
+                              </td>,
+                              <td
+                                key={row.name + '-' + idx + '-' + cat.name + '-' + level + '-points-' + levelIdx}
+                                className={`p-2 ${catBg}`}
+                              >
+                                {cat.name === "Epic Ancient squad" || cat.name === "EAs Total"
+                                  ? row.chestDetails
+                                      .filter(chest => (
+                                        chest.Name === "Golden Guardian Epic Chest" &&
+                                        chest.Type === "Epic Ancient squad" &&
+                                        chest.Source === "Epic Ancient squad"
+                                      ))
+                                      .reduce((sum, chest) => sum + (chest.points || 0), 0)
+                                  : (isVault || isRunic)
+                                    ? row.chestDetails
+                                        .filter(chest => {
+                                          if (chest.category !== cat.name) return false;
+                                          const chestLevel = Number(chest.level ?? chest.Level ?? "");
+                                          return chestLevel >= start && chestLevel <= end;
+                                        })
+                                        .reduce((sum, chest) => sum + (chest.points || 0), 0)
+                                  : isBank
+                                    ? row.chestDetails
+                                        .filter(chest => chest.category === cat.name && String(chest.level ?? chest.Level ?? "").toLowerCase() === String(level).toLowerCase())
+                                        .reduce((sum, chest) => {
+                                          let points = chest.points;
+                                          if (points === undefined || points === null || points === "") {
+                                            // Fallback: Mapping suchen
+                                            const mapping = chestMappings && chestMappings.find(m => {
+                                              const typeA = (m.type || m.Type || "").trim().toLowerCase();
+                                              const typeB = (chest.Type || "").trim().toLowerCase();
+                                              const nameA = (m.chestName || m.Name || "").trim().toLowerCase();
+                                              const nameB = (chest.Name || "").trim().toLowerCase();
+                                              const categoryA = (m.category || "").trim().toLowerCase();
+                                              const categoryB = (chest.category || "").trim().toLowerCase();
+                                              const levelA = String(m.levelStart || m.level || m.Level || m.levelEnd || "").trim().toLowerCase();
+                                              const levelB = String(chest.level ?? chest.Level ?? chest.levelStart ?? chest.levelEnd ?? "").trim().toLowerCase();
+                                              return (
+                                                (!nameA || nameA === nameB) &&
+                                                (!categoryA || categoryA === categoryB) &&
+                                                (!typeA || typeA === typeB) &&
+                                                (!levelA || levelA === levelB || m.levelEnd === levelB)
+                                              );
+                                            });
+                                            if (mapping && mapping.points !== undefined) {
+                                              points = Number(mapping.points);
+                                            }
+                                          }
+                                          points = Number(points) || 0;
+                                          return sum + points * (chest.count || 1);
+                                        }, 0)
+                                  : (isElven || isCursed)
+                                    ? row.chestDetails
+                                        .filter(chest => {
+                                          if (chest.category !== cat.name) return false;
+                                          const chestLevel = Number(chest.level ?? chest.Level ?? "");
+                                          if (typeof level === "number") return chestLevel === level;
+                                          if (start !== null && end !== null) return chestLevel >= start && chestLevel <= end;
+                                          return false;
+                                        })
+                                        .reduce((sum, chest) => {
+                                          let points = chest.points;
+                                          if (points === undefined || points === null || points === "") {
+                                            // Tolerantes Mapping suchen
+                                            const mapping = chestMappings && chestMappings.find(m => {
+                                              const typeA = (m.type || m.Type || "").trim().toLowerCase();
+                                              const typeB = (chest.Type || "").trim().toLowerCase();
+                                              const nameA = (m.chestName || m.Name || "").trim().toLowerCase();
+                                              const nameB = (chest.Name || "").trim().toLowerCase();
+                                              const categoryA = (m.category || "").trim().toLowerCase();
+                                              const categoryB = (chest.category || "").trim().toLowerCase();
+                                              const sourceA = (m.source || m.Source || "").trim().toLowerCase();
+                                              const sourceB = (chest.Source || "").trim().toLowerCase();
+                                              const chestLevel = Number(chest.level ?? chest.Level ?? 0);
+                                              let levelStart = m.levelStart !== undefined ? parseInt(m.levelStart) : (m.level !== undefined ? parseInt(m.level) : (m.Level !== undefined ? parseInt(m.Level) : 0));
+                                              let levelEnd = m.levelEnd !== undefined ? parseInt(m.levelEnd) : (m.level !== undefined ? parseInt(m.level) : (m.Level !== undefined ? parseInt(m.Level) : 0));
+                                              if (isNaN(levelStart)) levelStart = 0;
+                                              if (isNaN(levelEnd)) levelEnd = levelStart;
+                                              // Toleranter Vergleich: Name, Kategorie, Typ, Source dürfen auch Teilstrings sein
+                                              const nameMatch = !nameA || nameA === nameB || nameB.includes(nameA) || nameA.includes(nameB);
+                                              const catMatch = !categoryA || categoryA === categoryB || categoryB.includes(categoryA) || categoryA.includes(categoryB);
+                                              const typeMatch = !typeA || typeA === typeB || typeB.includes(typeA) || typeA.includes(typeB);
+                                              const sourceMatch = !sourceA || sourceA === sourceB || sourceB.includes(sourceA) || sourceA.includes(sourceB);
+                                              return (
+                                                nameMatch &&
+                                                catMatch &&
+                                                typeMatch &&
+                                                sourceMatch &&
+                                                chestLevel >= levelStart && chestLevel <= levelEnd
+                                              );
+                                            });
+                                            if (mapping && mapping.points !== undefined) {
+                                              points = Number(mapping.points);
+                                            }
+                                          }
+                                          points = Number(points) || 0;
+                                          return sum + points * (chest.count || 1);
+                                        }, 0)
+                                  : row.chestDetails
+                                        .filter(chest => chest.category === cat.name && chest.level === level)
+                                        .reduce((sum, chest) => {
+                                          if (typeof chest.points === "number") return sum + chest.points * (chest.count || 1);
+                                          return sum;
+                                        }, 0)
+                                }
+                              </td>
+                            ];
+                          }).flat().concat([
                             <td
                               key={row.name + '-' + idx + '-' + cat.name + '-sum'}
                               className={`p-2 font-semibold ${catBg}`}
                             >
-                              {row.chestDetails
-                                .filter(chest => chest.category === cat.name)
-                                .reduce((sum, chest) => sum + (chest.count || 0), 0)}
+                              {(cat.name === "Epic Ancient squad" || cat.name === "EAs Total")
+                                ? row.chestDetails
+                                    .filter(chest => (
+                                      chest.Name === "Golden Guardian Epic Chest" &&
+                                      chest.Type === "Epic Ancient squad" &&
+                                      chest.Source === "Epic Ancient squad"
+                                    ))
+                                    .reduce((sum, chest) => sum + (chest.count || 0), 0)
+                                : cat.name === "Bank Chests"
+                                    ? row.chestDetails
+                                        .filter(chest => chest.category === cat.name)
+                                        .reduce((sum, chest) => sum + (chest.count || 0), 0)
+                                    : row.chestDetails
+                                        .filter(chest => chest.category === cat.name)
+                                        .reduce((sum, chest) => sum + (chest.count || 0), 0)
+                              }
                             </td>,
                             <td
                               key={row.name + '-' + idx + '-' + cat.name + '-sumPoints'}
                               className={`p-2 font-semibold ${catBg}`}
                             >
-                              {row.chestDetails
-                                .filter(chest => chest.category === cat.name)
-                                .reduce((sum, chest) => sum + (chest.points || 0), 0)}
+                              {(cat.name === "Epic Ancient squad" || cat.name === "EAs Total")
+                                ? row.chestDetails
+                                    .filter(chest => (
+                                      chest.Name === "Golden Guardian Epic Chest" &&
+                                      chest.Type === "Epic Ancient squad" &&
+                                      chest.Source === "Epic Ancient squad"
+                                    ))
+                                    .reduce((sum, chest) => sum + (chest.points || 0), 0)
+                                : cat.name === "Bank Chests"
+                                    ? row.chestDetails
+                                        .filter(chest => chest.category === cat.name)
+                                        .reduce((sum, chest) => {
+                                          if (typeof chest.points === "number") return sum + chest.points * (chest.count || 1);
+                                          return sum;
+                                        }, 0)
+                                    : row.chestDetails
+                                        .filter(chest => chest.category === cat.name)
+                                        .reduce((sum, chest) => sum + (chest.points || 0), 0)
+                              }
                             </td>
                           ]);
                         } else {
+                          // Spezialfall: EAs Total und Epic Ancient squad ohne Levels
+                        if (cat.name === "Epic Ancient squad") {
+                            return (
+                              <td
+                                key={row.name + '-' + idx + '-' + cat.name + '-single'}
+                                className={`p-2 ${catBg}`}
+                              >
+                                {row.chestDetails
+                                  .filter(chest => (
+                                    chest.Name === "Golden Guardian Epic Chest" &&
+                                    chest.Type === "Epic Ancient squad" &&
+                                    chest.Source === "Epic Ancient squad"
+                                  ))
+                                  .reduce((sum, chest) => sum + (chest.count || 0), 0)}
+                              </td>
+                            );
+                        }
+                        if (cat.name === "EAs Punkte") {
+                            return (
+                              <td
+                                key={row.name + '-' + idx + '-' + cat.name + '-single'}
+                                className={`p-2 ${catBg}`}
+                              >
+                                {row.chestDetails
+                                  .filter(chest => (
+                                    chest.Name === "Golden Guardian Epic Chest" &&
+                                    chest.Type === "Epic Ancient squad" &&
+                                    chest.Source === "Epic Ancient squad"
+                                  ))
+                                  .reduce((sum, chest) => sum + (chest.points || 0), 0)}
+                              </td>
+                            );
+                        }
+                          // Standardfall für Einzelspalte
                           return (
                             <td
                               key={row.name + '-' + idx + '-' + cat.name + '-single'}
@@ -944,3 +1223,4 @@ const verticalHeaders = [
     </div>
   );
 }
+

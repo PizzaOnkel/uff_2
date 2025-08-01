@@ -16,7 +16,6 @@ def git_checkout_ghpages():
     subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git checkout gh-pages"', shell=True)
 def build_react():
     # Hinweis: Node-Server sollte vorher laufen
-    subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && npm run build"', shell=True)
     if not is_node_server_running():
         tkinter.messagebox.showwarning("Achtung", "Starte zuerst den Node-Server (Backend), bevor du den Build ausführst!")
         return
@@ -39,13 +38,15 @@ def git_commit_and_push_ghpages():
 
     subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git add . && git commit -m \"Publish to gh-pages\" && git push"', shell=True)
 
+
+
 # --- Imports ---
 import tkinter as tk
 import tkinter.messagebox
-import tkinter.ttk
 import subprocess
 import os
 import shutil
+from tkinter import ttk
 import datetime
 
 # --- GIT-TOOLS ---
@@ -105,10 +106,40 @@ def backup_project():
     backup_name = f"B A C K U P - Clan-Dashboard_uff_2_{now}"
     dest = os.path.join(BACKUP_DIR, backup_name)
     try:
-        shutil.copytree(UFF2_PATH, dest)
+        # Zähle alle Dateien für den Fortschritt
+        total_files = 0
+        for rootdir, dirs, files in os.walk(UFF2_PATH):
+            total_files += len(files)
+        if total_files == 0:
+            tkinter.messagebox.showwarning("Backup", "Keine Dateien zum Sichern gefunden!")
+            return
+        progress_var.set(0)
+        progress_bar['maximum'] = total_files
+        progress_bar.update()
+        copied = 0
+        def copy_with_progress(src, dst):
+            nonlocal copied
+            if not os.path.exists(dst):
+                os.makedirs(dst)
+            for item in os.listdir(src):
+                s = os.path.join(src, item)
+                d = os.path.join(dst, item)
+                if os.path.isdir(s):
+                    copy_with_progress(s, d)
+                else:
+                    shutil.copy2(s, d)
+                    copied += 1
+                    progress_var.set(copied)
+                    progress_bar.update()
+        copy_with_progress(UFF2_PATH, dest)
+        progress_var.set(total_files)
+        progress_bar.update()
         tkinter.messagebox.showinfo("Backup erfolgreich", f"Backup wurde erstellt: {dest}")
     except Exception as e:
         tkinter.messagebox.showerror("Backup fehlgeschlagen", f"Fehler: {e}")
+    finally:
+        progress_var.set(0)
+        progress_bar.update()
 
 def start_node_server():
     subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && node server.js"', shell=True)
@@ -124,6 +155,7 @@ def git_checkout_main():
 
 def open_build_folder():
     os.startfile(os.path.join(UFF2_PATH, "build"))
+
 
 # --- GUI-Initialisierung und Layout ---
 root = tk.Tk()
@@ -153,66 +185,11 @@ tk.Label(git_frame, text="Tipp: Vor jedem Push immer erst Pull & Status prüfen!
 backup_frame = tk.LabelFrame(main_frame, text="Backup & Sicherheit", fg="#eebc1d", bg="#232946", font=("Segoe UI", 12, "bold"), bd=2, relief="ridge", padx=16, pady=12, labelanchor="n")
 backup_frame.pack(fill="x", pady=(10, 10))
 tk.Label(backup_frame, text="Projekt-Backup auf externes Laufwerk (empfohlen vor jedem Deployment)", anchor="w", fg="#eebc1d", bg="#232946", font=("Segoe UI", 10)).pack(fill="x")
-
-# Progressbar und Label für Backup (werden dynamisch angezeigt)
-backup_progress_var = tk.DoubleVar()
-backup_progressbar = tkinter.ttk.Progressbar(backup_frame, variable=backup_progress_var, maximum=100, length=420)
-backup_progress_label = tk.Label(backup_frame, text="", fg="#eebc1d", bg="#232946", font=("Segoe UI", 10, "italic"))
-
-def show_backup_progress():
-    backup_progressbar.pack(pady=(6,2))
-    backup_progress_label.config(text="Backup läuft... Bitte warten.")
-    backup_progress_label.pack()
-    backup_frame.update()
-
-def hide_backup_progress():
-    backup_progressbar.pack_forget()
-    backup_progress_label.pack_forget()
-    backup_progress_var.set(0)
-    backup_frame.update()
-
-def backup_project():
-    now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    backup_name = f"B A C K U P - Clan-Dashboard_uff_2_{now}"
-    dest = os.path.join(BACKUP_DIR, backup_name)
-    def count_files(path):
-        total = 0
-        for root, dirs, files in os.walk(path):
-            total += len(files)
-        return total
-    def copytree_with_progress(src, dst):
-        total_files = count_files(src)
-        copied = 0
-        for root, dirs, files in os.walk(src):
-            rel_path = os.path.relpath(root, src)
-            dest_dir = os.path.join(dst, rel_path)
-            os.makedirs(dest_dir, exist_ok=True)
-            for file in files:
-                src_file = os.path.join(root, file)
-                dest_file = os.path.join(dest_dir, file)
-                try:
-                    shutil.copy2(src_file, dest_file)
-                except Exception as e:
-                    pass
-                copied += 1
-                percent = (copied / total_files) * 100 if total_files else 100
-                backup_progress_var.set(percent)
-                backup_progress_label.config(text=f"Backup läuft... ({copied}/{total_files} Dateien)")
-                backup_frame.update()
-        return copied, total_files
-    show_backup_progress()
-    try:
-        copied, total = copytree_with_progress(UFF2_PATH, dest)
-        backup_progress_var.set(100)
-        backup_progress_label.config(text=f"Backup abgeschlossen! {copied} Dateien kopiert.")
-        backup_frame.update()
-        backup_frame.after(1200, hide_backup_progress)
-        tkinter.messagebox.showinfo("Backup erfolgreich", f"Backup wurde erstellt: {dest}")
-    except Exception as e:
-        hide_backup_progress()
-        tkinter.messagebox.showerror("Backup fehlgeschlagen", f"Fehler: {e}")
-
 tk.Button(backup_frame, text="Backup jetzt erstellen", width=36, bg="#eebc1d", fg="#232946", font=("Segoe UI", 10, "bold"), command=backup_project).pack(pady=4)
+# Fortschrittsbalken für Backup
+progress_var = tk.IntVar()
+progress_bar = ttk.Progressbar(backup_frame, variable=progress_var, maximum=100, length=400)
+progress_bar.pack(pady=(0, 8))
 
 tk.Label(main_frame, text="Clan-Dashboard Control Center", font=("Segoe UI", 22, "bold"), fg="#eebc1d", bg="#232946", pady=10).pack()
 
@@ -224,59 +201,37 @@ tk.Button(dev_frame, text="1. Node Server starten", width=36, bg="#3fa7d6", fg="
 tk.Label(dev_frame, text="2. React starten (Frontend für Entwicklung, öffnet Browser)", anchor="w", fg="#3fa7d6", bg="#232946", font=("Segoe UI", 10)).pack(fill="x")
 tk.Button(dev_frame, text="2. React starten (Entwicklung)", width=36, bg="#3fa7d6", fg="white", font=("Segoe UI", 10, "bold"), command=start_react).pack(pady=4)
 
+# --- Deployment-Bereiche nebeneinander ---
+deploy_row = tk.Frame(main_frame, bg="#232946")
+deploy_row.pack(fill="both", expand=True, pady=(18, 10))
+
+# --- gh-pages links ---
+ghpages_frame = tk.LabelFrame(deploy_row, text="Deployment-Prozess (gh-pages)", fg="#a259d9", bg="#232946", font=("Segoe UI", 12, "bold"), bd=2, relief="ridge", padx=16, pady=12, labelanchor="n")
+ghpages_frame.pack(side="left", fill="both", expand=True, padx=(0, 12))
+tk.Label(ghpages_frame, text="GitHub Pages: Automatische Veröffentlichung als statische Website direkt über GitHub. Ideal für React-Apps ohne eigenen Server. Die Seite ist nach dem Push sofort öffentlich unter https://<username>.github.io/<repo>.", wraplength=520, justify="left", fg="#a259d9", bg="#232946", font=("Segoe UI", 9, "italic"), pady=4).pack(fill="x")
+tk.Button(ghpages_frame, text="3. Zu 'gh-pages' Branch wechseln", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=git_checkout_ghpages).pack(pady=3)
+tk.Label(ghpages_frame, text="Wechselt auf den speziellen Branch für GitHub Pages.", fg="#a259d9", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
+tk.Button(ghpages_frame, text="4. Build ausführen (npm run build)", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=build_react).pack(pady=3)
+tk.Label(ghpages_frame, text="Erstellt die statischen Dateien für die Veröffentlichung.", fg="#a259d9", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
+tk.Button(ghpages_frame, text="5. Änderungen committen & pushen (gh-pages)", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=git_commit_and_push_ghpages).pack(pady=3)
+tk.Label(ghpages_frame, text="Veröffentlicht die gebaute App direkt auf GitHub Pages.", fg="#a259d9", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
+tk.Button(ghpages_frame, text="6. Zurück zu 'main' wechseln", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=git_checkout_main).pack(pady=3)
+tk.Label(ghpages_frame, text="Wechselt zurück zum Hauptentwicklungs-Branch.", fg="#a259d9", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
+
+# --- deploy-Branch rechts ---
+deploy_frame = tk.LabelFrame(deploy_row, text="Deployment-Prozess (deploy-Branch)", fg="#43d675", bg="#232946", font=("Segoe UI", 12, "bold"), bd=2, relief="ridge", padx=16, pady=12, labelanchor="n")
+deploy_frame.pack(side="right", fill="both", expand=True, padx=(12, 0))
+tk.Label(deploy_frame, text="Eigener Deploy-Branch: Für eigene Server oder individuelle Deployments. Die gebaute App wird nicht automatisch auf GitHub Pages veröffentlicht, sondern z.B. manuell auf einen Webserver kopiert oder von einem anderen System verarbeitet.", wraplength=520, justify="left", fg="#43d675", bg="#232946", font=("Segoe UI", 9, "italic"), pady=4).pack(fill="x")
+tk.Button(deploy_frame, text="7. Zu 'deploy' Branch wechseln", width=36, bg="#43d675", fg="white", font=("Segoe UI", 10, "bold"), command=git_checkout_deploy).pack(pady=3)
+tk.Label(deploy_frame, text="Wechselt auf den eigenen Deploy-Branch.", fg="#43d675", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
+tk.Button(deploy_frame, text="8. Build ausführen (npm run build)", width=36, bg="#43d675", fg="white", font=("Segoe UI", 10, "bold"), command=build_react).pack(pady=3)
+tk.Label(deploy_frame, text="Erstellt die statischen Dateien für die Veröffentlichung.", fg="#43d675", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
+tk.Button(deploy_frame, text="9. Änderungen committen & pushen (deploy)", width=36, bg="#43d675", fg="white", font=("Segoe UI", 10, "bold"), command=git_commit_and_push).pack(pady=3)
+tk.Label(deploy_frame, text="Veröffentlicht die gebaute App im Deploy-Branch (z.B. für eigenen Server).", fg="#43d675", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
+tk.Button(deploy_frame, text="10. Zurück zu 'main' wechseln", width=36, bg="#43d675", fg="white", font=("Segoe UI", 10, "bold"), command=git_checkout_main).pack(pady=3)
+tk.Label(deploy_frame, text="Wechselt zurück zum Hauptentwicklungs-Branch.", fg="#43d675", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
 
 # --- Build-Ordner öffnen ---
-### --- Projekt-Veröffentlichung (GitHub Pages) mit Scrollbar ---
-publish_canvas = tk.Canvas(main_frame, bg="#232946", highlightthickness=0, height=380)
-publish_scrollbar = tk.Scrollbar(main_frame, orient="vertical", command=publish_canvas.yview)
-publish_canvas.configure(yscrollcommand=publish_scrollbar.set)
-publish_scrollbar.pack(side="right", fill="y", padx=(0,8), pady=(18,10))
-publish_canvas.pack(fill="x", pady=(18, 10), expand=False)
-
-publish_frame = tk.LabelFrame(publish_canvas, text="Projekt-Veröffentlichung (GitHub Pages)", fg="#a259d9", bg="#232946", font=("Segoe UI", 14, "bold"), bd=2, relief="ridge", padx=16, pady=12, labelanchor="n")
-publish_window = publish_canvas.create_window((0,0), window=publish_frame, anchor="nw", width=1100)
-
-def on_publish_frame_configure(event):
-    publish_canvas.configure(scrollregion=publish_canvas.bbox("all"))
-publish_frame.bind("<Configure>", on_publish_frame_configure)
-
-tk.Label(
-    publish_frame,
-    text=(
-        "Schritt-für-Schritt Veröffentlichung deiner App auf GitHub Pages. "
-        "Bitte führe die folgenden drei Schritte in der Reihenfolge aus:\n\n"
-        "1. Commiten: Speichert alle Änderungen im lokalen Git-Repository.\n"
-        "2. npm run build: Baut das React-Projekt für die Produktion.\n"
-        "3. npm run deploy: Veröffentlicht die gebaute App automatisch auf GitHub Pages.\n\n"
-        "Nach Schritt 3 ist deine App sofort unter folgendem Link online!"
-    ),
-    wraplength=900,
-    justify="left",
-    fg="#a259d9",
-    bg="#232946",
-    font=("Segoe UI", 10, "italic"),
-    pady=4
-).pack(fill="x")
-
-# Button zum Öffnen der GitHub Pages Seite
-import webbrowser
-def open_github_pages():
-    webbrowser.open_new("https://pizzaonkel.github.io/uff_2/")
-tk.Button(publish_frame, text="Zu deiner veröffentlichten App (GitHub Pages)", width=44, bg="#eebc1d", fg="#232946", font=("Segoe UI", 10, "bold"), command=open_github_pages).pack(pady=(2,10))
-
-def commit_local_changes():
-    subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git add . && git commit -m \"Deploy build\""', shell=True)
-
-def build_react():
-    subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && npm run build"', shell=True)
-
-def npm_run_deploy():
-    subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && npm run deploy"', shell=True)
-
-# Nur die drei gewünschten Buttons:
-tk.Button(publish_frame, text="1. Commiten", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=commit_local_changes).pack(pady=6)
-tk.Button(publish_frame, text="2. npm run build", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=build_react).pack(pady=6)
-tk.Button(publish_frame, text="3. npm run deploy", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=npm_run_deploy).pack(pady=6)
 build_frame = tk.LabelFrame(main_frame, text="Build-Ordner", fg="#eebc1d", bg="#232946", font=("Segoe UI", 12, "bold"), bd=2, relief="ridge", padx=16, pady=12, labelanchor="n")
 build_frame.pack(fill="x", pady=(18, 10))
 tk.Button(build_frame, text="Build-Ordner öffnen", width=36, bg="#eebc1d", fg="#232946", font=("Segoe UI", 10, "bold"), command=open_build_folder).pack(pady=3)

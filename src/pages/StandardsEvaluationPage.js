@@ -1,11 +1,10 @@
+
 import React, { useEffect, useState } from "react";
-// import { collection, getDocs } from "firebase/firestore";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { Doughnut } from "react-chartjs-2";
 import "./TopTen.css";
-import StickyBackButton from "../components/StickyBackButton";
 
 const normCategories = [
   { min: 0, max: 25, label: "0% - 25%", color: "#ef4444", icon: "❌" },
@@ -24,43 +23,45 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
   const [categoryCounts, setCategoryCounts] = useState([]);
   const [categorizedPlayers, setCategorizedPlayers] = useState([]);
 
-  const [ignoreChests, setIgnoreChests] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      // Spieler, Normen, Ergebnisse, ChestMappings, Ignore-Liste, Perioden laden
-      const [playersSnap, normsSnap, resultsSnap, chestMappingsSnap, ignoreSnap, periodsSnap] = await Promise.all([
+      // Spieler, Normen, Ergebnisse, ChestMappings, Ignore-Liste laden
+      const [playersSnap, normsSnap, resultsSnap, chestMappingsSnap] = await Promise.all([
         getDocs(collection(db, "players")),
         getDocs(collection(db, "norms")),
         getDocs(collection(db, "results")),
         getDocs(collection(db, "chestMappings")),
-        getDocs(collection(db, "chestMappingIgnore")),
-        getDocs(collection(db, "periods")),
       ]);
       const playersArr = playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const normsArr = normsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const resultsArr = resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const chestMappings = chestMappingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const ignoreList = ignoreSnap.docs.map(doc => doc.data());
-      setIgnoreChests(ignoreList);
-      // Aktuelle Periode bestimmen wie im Dashboard
-      const periodsArr = periodsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      let now = new Date();
-      let currentPeriod = null;
-      let currentPeriodId = null;
-      for (const p of periodsArr) {
-        if (p.start && new Date(p.start) <= now && (!p.end || new Date(p.end) >= now)) {
-          currentPeriod = p;
-          currentPeriodId = p.id;
-          break;
+
+      // Ignore-Liste laden (aus public/json-data/chest_mapping_ignore.csv)
+      let ignoreChests = [];
+      try {
+        const resp = await fetch("/json-data/chest-mapping-ignore.csv");
+        if (resp.ok) {
+          const text = await resp.text();
+          ignoreChests = text.split("\n").map(line => {
+            const [Name, Level, Type, Source] = line.split(",");
+            return { Name: Name?.trim(), Level: Level?.trim(), Type: Type?.trim(), Source: Source?.trim() };
+          }).filter(x => x.Name || x.Type || x.Source);
         }
-      }
-      if (!currentPeriod && periodsArr.length > 0) {
-        currentPeriod = periodsArr.reduce((a, b) => (!a.start || (b.start && new Date(b.start) > new Date(a.start))) ? b : a);
-        currentPeriodId = currentPeriod.id;
+      } catch (e) {}
+
+      // Aktuelle Veranstaltungsperiode bestimmen (letztes Ergebnis mit periodId)
+      let aktuellePeriode = null;
+      const periodIds = resultsArr.map(r => r.periodId).filter(Boolean);
+      if (periodIds.length > 0) {
+        aktuellePeriode = periodIds.sort().reverse()[0];
       }
       // Nur Ergebnisse der aktuellen Periode berücksichtigen
-      const filteredResults = resultsArr.filter(r => r.periodId === currentPeriodId);
+      const filteredResults = aktuellePeriode
+        ? resultsArr.filter(r => r.periodId === aktuellePeriode)
+        : resultsArr;
+
       // Hilfsfunktionen wie in CurrentTotalEventPage.js
       function getNormPoints(troopStrengthName) {
         if (!troopStrengthName || troopStrengthName.trim() === '') {
@@ -78,7 +79,8 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
       }
       function isIgnoredChest(chest) {
         if (isArenaChest(chest)) return false;
-        for (const ignore of ignoreList) {
+        let ignored = false;
+        for (const ignore of ignoreChests) {
           if (ignore.Name && ignore.Name.trim().toLowerCase() !== (chest.Name || "").trim().toLowerCase()) continue;
           if (ignore.Level && ignore.Level.trim() !== "" && String(ignore.Level).trim() !== String(chest.level ?? chest.Level ?? "").trim()) continue;
           if (ignore.Type && ignore.Type.trim() !== "") {
@@ -93,10 +95,12 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
             const s2 = (chest.Source || "").trim().toLowerCase();
             if (!(s2.includes(s1))) continue;
           }
-          return true;
+          ignored = true;
+          break;
         }
-        return false;
+        return ignored;
       }
+
       // Spieler-Aggregation wie in CurrentTotalEventPage.js
       const playerMap = new Map();
       filteredResults.forEach(result => {
@@ -107,6 +111,7 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
           troopStrength = 'nicht definiert';
         }
         const normPoints = getNormPoints(troopStrength);
+
         // Mapping-Logik für Chests
         const mappedChests = Array.isArray(result.chests)
           ? result.chests.map(chest => {
@@ -157,6 +162,7 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
         // Filtere ignorierte Truhen raus (außer Arena)
         const filteredChests = mappedChests.filter(chest => !isIgnoredChest(chest));
         const ist = filteredChests.reduce((sum, chest) => sum + (chest.points || 0), 0);
+
         if (playerMap.has(playerName)) {
           const entry = playerMap.get(playerName);
           entry.ist += ist;
@@ -170,6 +176,7 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
           });
         }
       });
+
       // Normerfüllung berechnen
       playerMap.forEach(entry => {
         entry.normErfuellung = entry.soll > 0 ? Math.round((entry.ist / entry.soll) * 100) : 0;
@@ -208,7 +215,19 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
 
   return (
     <div className="top-ten-container flex flex-col items-center min-h-screen pb-8 relative">
-      <StickyBackButton onClick={() => setCurrentPage(ROUTES.NAVIGATION)} label={t?.backToAdminPanel || "Zurück"} />
+      {/* Zurück-Button oben links */}
+      <button
+        onClick={() => setCurrentPage(ROUTES.NAVIGATION)}
+        className="absolute top-4 left-4 px-3 py-2 bg-gradient-to-r from-blue-500 to-cyan-600 text-white text-base font-medium rounded-lg shadow-md hover:from-blue-600 hover:to-cyan-700 transition-all duration-200 z-20 flex items-center"
+        style={{ minWidth: 0, minHeight: 0 }}
+        title="Zurück zur Navigation"
+      >
+        <svg className="mr-2 w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+          <line x1="19" y1="12" x2="5" y2="12" />
+          <polyline points="12 19 5 12 12 5" />
+        </svg>
+        {t.backToAdminPanel}
+      </button>
 
       <div className="top-ten-header">
         <span className="crown-icon">🏆</span>

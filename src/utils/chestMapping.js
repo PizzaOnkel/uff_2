@@ -19,13 +19,19 @@ export function mapChestToCategoryAndLevel(chest, chestMappings = []) {
       const levelB = String(chest.level ?? chest.Level ?? chest.levelStart ?? chest.levelEnd ?? "").trim().toLowerCase();
       let score = 0;
       if (nameA && nameA === nameB) score++;
-      if (categoryA && categoryA === categoryB) score++;
+      // Kategorie-Matching: Für Citadel akzeptiere auch 'Citadel' <-> 'Elven Chests'/'Cursed Chests'
+      let citadelMatch = false;
+      if ((categoryA === 'citadel' && (categoryB === 'elven chests' || categoryB === 'cursed chests')) ||
+          ((categoryA === 'elven chests' || categoryA === 'cursed chests') && categoryB === 'citadel')) {
+        citadelMatch = true;
+      }
+      if (categoryA && (categoryA === categoryB || citadelMatch)) score++;
       if (typeA && typeA === typeB) score++;
       if (sourceA && sourceA === sourceB) score++;
       if (levelA && (levelA === levelB || m.levelEnd === levelB)) score++;
       let matches = true;
       if (nameA && nameA !== nameB) matches = false;
-      if (categoryA && categoryA !== categoryB) matches = false;
+      if (categoryA && !(categoryA === categoryB || citadelMatch)) matches = false;
       if (typeA && typeA !== typeB) matches = false;
       if (sourceA && sourceA !== sourceB) matches = false;
       if (levelA && (levelA !== levelB && m.levelEnd !== levelB)) matches = false;

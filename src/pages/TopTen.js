@@ -1,6 +1,4 @@
-
 import React, { useState, useEffect } from 'react';
-import StickyBackButton from '../components/StickyBackButton';
 import { mapToMainName } from '../utils/aliasMapping';
 import { translations } from '../translations/translations';
 import { ROUTES } from '../routes';
@@ -10,33 +8,12 @@ import { db } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import './TopTen.css';
 
-// --- Tartaros-Logik aus CurrentTotalEventPage.js ---
-function tartarosLevelFromChest(chest) {
-  // Level explizit aus Name, Type oder Source extrahieren
-  let tartarosMatch = (chest.Name||"").match(/tartaros crypt level (\d+)/i);
-  if (!tartarosMatch && chest.Type) {
-    tartarosMatch = (chest.Type||"").match(/tartaros crypt level (\d+)/i);
-  }
-  if (!tartarosMatch && chest.Source) {
-    tartarosMatch = (chest.Source||"").match(/tartaros crypt level (\d+)/i);
-  }
-  if (tartarosMatch) {
-    return Number(tartarosMatch[1]);
-  } else if ([15,20,25,30,35].includes(Number(chest.level ?? chest.Level))) {
-    return Number(chest.level ?? chest.Level);
-  }
-  return null;
-}
-
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement, RadialLinearScale, Filler);
 
 const TopTen = ({ t, setCurrentPage }) => {
   const [data, setData] = useState([]);
-  const [periods, setPeriods] = useState([]);
-  const [currentPeriodId, setCurrentPeriodId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [players, setPlayers] = useState([]); // Spieler für Alias-Mapping
-  const [ignoreChests, setIgnoreChests] = useState([]); // Ignore-Liste aus Firestore
   // Startseite zeigt Gesamtsumme aller Kategorien
   const [selectedCategory, setSelectedCategory] = useState('ALL_CATEGORIES');
   const [topPlayers, setTopPlayers] = useState([]);
@@ -54,50 +31,16 @@ const TopTen = ({ t, setCurrentPage }) => {
         setPlayers([]);
       }
     };
-    // Ignore-Liste aus Firestore laden
-    const fetchIgnoreList = async () => {
-      try {
-        const ignoreSnap = await getDocs(collection(db, "chestMappingIgnore"));
-        const ignoreList = ignoreSnap.docs.map(doc => doc.data());
-        setIgnoreChests(ignoreList);
-      } catch (e) {
-        setIgnoreChests([]);
-      }
-    };
     fetchPlayers();
-    fetchIgnoreList();
   }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Lade alle Perioden
-        const periodsSnap = await getDocs(collection(db, "periods"));
-        const periodsArr = periodsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setPeriods(periodsArr);
-        // Bestimme aktuelle Periode (wie in CurrentTotalEventPage.js)
-        let now = new Date();
-        let currentPeriod = null;
-        let periodId = null;
-        for (const p of periodsArr) {
-          if (p.start && new Date(p.start) <= now && (!p.end || new Date(p.end) >= now)) {
-            currentPeriod = p;
-            periodId = p.id;
-            break;
-          }
-        }
-        if (!currentPeriod && periodsArr.length > 0) {
-          currentPeriod = periodsArr.reduce((a, b) => (!a.start || (b.start && new Date(b.start) > new Date(a.start))) ? b : a);
-          periodId = currentPeriod.id;
-        }
-        setCurrentPeriodId(periodId);
-        // Lade alle Ergebnisse
         const resultsSnap = await getDocs(collection(db, "results"));
         const resultsArr = resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // Filtere auf aktuelle Periode
-        const filteredResults = resultsArr.filter(r => r.periodId === periodId);
-        setData(filteredResults);
+        setData(resultsArr);
       } catch (error) {
         console.error('[TopTen] Fehler beim Laden der Firestore-Daten:', error);
         setData([]);
@@ -106,28 +49,6 @@ const TopTen = ({ t, setCurrentPage }) => {
     };
     fetchData();
   }, []);
-
-  // Ignore-Logik wie in StandardsEvaluationPage.js
-  function isIgnoredChest(chest) {
-    for (const ignore of ignoreChests) {
-      if (ignore.Name && ignore.Name.trim().toLowerCase() !== (chest.Name || "").trim().toLowerCase()) continue;
-      if (ignore.Level && ignore.Level.trim() !== "" && String(ignore.Level).trim() !== String(chest.level ?? chest.Level ?? "").trim()) continue;
-      if (ignore.Type && ignore.Type.trim() !== "") {
-        if (!chest.Type) continue;
-        const t1 = ignore.Type.trim().toLowerCase();
-        const t2 = (chest.Type || "").trim().toLowerCase();
-        if (!(t2.includes(t1))) continue;
-      }
-      if (ignore.Source && ignore.Source.trim() !== "") {
-        if (!chest.Source) continue;
-        const s1 = ignore.Source.trim().toLowerCase();
-        const s2 = (chest.Source || "").trim().toLowerCase();
-        if (!(s2.includes(s1))) continue;
-      }
-      return true;
-    }
-    return false;
-  }
 
   // Noch robustere Aggregation: Spielernamen werden normalisiert (trim, lowercase), nur gewählte Kategorie, Top 10
   useEffect(() => {
@@ -165,7 +86,7 @@ const TopTen = ({ t, setCurrentPage }) => {
         }
         const entry = playerMap.get(key);
         if (Array.isArray(row.chests)) {
-          row.chests.filter(chest => !isIgnoredChest(chest)).forEach(chest => {
+          row.chests.forEach(chest => {
             let cat = '';
             const name = (chest.Name || '').toLowerCase();
             const type = (chest.Type || chest.Kategorie || chest.Category || '').toLowerCase();
@@ -216,9 +137,9 @@ const TopTen = ({ t, setCurrentPage }) => {
               entry[cat] += Number(chest.count || 1);
               entry['ALL_CATEGORIES'] += Number(chest.count || 1);
             }
-          });
-        }
-      });
+          }); // Ende row.chests.forEach
+        } // Ende if (Array.isArray(row.chests))
+      }); // Ende data.forEach
       let aggArr = [];
       let sortKey = '';
       if (selectedCategory === 'Arena Total') {
@@ -239,7 +160,7 @@ const TopTen = ({ t, setCurrentPage }) => {
     } else {
       setTopPlayers([]);
     }
-  }, [data, selectedCategory, ignoreChests]);
+  }, [data, selectedCategory]);
 
   // Kategorien mit Routing-Information
   const categories = [
@@ -277,46 +198,16 @@ const TopTen = ({ t, setCurrentPage }) => {
         borderWidth: 2,
         borderRadius: 8,
         borderSkipped: false,
+        titleColor: '#F9FAFB',
+        bodyColor: '#F9FAFB',
+        borderColor: '#374151',
+        borderWidth: 1,
+        cornerRadius: 8
       }]
     };
   };
-
-  const getDoughnutData = () => {
-    const top5 = topPlayers.slice(0, 5);
-    const categoryInfo = categories.find(cat => cat.key === selectedCategory);
-    const label = categoryInfo ? `${categoryInfo.label} (Anzahl Chests)` : selectedCategory;
-    return {
-      labels: top5.map((player, idx) => `${mapToMainName(players, player.Clanmate)} (${player[selectedCategory]}) [${selectedCategory}] #${idx + 1}`),
-      datasets: [{
-        label: label,
-        data: top5.map(player => player[selectedCategory]),
-        backgroundColor: ['#FFD700', '#C0C0C0', '#CD7F32', '#8B5CF6', '#3B82F6'],
-        borderColor: '#1F2937',
-        borderWidth: 3,
-        hoverOffset: 10
-      }]
-    };
-  };
-
-  const getRadarData = () => {
-    const top5 = topPlayers.slice(0, 5);
-    const radarCategories = ['VotA Total', 'Heroic Total', 'Common Total', 'Rare Total', 'Epic Total', 'Runic Total'];
-    return {
-      labels: radarCategories.map(cat => categories.find(c => c.key === cat)?.label || cat),
-      datasets: top5.map((player, index) => ({
-        label: `${mapToMainName(players, player.Clanmate)} (${player[selectedCategory]}) [${selectedCategory}] #${index + 1}`,
-        data: radarCategories.map(cat => player[cat] || 0),
-        backgroundColor: [`#FFD700`, `#C0C0C0`, `#CD7F32`, `#8B5CF6`, `#3B82F6`][index] + '40',
-        borderColor: [`#FFD700`, `#C0C0C0`, `#CD7F32`, `#8B5CF6`, `#3B82F6`][index],
-        borderWidth: 2,
-        pointBackgroundColor: [`#FFD700`, `#C0C0C0`, `#CD7F32`, `#8B5CF6`, `#3B82F6`][index],
-        pointBorderColor: '#1F2937',
-        pointHoverBackgroundColor: '#1F2937',
-        pointHoverBorderColor: [`#FFD700`, `#C0C0C0`, `#CD7F32`, `#8B5CF6`, `#3B82F6`][index]
-      }))
-    };
-  };
-
+  
+  // Chart Optionen für Bar-Chart
   const chartOptions = {
     responsive: true,
     plugins: {
@@ -324,44 +215,27 @@ const TopTen = ({ t, setCurrentPage }) => {
         position: 'top',
         labels: {
           color: '#F9FAFB',
-          font: {
-            size: 14,
-            weight: 'bold'
-          }
+          font: { size: 12 }
         }
       },
-      tooltip: {
-        backgroundColor: '#1F2937',
-        titleColor: '#F9FAFB',
-        bodyColor: '#F9FAFB',
-        borderColor: '#374151',
-        borderWidth: 1,
-        cornerRadius: 8,
-        displayColors: true
+      title: {
+        display: false
       }
     },
     scales: {
+      x: {
+        ticks: { color: '#F9FAFB' },
+        grid: { color: '#374151' }
+      },
       y: {
         beginAtZero: true,
-        ticks: {
-          color: '#9CA3AF'
-        },
-        grid: {
-          color: '#374151'
-        }
-      },
-      x: {
-        ticks: {
-          color: '#9CA3AF',
-          maxRotation: 45
-        },
-        grid: {
-          color: '#374151'
-        }
+        ticks: { color: '#F9FAFB' },
+        grid: { color: '#374151' }
       }
     }
   };
-
+  
+  // Chart Optionen für Doughnut-Chart
   const doughnutOptions = {
     responsive: true,
     plugins: {
@@ -369,20 +243,40 @@ const TopTen = ({ t, setCurrentPage }) => {
         position: 'bottom',
         labels: {
           color: '#F9FAFB',
-          font: {
-            size: 12
-          }
+          font: { size: 12 }
         }
-      },
-      tooltip: {
-        backgroundColor: '#1F2937',
-        titleColor: '#F9FAFB',
-        bodyColor: '#F9FAFB',
-        borderColor: '#374151',
-        borderWidth: 1,
-        cornerRadius: 8
       }
     }
+  };
+  
+  // Daten für Doughnut-Chart (Top 5)
+  const getDoughnutData = () => {
+    const top5 = topPlayers.slice(0, 5);
+    return {
+      labels: top5.map(player => mapToMainName(players, player.Clanmate)),
+      datasets: [{
+        data: top5.map(player => player[selectedCategory]),
+        backgroundColor: ['#FFD700', '#C0C0C0', '#CD7F32', '#8B5CF6', '#3B82F6'],
+        borderColor: '#1F2937',
+        borderWidth: 2
+      }]
+    };
+  };
+  
+  // Daten für Radar-Chart (Multi-Kategorie Vergleich Top 5)
+  const getRadarData = () => {
+    const top5 = topPlayers.slice(0, 5);
+    const radarLabels = categories.map(cat => cat.label);
+    return {
+      labels: radarLabels,
+      datasets: top5.map((player, idx) => ({
+        label: mapToMainName(players, player.Clanmate),
+        data: categories.map(cat => player[cat.key] || 0),
+        backgroundColor: `rgba(56, 189, 248, 0.2)`,
+        borderColor: ['#FFD700', '#C0C0C0', '#CD7F32', '#8B5CF6', '#3B82F6'][idx] || '#6B7280',
+        borderWidth: 2
+      }))
+    };
   };
 
   const radarOptions = {
@@ -451,9 +345,44 @@ const TopTen = ({ t, setCurrentPage }) => {
 
   return (
     <div className="top-ten-container">
-      <StickyBackButton onClick={() => setCurrentPage(ROUTES.NAVIGATION)} label={t?.backToNavigation || 'Zurück zur Navigation'} />
       <div style={headerStyle}></div>
       <div className="top-ten-header">
+        <button
+          onClick={() => setCurrentPage(ROUTES.NAVIGATION)}
+          className="back-button"
+          style={{
+            position: 'absolute',
+            top: '20px',
+            left: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '12px 20px',
+            background: 'linear-gradient(135deg, #1F2937 0%, #374151 100%)',
+            color: '#F9FAFB',
+            border: 'none',
+            borderRadius: '12px',
+            fontSize: '16px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            zIndex: 10
+          }}
+          onMouseOver={(e) => {
+            e.target.style.background = 'linear-gradient(135deg, #374151 0%, #4B5563 100%)';
+            e.target.style.transform = 'translateY(-2px)';
+          }}
+          onMouseOut={(e) => {
+            e.target.style.background = 'linear-gradient(135deg, #1F2937 0%, #374151 100%)';
+            e.target.style.transform = 'translateY(0)';
+          }}
+        >
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          {t.backToNavigation || 'Zurück zur Navigation'}
+        </button>
         <h1 className="top-ten-title">
           <span className="crown-icon">👑</span>
           {t.topTenTitle}
@@ -600,6 +529,6 @@ const TopTen = ({ t, setCurrentPage }) => {
       </div>
     </div>
   );
-}
+};
 
 export default TopTen;

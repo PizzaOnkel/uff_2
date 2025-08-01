@@ -60,12 +60,6 @@ export default function CreatePeriodPage({ t, setCurrentPage }) {
         id: doc.id,
         ...doc.data()
       }));
-      // Nach Startdatum sortieren (aufsteigend)
-      list.sort((a, b) => {
-        if (!a.start) return 1;
-        if (!b.start) return -1;
-        return new Date(a.start) - new Date(b.start);
-      });
       setPeriods(list);
     });
     return () => unsub();

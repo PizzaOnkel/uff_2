@@ -150,7 +150,33 @@ function AdminDashboard2({ setCurrentPage }) {
   const [sortField, setSortField] = useState('category'); // 'category' oder 'chestName'
   const [sortOrder, setSortOrder] = useState('asc'); // 'asc' oder 'desc'
   // ...existing code...
-
+  // Ergebnisse veröffentlichen
+  const handlePublish = async () => {
+    setPublishStatus('läuft...');
+    try {
+      // Schreibe jede Gruppe als eigenes Dokument in publishedResults
+      for (const group of aggregatedData) {
+        const docRef = doc(db, 'publishedResults', `${group.periodId}_${group.eventDate}`);
+        const payload = {
+          periodId: group.periodId,
+          eventDate: group.eventDate,
+          players: group.players,
+          publishedAt: new Date().toISOString(),
+        };
+        console.log('[DEBUG] Schreibe publishedResults:', docRef.path, payload);
+        await setDoc(docRef, payload);
+      }
+      setPublishStatus('erledigt');
+      setToast('Ergebnisse veröffentlicht!');
+      setTimeout(() => setToast(''), 2000);
+      console.log('[DEBUG] Ergebnisse erfolgreich veröffentlicht!');
+    } catch (e) {
+      setPublishStatus('Fehler');
+      setToast('Fehler beim Veröffentlichen!');
+      setTimeout(() => setToast(''), 3000);
+      console.error('[DEBUG] Fehler beim Veröffentlichen:', e);
+    }
+  };
 
   // CSV-Export-Button-Handler
   const [exportStatus, setExportStatus] = useState('offen');
@@ -349,24 +375,8 @@ function AdminDashboard2({ setCurrentPage }) {
     async function fetchPeriods() {
       try {
         const periodSnap = await getDocs(collection(db, "periods"));
-        let periodList = periodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        // Versuche das Veranstaltungsdatum aus dem Namen zu extrahieren (Format: "Beschreibung ... (dd.mm.yyyy)")
-        function extractDateFromName(name) {
-          if (!name) return null;
-          const match = name.match(/(\d{2})\.(\d{2})\.(\d{4})/);
-          if (match) {
-            // dd.mm.yyyy
-            return new Date(`${match[3]}-${match[2]}-${match[1]}`);
-          }
-          return null;
-        }
-        periodList = periodList.sort((a, b) => {
-          // 1. Versuche Datum aus Name zu extrahieren
-          const aDate = extractDateFromName(a.name) || (a.start ? new Date(a.start) : new Date(0));
-          const bDate = extractDateFromName(b.name) || (b.start ? new Date(b.start) : new Date(0));
-          return bDate - aDate;
-        });
-        console.log('[DEBUG] Geladene Perioden aus Firestore (sortiert nach Name/Datum):', periodList);
+        const periodList = periodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        console.log('[DEBUG] Geladene Perioden aus Firestore:', periodList);
         setPeriods(periodList);
       } catch (e) {
         console.error('[DEBUG] Fehler beim Laden der Perioden:', e);
@@ -396,7 +406,39 @@ useEffect(() => {
     );
   }
 
-
+  // Server starten: Hier könnte ein echter API-Call erfolgen (Platzhalter)
+  const handleServer = async () => {
+    setServerStatus('läuft...');
+    try {
+      // Beispiel: await fetch('/api/server-action', { method: 'POST' });
+      // Hier ggf. echten Serverprozess anstoßen
+    } catch (e) {
+      // Fehlerbehandlung, falls nötig
+    }
+    try {
+      // Schreibe jede Gruppe als eigenes Dokument in publishedResults
+      for (const group of aggregatedData) {
+        const docRef = doc(db, 'publishedResults', `${group.periodId}_${group.eventDate}`);
+        const payload = {
+          periodId: group.periodId,
+          eventDate: group.eventDate,
+          players: group.players,
+          publishedAt: new Date().toISOString(),
+        };
+        console.log('[DEBUG] Schreibe publishedResults:', docRef.path, payload);
+        await setDoc(docRef, payload);
+      }
+      setPublishStatus('erledigt');
+      setToast('Ergebnisse veröffentlicht!');
+      setTimeout(() => setToast(''), 2000);
+      console.log('[DEBUG] Ergebnisse erfolgreich veröffentlicht!');
+    } catch (e) {
+      setPublishStatus('Fehler');
+      setToast('Fehler beim Veröffentlichen!');
+      setTimeout(() => setToast(''), 2000);
+      console.error('[DEBUG] Fehler beim Veröffentlichen:', e);
+    }
+  };
   const handleStartUpload = () => {
     setShowUploadDialog(true);
     setUploadStep(1);
@@ -468,8 +510,7 @@ useEffect(() => {
         return;
       }
 
-      // Generiere eine eindeutige fileId pro Upload (Dateiname + Timestamp)
-      const fileId = `${selectedFile.name.replace(/\.[^/.]+$/, '')}_${Date.now()}`;
+      // Schreibe jeden Eintrag als Dokument in die Collection 'results'
       let uploaded = 0;
       for (const entry of flatEntries) {
         // periodId aus Auswahl ergänzen
@@ -477,7 +518,7 @@ useEffect(() => {
           console.warn('[DEBUG] Überspringe Eintrag ohne eventDate:', entry);
           continue;
         }
-        const docData = { ...entry, periodId: selectedPeriod, uploadtime, fileId };
+        const docData = { ...entry, periodId: selectedPeriod, uploadtime };
         try {
           await addDoc(collection(db, 'results'), docData);
         } catch (err) {
@@ -489,55 +530,6 @@ useEffect(() => {
       }
       setUploadProgress(100);
       setUploadStatus('');
-
-      // === Automatisierung: Neue, noch nicht gemappte Truhen als Vorschläge in usedChestMappings speichern ===
-      try {
-        // Alle existierenden Mappings und Vorschläge laden
-        const [mappingsSnap, usedSnap] = await Promise.all([
-          getDocs(collection(db, 'chestMappings')),
-          getDocs(collection(db, 'usedChestMappings'))
-        ]);
-        const mappedChests = new Set();
-        mappingsSnap.forEach(doc => {
-          const d = doc.data();
-          if (d.chestName && d.category) mappedChests.add(`${d.chestName}__${d.category}__${d.levelStart||''}`);
-        });
-        usedSnap.forEach(doc => {
-          const d = doc.data();
-          if (d.chestName && d.category) mappedChests.add(`${d.chestName}__${d.category}__${d.level||''}`);
-        });
-
-        // Alle neuen Truhen aus Upload extrahieren
-        const newSuggestions = [];
-        flatEntries.forEach(entry => {
-          if (!Array.isArray(entry.chests)) return;
-          entry.chests.forEach(chest => {
-            const chestName = chest.chestName || chest.name || chest.type || chest.id || '';
-            const category = chest.category || '';
-            const level = chest.level || '';
-            const key = `${chestName}__${category}__${level}`;
-            if (!mappedChests.has(key) && chestName) {
-              newSuggestions.push({
-                chestName,
-                category,
-                level,
-                createdAt: new Date().toISOString()
-              });
-              mappedChests.add(key);
-            }
-          });
-        });
-        // Vorschläge in Firestore speichern
-        for (const suggestion of newSuggestions) {
-          await addDoc(collection(db, 'usedChestMappings'), suggestion);
-        }
-        if (newSuggestions.length > 0) {
-          console.log(`[DEBUG] ${newSuggestions.length} neue Truhen-Mapping-Vorschläge gespeichert.`);
-        }
-      } catch (err) {
-        console.error('[ERROR] Fehler beim automatischen Vorschlag neuer Truhen-Mappings:', err);
-      }
-
       setTimeout(() => {
         setShowUploadDialog(false);
         setToast('Upload erfolgreich!');
@@ -785,10 +777,27 @@ useEffect(() => {
             <span className={`text-sm font-semibold mt-1 ${aggStatus === 'erledigt' ? 'text-green-400' : aggStatus === 'läuft...' ? 'text-yellow-400' : 'text-gray-400'}`}>Status: {aggStatus}</span>
           </div>
           <div className="flex-1 flex flex-col items-center bg-gray-800 rounded-xl p-6 shadow-lg">
+            <button
+              onClick={handleServer}
+              className="w-full py-3 px-4 rounded-lg shadow-md transition duration-200 bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 text-white font-bold text-lg mb-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            >
+              Server starten (Veröffentlichung Schritt 2)
+            </button>
+            <span className={`text-sm font-semibold mt-1 ${serverStatus === 'erledigt' ? 'text-green-400' : serverStatus === 'läuft...' ? 'text-yellow-400' : 'text-gray-400'}`}>Status: {serverStatus}</span>
+          </div>
+          <div className="flex-1 flex flex-col items-center bg-gray-800 rounded-xl p-6 shadow-lg">
+            <button
+              onClick={() => { console.log('[DEBUG] Publish-Button geklickt'); handlePublish(); }}
+              className="w-full py-3 px-4 rounded-lg shadow-md transition duration-200 bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 text-white font-bold text-lg mb-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+            >
+              Ergebnisse veröffentlichen (Veröffentlichung Schritt 3)
+            </button>
+            <span className={`text-sm font-semibold mt-1 ${publishStatus === 'erledigt' ? 'text-green-400' : publishStatus === 'läuft...' ? 'text-yellow-400' : 'text-gray-400'}`}>Status: {publishStatus}</span>
+          </div>
+          <div className="flex-1 flex flex-col items-center bg-gray-800 rounded-xl p-6 shadow-lg">
             {!showExportSuccess ? (
               <>
                 <button
-                  type="button"
                   onClick={handleExportCSV}
                   className="w-full py-3 px-4 rounded-lg shadow-md transition duration-200 bg-gradient-to-r from-yellow-500 to-yellow-700 hover:from-yellow-600 hover:to-yellow-800 text-white font-bold text-lg mb-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 >
