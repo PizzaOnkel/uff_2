@@ -1,3 +1,9 @@
+# --- npm run deploy Button ---
+def run_deploy():
+    try:
+        subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && npm run deploy"', shell=True)
+    except Exception as e:
+        tkinter.messagebox.showerror("Fehler bei npm run deploy", str(e))
 def git_commit_only():
     try:
         subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git add . && git commit -m \"Quick Commit\""', shell=True)
@@ -6,7 +12,13 @@ def git_commit_only():
 
 def git_push_only():
     try:
-        subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git push"', shell=True)
+        # Prüfe, ob ein Upstream-Branch existiert
+        result = subprocess.run(f'cd /d {UFF2_PATH} && git rev-parse --abbrev-ref --symbolic-full-name "@{{u}}"', shell=True, capture_output=True, text=True)
+        if result.returncode != 0:
+            # Kein Upstream: setze ihn beim Push
+            subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git push --set-upstream origin main"', shell=True)
+        else:
+            subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git push"', shell=True)
     except Exception as e:
         tkinter.messagebox.showerror("Fehler beim Push", str(e))
 
@@ -226,8 +238,10 @@ tk.Button(main_deploy_frame, text="1. Committen (nur Commit)", width=36, bg="#a2
 tk.Label(main_deploy_frame, text="Fügt alle Änderungen zum Commit hinzu und erstellt einen Commit.", fg="#a259d9", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
 tk.Button(main_deploy_frame, text="2. Build ausführen (npm run build)", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=build_react).pack(pady=3)
 tk.Label(main_deploy_frame, text="Erstellt die statischen Dateien für die Veröffentlichung.", fg="#a259d9", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
-tk.Button(main_deploy_frame, text="3. Pushen (nur Push)", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=git_push_only).pack(pady=3)
-tk.Label(main_deploy_frame, text="Pusht den aktuellen Stand ins Remote-Repository (z.B. main-Branch).", fg="#a259d9", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
+
+# --- Deploy-Button für npm run deploy ---
+tk.Button(main_deploy_frame, text="3. Deploy (npm run deploy)", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=run_deploy).pack(pady=3)
+tk.Label(main_deploy_frame, text="Führt npm run deploy aus (z.B. für gh-pages oder andere automatische Deployments).", fg="#a259d9", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
 
 # --- deploy-Branch rechts ---
 deploy_frame = tk.LabelFrame(deploy_row, text="Deployment-Prozess (deploy-Branch)", fg="#43d675", bg="#232946", font=("Segoe UI", 12, "bold"), bd=2, relief="ridge", padx=16, pady=12, labelanchor="n")
