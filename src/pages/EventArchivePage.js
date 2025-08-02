@@ -5,6 +5,7 @@ import { ROUTES } from "../routes";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { mapToMainName } from "../utils/aliasMapping";
+import { getChestPoints, isIgnoredChest, fallbackCategory, fallbackLevel } from "../utils/logicZentrale";
 
 export default function EventArchivePage({ t, setCurrentPage }) {
   // --- wie CurrentTotalEventPage, aber mit Perioden-Auswahl ---

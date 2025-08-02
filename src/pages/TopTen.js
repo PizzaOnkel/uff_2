@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { mapToMainName } from '../utils/aliasMapping';
+import { getChestPoints, isIgnoredChest, fallbackCategory, fallbackLevel } from '../utils/logicZentrale';
 import { translations } from '../translations/translations';
 import { ROUTES } from '../routes';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement, RadialLinearScale, Filler } from 'chart.js';
@@ -51,116 +52,62 @@ const TopTen = ({ t, setCurrentPage }) => {
   }, []);
 
   // Noch robustere Aggregation: Spielernamen werden normalisiert (trim, lowercase), nur gewählte Kategorie, Top 10
+  const [allAggregatedPlayers, setAllAggregatedPlayers] = useState([]);
   useEffect(() => {
     if (data.length > 0) {
       const playerMap = new Map();
+      // Kategorien wie in HallOfChampionsPage.js
+      const categoriesList = [
+        'Arena Total', 'Common Total', 'Rare Total', 'Epic Total', 'Tartaros Total',
+        'Elven Total', 'Cursed Total', 'Bank Total', 'Runic Total', 'Heroic Total',
+        'VotA Total', 'ROTA Total', 'EAs Total', 'Union Total', 'Jormungandr Total', 'ALL_CATEGORIES'
+      ];
       data.forEach(row => {
         if (!row.Clanmate || row.Clanmate.trim() === '') return;
-        // Hauptnamen-Mapping anwenden
         const mainName = mapToMainName(players, row.Clanmate);
         const key = (row.playerId && String(row.playerId).trim() !== '')
           ? String(row.playerId).trim()
           : (mainName || '').trim().normalize('NFKC').toLowerCase();
-        // Initialisiere alle Kategorien
         if (!playerMap.has(key)) {
           playerMap.set(key, {
             Clanmate: mainName,
             _aggKey: key,
-            'Arena Total': 0,
-            'Common Total': 0,
-            'Rare Total': 0,
-            'Epic Total': 0,
-            'Tartaros Total': 0,
-            'Elven Total': 0,
-            'Cursed Total': 0,
-            'Bank Total': 0,
-            'Runic Total': 0,
-            'Heroic Total': 0,
-            'VotA Total': 0,
-            'ROTA Total': 0,
-            'EAs Total': 0,
-            'Union Total': 0,
-            'Jormungandr Total': 0,
-            'ALL_CATEGORIES': 0
+            ...Object.fromEntries(categoriesList.map(c => [c, 0]))
           });
         }
         const entry = playerMap.get(key);
         if (Array.isArray(row.chests)) {
           row.chests.forEach(chest => {
-            let cat = '';
-            const name = (chest.Name || '').toLowerCase();
-            const type = (chest.Type || chest.Kategorie || chest.Category || '').toLowerCase();
-            const source = (chest.Source || '').toLowerCase();
-            // Heroic nur wenn Kategorie/Type/Category 'heroic monster' enthält
-            if (type.includes('heroic monster')) {
-              cat = 'Heroic Total';
-            } else {
-              // Elven und Cursed können gemeinsam gezählt werden
-              let counted = false;
-              if (name.includes('elven citadel chest')) {
-                cat = 'Elven Total';
-                if (cat && entry.hasOwnProperty(cat)) {
-                  entry[cat] += Number(chest.count || 1);
-                  entry['ALL_CATEGORIES'] += Number(chest.count || 1);
-                  counted = true;
-                }
-              }
-              if (name.includes('cursed citadel chest')) {
-                cat = 'Cursed Total';
-                if (cat && entry.hasOwnProperty(cat)) {
-                  entry[cat] += Number(chest.count || 1);
-                  entry['ALL_CATEGORIES'] += Number(chest.count || 1);
-                  counted = true;
-                }
-              }
-              // Wenn weder Elven noch Cursed, dann andere Kategorien prüfen
-              if (!counted) {
-                if (type.includes('arena') || source.includes('arena') || name.includes('arena')) cat = 'Arena Total';
-                else if (name.includes('orc') || type.includes('common crypt')) cat = 'Common Total';
-                else if (name.includes('rare dragon') || type.includes('rare crypt')) cat = 'Rare Total';
-                else if ((name.includes('epic') && !name.includes('ancient squad')) || type.includes('epic') || name.includes('undead')) cat = 'Epic Total';
-                else if (name.includes('tartaros') || type.includes('tartaros')) cat = 'Tartaros Total';
-                else if (name.includes('bank') || type.includes('bank') || source.includes('bank')) cat = 'Bank Total';
-                else if (name.includes('jormungandr') || type.includes('jormungandr') || source.includes('jormungandr')) cat = 'Jormungandr Total';
-                else if (name.includes('runic') || type.includes('runic') || source.includes('runic')) cat = 'Runic Total';
-                else if (name.includes('vault') || type.includes('vault') || source.includes('vault')) cat = 'VotA Total';
-                else if (name.includes('rota') || type.includes('rota') || source.includes('rota')) cat = 'ROTA Total';
-                else if (name.includes('epic ancient squad') || type.includes('epic ancient squad') || source.includes('epic ancient squad')) cat = 'EAs Total';
-                else if (name.includes('union total') || type.includes('union total') || source.includes('union total')) cat = 'Union Total';
-                if (cat && entry.hasOwnProperty(cat)) {
-                  entry[cat] += Number(chest.count || 1);
-                  entry['ALL_CATEGORIES'] += Number(chest.count || 1);
-                }
-              }
-            }
-            if (cat === 'Heroic Total' && entry.hasOwnProperty(cat)) {
+            const cat = fallbackCategory(chest);
+            if (cat && entry.hasOwnProperty(cat)) {
               entry[cat] += Number(chest.count || 1);
               entry['ALL_CATEGORIES'] += Number(chest.count || 1);
             }
-          }); // Ende row.chests.forEach
-        } // Ende if (Array.isArray(row.chests))
-      }); // Ende data.forEach
+          });
+        }
+      });
+      // Aggregation für Statistik und Top 10 bereitstellen
+      const allPlayersArr = Array.from(playerMap.values());
+      setAllAggregatedPlayers(allPlayersArr);
       let aggArr = [];
       let sortKey = '';
       if (selectedCategory === 'Arena Total') {
-        // Nur Arena-Truhen anzeigen
-        aggArr = Array.from(playerMap.values()).filter(p => p['Arena Total'] > 0);
+        aggArr = allPlayersArr.filter(p => p['Arena Total'] > 0);
         sortKey = 'Arena Total';
-      } else if (selectedCategory && playerMap.values().next().value?.hasOwnProperty(selectedCategory)) {
-        // Einzelkategorie
-        aggArr = Array.from(playerMap.values()).filter(p => p[selectedCategory] > 0);
+      } else if (selectedCategory && allPlayersArr[0]?.hasOwnProperty(selectedCategory)) {
+        aggArr = allPlayersArr.filter(p => p[selectedCategory] > 0);
         sortKey = selectedCategory;
       } else {
-        // Startseite: Summe aller Kategorien
-        aggArr = Array.from(playerMap.values()).filter(p => p['ALL_CATEGORIES'] > 0);
+        aggArr = allPlayersArr.filter(p => p['ALL_CATEGORIES'] > 0);
         sortKey = 'ALL_CATEGORIES';
       }
       const sorted = aggArr.sort((a, b) => b[sortKey] - a[sortKey]).slice(0, 10);
       setTopPlayers(sorted);
     } else {
       setTopPlayers([]);
+      setAllAggregatedPlayers([]);
     }
-  }, [data, selectedCategory]);
+  }, [data, selectedCategory, players]);
 
   // Kategorien mit Routing-Information
   const categories = [
@@ -311,16 +258,14 @@ const TopTen = ({ t, setCurrentPage }) => {
     }
   };
 
-  // Verbesserte Statistik-Berechnung mit echten Daten
+  // Verbesserte Statistik-Berechnung auf Basis der Aggregation
   const getStatistics = () => {
-    const totalPlayers = data.filter(player => player.Clanmate && player.Clanmate.trim() !== '').length;
-    const totalChests = data.reduce((sum, player) => sum + (player[selectedCategory] || 0), 0);
+    const relevantPlayers = allAggregatedPlayers.filter(player => player[selectedCategory] > 0);
+    const totalPlayers = relevantPlayers.length;
+    const totalChests = relevantPlayers.reduce((sum, player) => sum + (player[selectedCategory] || 0), 0);
     const averageChests = totalPlayers > 0 ? Math.round(totalChests / totalPlayers) : 0;
     const topScore = topPlayers.length > 0 ? topPlayers[0][selectedCategory] : 0;
-    const activePlayersCount = data.filter(player => 
-      player.Clanmate && player.Clanmate.trim() !== '' && player[selectedCategory] > 0
-    ).length;
-    
+    const activePlayersCount = totalPlayers;
     return {
       totalPlayers,
       totalChests,

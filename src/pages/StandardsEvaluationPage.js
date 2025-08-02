@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import { ROUTES } from "../routes";
+import { getChestPoints, isIgnoredChest, fallbackCategory, fallbackLevel } from "../utils/logicZentrale";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { Doughnut } from "react-chartjs-2";
@@ -36,7 +37,7 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
       const playersArr = playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const normsArr = normsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const resultsArr = resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const chestMappings = chestMappingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const chestMappings = chestMappingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) || [];
 
       // Ignore-Liste laden (aus public/json-data/chest_mapping_ignore.csv)
       let ignoreChests = [];
@@ -101,57 +102,25 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
         return ignored;
       }
 
-      // Spieler-Aggregation wie in CurrentTotalEventPage.js
+      // Aggregation und Normerfüllung wie in CurrentTotalEventPage.js
       const playerMap = new Map();
       filteredResults.forEach(result => {
-        const playerName = result.Clanmate;
-        const player = playersArr.find(p => p.name === playerName || (Array.isArray(p.aliases) && p.aliases.includes(playerName)));
+        const playerNameRaw = result.Clanmate;
+        const playerName = playersArr.find(p => p.name === playerNameRaw || (Array.isArray(p.aliases) && p.aliases.includes(playerNameRaw)))?.name || playerNameRaw;
+        const player = playersArr.find(p => p.name === playerNameRaw || (Array.isArray(p.aliases) && p.aliases.includes(playerNameRaw)));
         let troopStrength = player?.troopStrength || result.troopStrength || '';
         if (!troopStrength || troopStrength.trim() === '') {
           troopStrength = 'nicht definiert';
         }
         const normPoints = getNormPoints(troopStrength);
 
-        // Mapping-Logik für Chests
+        // Mapping-Logik für Chests wie in CurrentTotalEventPage.js
         const mappedChests = Array.isArray(result.chests)
           ? result.chests.map(chest => {
               if (!chest.category && chest.Type) chest.category = chest.Type;
-              let points = 0;
-              if (chestMappings.length > 0) {
-                let bestMapping = null;
-                let bestScore = -1;
-                chestMappings.forEach(m => {
-                  const typeA = (m.type || m.Type || "").trim().toLowerCase();
-                  const typeB = (chest.Type || "").trim().toLowerCase();
-                  const nameA = (m.chestName || m.Name || "").trim().toLowerCase();
-                  const nameB = (chest.Name || "").trim().toLowerCase();
-                  const categoryA = (m.category || "").trim().toLowerCase();
-                  const categoryB = (chest.category || "").trim().toLowerCase();
-                  const sourceA = (m.source || m.Source || "").trim().toLowerCase();
-                  const sourceB = (chest.Source || chest.source || "").trim().toLowerCase();
-                  const levelA = String(m.levelStart || m.level || m.Level || m.levelEnd || "").trim().toLowerCase();
-                  const levelB = String(chest.level ?? chest.Level ?? chest.levelStart ?? chest.levelEnd ?? "").trim().toLowerCase();
-                  let score = 0;
-                  if (nameA && nameA === nameB) score++;
-                  if (categoryA && categoryA === categoryB) score++;
-                  if (typeA && typeA === typeB) score++;
-                  if (sourceA && sourceA === sourceB) score++;
-                  if (levelA && (levelA === levelB || m.levelEnd === levelB)) score++;
-                  let matches = true;
-                  if (nameA && nameA !== nameB) matches = false;
-                  if (categoryA && categoryA !== categoryB) matches = false;
-                  if (typeA && typeA !== typeB) matches = false;
-                  if (sourceA && sourceA !== sourceB) matches = false;
-                  if (levelA && (levelA !== levelB && m.levelEnd !== levelB)) matches = false;
-                  if (matches && score > bestScore) {
-                    bestScore = score;
-                    bestMapping = m;
-                  }
-                });
-                if (bestMapping && bestMapping.points !== undefined) {
-                  points = Number(bestMapping.points);
-                }
-              }
+              let points = getChestPoints(chest, chestMappings || []);
+              // Fallback: Wenn kein Mapping gefunden, Standardwert 1 Punkt
+              if (!points || points === 0) points = 1;
               return {
                 ...chest,
                 count: chest.count || 1,

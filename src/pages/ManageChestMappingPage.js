@@ -141,6 +141,17 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
       await refreshUsedChestMappings(db);
     })();
   }, []);
+
+  // Funktion für Ignore-Button in Vorschlagsliste
+  const handleAddIgnoreFromSuggestion = async (mapping) => {
+    await addDoc(collection(db, "chestMappingIgnore"), {
+      Name: mapping.chestName || '',
+      Level: mapping.level || '',
+      Type: mapping.type || '',
+      Source: mapping.source || '',
+      timestamp: new Date().toISOString()
+    });
+  };
   // Dynamisch alle Werte aus Rohdaten, Mappings und Vorschlägen sammeln
   const [allChestNames, setAllChestNames] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
@@ -206,10 +217,13 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
   // Dynamisch generierte Kategorien (Fallback auf statisch falls leer)
   const categories = allCategories.length > 0 ? allCategories : [
     "Arena", "Common", "Rare", "Epic", "Tartaros",
-    "Elven", "Cursed", "Bank", "Runic", "Heroic",
+    "Elven", "Elven Chests", "Cursed", "Cursed Chests", "Bank", "Runic", "Heroic",
     "Vota", "Quick March", "Ancients", "ROTA", "Epic Ancient",
     "Union", "Jormungandr"
   ];
+  // Doppelt sicherstellen, dass die beiden Kategorien immer dabei sind
+  if (!categories.includes("Cursed Chests")) categories.push("Cursed Chests");
+  if (!categories.includes("Elven Chests")) categories.push("Elven Chests");
   useEffect(() => {
     // chestMappings abonnieren
     const unsub1 = onSnapshot(collection(db, "chestMappings"), snapshot => {
@@ -334,10 +348,19 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
     if (!newMapping.category || !newMapping.points) return;
     let levelStart = newMapping.levelStart;
     let levelEnd = newMapping.levelEnd;
-    // Für Banktruhen als String speichern, sonst als Zahl
     if (newMapping.category !== "Bank") {
       levelStart = levelStart !== "" ? parseInt(levelStart, 10) : "";
       levelEnd = levelEnd !== "" ? parseInt(levelEnd, 10) : "";
+    }
+    // Doppelte prüfen
+    const exists = chestMappings.some(m =>
+      (m.chestName || "") === (newMapping.chestName || "") &&
+      (m.category || "") === (newMapping.category || "") &&
+      ((m.levelStart !== undefined ? m.levelStart : m.level) || "") == (levelStart || "")
+    );
+    if (exists) {
+      alert("Es existiert bereits ein Mapping mit gleichem Name, Kategorie und Level!");
+      return;
     }
     const docRef = await addDoc(collection(db, "chestMappings"), {
       ...newMapping,
@@ -402,15 +425,16 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
       </div>
       {/* Ausgelagerte Komponenten */}
       {showSuggestions && (
-        <ChestMappingSuggestions
-          usedChestMappings={filteredSuggestions}
-          importUsedMapping={importUsedMapping}
-          importing={importing}
-          sortField={sortField}
-          setSortField={setSortField}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-        />
+      <ChestMappingSuggestions
+        usedChestMappings={filteredSuggestions}
+        importUsedMapping={importUsedMapping}
+        importing={importing}
+        sortField={sortField}
+        setSortField={setSortField}
+        sortOrder={sortOrder}
+        setSortOrder={setSortOrder}
+        handleAddIgnoreFromSuggestion={handleAddIgnoreFromSuggestion}
+      />
       )}
       {showIgnoreList && (
         <ChestMappingIgnoreList
@@ -613,7 +637,40 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
                 </tr>
               </thead>
               <tbody>
-                {chestMappings.map((mapping) => {
+                {[...chestMappings]
+                  .sort((a, b) => {
+                    // 1. Kategorie
+                    const catA = (a.category || '').toLowerCase();
+                    const catB = (b.category || '').toLowerCase();
+                    if (catA !== catB) return catA.localeCompare(catB, 'de', {numeric:true});
+                    // 2. Source
+                    const srcA = (a.source || '').toLowerCase();
+                    const srcB = (b.source || '').toLowerCase();
+                    if (srcA !== srcB) return srcA.localeCompare(srcB, 'de', {numeric:true});
+                    // 3. Type
+                    const typeA = (a.type || '').toLowerCase();
+                    const typeB = (b.type || '').toLowerCase();
+                    if (typeA !== typeB) return typeA.localeCompare(typeB, 'de', {numeric:true});
+                    // 4. Name
+                    const nameA = (a.chestName || '').toLowerCase();
+                    const nameB = (b.chestName || '').toLowerCase();
+                    if (nameA !== nameB) return nameA.localeCompare(nameB, 'de', {numeric:true});
+                    // 5. Level (Start, dann End)
+                    const lvlA = a.levelStart !== undefined ? a.levelStart : a.level;
+                    const lvlB = b.levelStart !== undefined ? b.levelStart : b.level;
+                    if (lvlA !== undefined && lvlB !== undefined) {
+                      if (!isNaN(lvlA) && !isNaN(lvlB)) {
+                        if (Number(lvlA) !== Number(lvlB)) return Number(lvlA) - Number(lvlB);
+                      } else {
+                        const strA = String(lvlA || '').toLowerCase();
+                        const strB = String(lvlB || '').toLowerCase();
+                        if (strA !== strB) return strA.localeCompare(strB, 'de', {numeric:true});
+                      }
+                    }
+                    // Falls alles gleich: timestamp als Fallback
+                    return (a.timestamp || '').localeCompare(b.timestamp || '', 'de', {numeric:true});
+                  })
+                  .map((mapping) => {
                   // Firestore-IDs sind 20 Zeichen lang und bestehen nur aus [A-Za-z0-9_-]
                   const isValidId = mapping.id && /^[A-Za-z0-9_-]{20}$/.test(mapping.id);
                   return (

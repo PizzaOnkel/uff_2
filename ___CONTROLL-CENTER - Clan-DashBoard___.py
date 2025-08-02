@@ -1,3 +1,15 @@
+def git_commit_only():
+    try:
+        subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git add . && git commit -m \"Quick Commit\""', shell=True)
+    except Exception as e:
+        tkinter.messagebox.showerror("Fehler beim Commit", str(e))
+
+def git_push_only():
+    try:
+        subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && git push"', shell=True)
+    except Exception as e:
+        tkinter.messagebox.showerror("Fehler beim Push", str(e))
+
 import psutil
 
 def is_node_server_running():
@@ -205,18 +217,17 @@ tk.Button(dev_frame, text="2. React starten (Entwicklung)", width=36, bg="#3fa7d
 deploy_row = tk.Frame(main_frame, bg="#232946")
 deploy_row.pack(fill="both", expand=True, pady=(18, 10))
 
-# --- gh-pages links ---
-ghpages_frame = tk.LabelFrame(deploy_row, text="Deployment-Prozess (gh-pages)", fg="#a259d9", bg="#232946", font=("Segoe UI", 12, "bold"), bd=2, relief="ridge", padx=16, pady=12, labelanchor="n")
-ghpages_frame.pack(side="left", fill="both", expand=True, padx=(0, 12))
-tk.Label(ghpages_frame, text="GitHub Pages: Automatische Veröffentlichung als statische Website direkt über GitHub. Ideal für React-Apps ohne eigenen Server. Die Seite ist nach dem Push sofort öffentlich unter https://<username>.github.io/<repo>.", wraplength=520, justify="left", fg="#a259d9", bg="#232946", font=("Segoe UI", 9, "italic"), pady=4).pack(fill="x")
-tk.Button(ghpages_frame, text="3. Zu 'gh-pages' Branch wechseln", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=git_checkout_ghpages).pack(pady=3)
-tk.Label(ghpages_frame, text="Wechselt auf den speziellen Branch für GitHub Pages.", fg="#a259d9", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
-tk.Button(ghpages_frame, text="4. Build ausführen (npm run build)", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=build_react).pack(pady=3)
-tk.Label(ghpages_frame, text="Erstellt die statischen Dateien für die Veröffentlichung.", fg="#a259d9", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
-tk.Button(ghpages_frame, text="5. Änderungen committen & pushen (gh-pages)", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=git_commit_and_push_ghpages).pack(pady=3)
-tk.Label(ghpages_frame, text="Veröffentlicht die gebaute App direkt auf GitHub Pages.", fg="#a259d9", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
-tk.Button(ghpages_frame, text="6. Zurück zu 'main' wechseln", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=git_checkout_main).pack(pady=3)
-tk.Label(ghpages_frame, text="Wechselt zurück zum Hauptentwicklungs-Branch.", fg="#a259d9", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
+
+# --- Deployment-Prozess (Standard, z.B. main-Branch) ---
+main_deploy_frame = tk.LabelFrame(deploy_row, text="Deployment-Prozess (Standard-Branch, z.B. main)", fg="#a259d9", bg="#232946", font=("Segoe UI", 12, "bold"), bd=2, relief="ridge", padx=16, pady=12, labelanchor="n")
+main_deploy_frame.pack(side="left", fill="both", expand=True, padx=(0, 12))
+tk.Label(main_deploy_frame, text="Standard-Deployment: Commit, Build und Push direkt im aktuellen Branch (z.B. main). Keine Branch-Wechsel nötig. Die App kann nach dem Push wie gewohnt weiterverarbeitet oder veröffentlicht werden.", wraplength=520, justify="left", fg="#a259d9", bg="#232946", font=("Segoe UI", 9, "italic"), pady=4).pack(fill="x")
+tk.Button(main_deploy_frame, text="1. Committen (nur Commit)", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=git_commit_only).pack(pady=3)
+tk.Label(main_deploy_frame, text="Fügt alle Änderungen zum Commit hinzu und erstellt einen Commit.", fg="#a259d9", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
+tk.Button(main_deploy_frame, text="2. Build ausführen (npm run build)", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=build_react).pack(pady=3)
+tk.Label(main_deploy_frame, text="Erstellt die statischen Dateien für die Veröffentlichung.", fg="#a259d9", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
+tk.Button(main_deploy_frame, text="3. Pushen (nur Push)", width=36, bg="#a259d9", fg="white", font=("Segoe UI", 10, "bold"), command=git_push_only).pack(pady=3)
+tk.Label(main_deploy_frame, text="Pusht den aktuellen Stand ins Remote-Repository (z.B. main-Branch).", fg="#a259d9", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
 
 # --- deploy-Branch rechts ---
 deploy_frame = tk.LabelFrame(deploy_row, text="Deployment-Prozess (deploy-Branch)", fg="#43d675", bg="#232946", font=("Segoe UI", 12, "bold"), bd=2, relief="ridge", padx=16, pady=12, labelanchor="n")
@@ -232,9 +243,21 @@ tk.Button(deploy_frame, text="10. Zurück zu 'main' wechseln", width=36, bg="#43
 tk.Label(deploy_frame, text="Wechselt zurück zum Hauptentwicklungs-Branch.", fg="#43d675", bg="#232946", font=("Segoe UI", 8), anchor="w").pack(fill="x")
 
 # --- Build-Ordner öffnen ---
+# --- Build-Ordner öffnen ---
 build_frame = tk.LabelFrame(main_frame, text="Build-Ordner", fg="#eebc1d", bg="#232946", font=("Segoe UI", 12, "bold"), bd=2, relief="ridge", padx=16, pady=12, labelanchor="n")
 build_frame.pack(fill="x", pady=(18, 10))
 tk.Button(build_frame, text="Build-Ordner öffnen", width=36, bg="#eebc1d", fg="#232946", font=("Segoe UI", 10, "bold"), command=open_build_folder).pack(pady=3)
+
+# --- Schnell-Deployment Bereich (3-Schritte) ---
+quickdeploy_frame = tk.LabelFrame(main_frame, text="Schnell-Deployment (3-Schritte)", fg="#FFD700", bg="#232946", font=("Segoe UI", 12, "bold"), bd=2, relief="ridge", padx=16, pady=12, labelanchor="n")
+quickdeploy_frame.pack(fill="x", pady=(18, 10))
+tk.Label(quickdeploy_frame, text="Einfacher 3-Schritte-Workflow für schnelles Deployment, unabhängig vom Branch.", fg="#FFD700", bg="#232946", font=("Segoe UI", 10, "italic"), anchor="w").pack(fill="x")
+btnrow_qd = tk.Frame(quickdeploy_frame, bg="#232946")
+btnrow_qd.pack(fill="x", pady=4)
+tk.Button(btnrow_qd, text="1. Committen (nur Commit)", width=28, bg="#FFD700", fg="#232946", font=("Segoe UI", 10, "bold"), command=git_commit_only).pack(side="left", padx=6)
+tk.Button(btnrow_qd, text="2. Build erstellen (npm run build)", width=28, bg="#FFD700", fg="#232946", font=("Segoe UI", 10, "bold"), command=build_react).pack(side="left", padx=6)
+tk.Button(btnrow_qd, text="3. Pushen (nur Push)", width=28, bg="#FFD700", fg="#232946", font=("Segoe UI", 10, "bold"), command=git_push_only).pack(side="left", padx=6)
+tk.Label(quickdeploy_frame, text="Hinweis: Diese Buttons führen KEINEN Branch-Wechsel aus und sind für schnelles, manuelles Deployment gedacht!", fg="#FFD700", bg="#232946", font=("Segoe UI", 9, "italic"), anchor="w").pack(fill="x", pady=(4,0))
 
 tk.Label(main_frame, text="Hinweis: Für die reine Entwicklung reichen die ersten beiden Buttons!", fg="#ff595e", bg="#232946", font=("Segoe UI", 10, "italic"), pady=10).pack()
 

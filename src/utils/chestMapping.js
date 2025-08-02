@@ -6,19 +6,25 @@ export function mapChestToCategoryAndLevel(chest, chestMappings = []) {
   if (chestMappings.length > 0) {
     let bestMapping = null;
     let bestScore = -1;
-    chestMappings.forEach(m => {
-      const typeA = (m.type || m.Type || "").trim().toLowerCase();
-      const typeB = (chest.Type || "").trim().toLowerCase();
-      const nameA = (m.chestName || m.Name || "").trim().toLowerCase();
-      const nameB = (chest.Name || "").trim().toLowerCase();
-      const categoryA = (m.category || "").trim().toLowerCase();
-      const categoryB = (chest.category || "").trim().toLowerCase();
-      const sourceA = (m.source || m.Source || "").trim().toLowerCase();
-      const sourceB = (chest.Source || chest.source || "").trim().toLowerCase();
-      const levelA = String(m.levelStart || m.level || m.Level || m.levelEnd || "").trim().toLowerCase();
-      const levelB = String(chest.level ?? chest.Level ?? chest.levelStart ?? chest.levelEnd ?? "").trim().toLowerCase();
+    chestMappings.forEach((m, idx) => {
+      // Tolerante Normalisierung
+      const norm = v => (v === undefined || v === null ? '' : String(v).trim().toLowerCase());
+      const typeA = norm(m.type || m.Type);
+      const typeB = norm(chest.Type);
+      const nameA = norm(m.chestName || m.Name);
+      const nameB = norm(chest.Name);
+      const categoryA = norm(m.category);
+      const categoryB = norm(chest.category);
+      const sourceA = norm(m.source || m.Source);
+      const sourceB = norm(chest.Source || chest.source);
+      // Level als Zahl oder String vergleichen
+      const levelA = norm(m.levelStart || m.level || m.Level || m.levelEnd);
+      const levelB = norm(chest.level ?? chest.Level ?? chest.levelStart ?? chest.levelEnd);
+      const numA = Number(m.levelStart || m.level || m.Level || m.levelEnd);
+      const numB = Number(chest.level ?? chest.Level ?? chest.levelStart ?? chest.levelEnd);
       let score = 0;
-      if (nameA && nameA === nameB) score++;
+      // Name: toleranter Vergleich (case-insensitive, whitespace, Teilstring)
+      if (nameA && (nameA === nameB || nameB.includes(nameA) || nameA.includes(nameB))) score++;
       // Kategorie-Matching: Für Citadel akzeptiere auch 'Citadel' <-> 'Elven Chests'/'Cursed Chests'
       let citadelMatch = false;
       if ((categoryA === 'citadel' && (categoryB === 'elven chests' || categoryB === 'cursed chests')) ||
@@ -26,15 +32,38 @@ export function mapChestToCategoryAndLevel(chest, chestMappings = []) {
         citadelMatch = true;
       }
       if (categoryA && (categoryA === categoryB || citadelMatch)) score++;
+      // Type: toleranter Vergleich
       if (typeA && typeA === typeB) score++;
+      // Source: toleranter Vergleich
       if (sourceA && sourceA === sourceB) score++;
-      if (levelA && (levelA === levelB || m.levelEnd === levelB)) score++;
+      // Level: toleranter Vergleich (Zahl oder String, auch Teilstring)
+      if (
+        (levelA && levelB && (levelA === levelB || levelA.includes(levelB) || levelB.includes(levelA))) ||
+        (!isNaN(numA) && !isNaN(numB) && numA === numB)
+      ) score++;
+      // Tolerantes Matching: Nur Felder vergleichen, die auf beiden Seiten gesetzt sind
       let matches = true;
-      if (nameA && nameA !== nameB) matches = false;
-      if (categoryA && !(categoryA === categoryB || citadelMatch)) matches = false;
-      if (typeA && typeA !== typeB) matches = false;
-      if (sourceA && sourceA !== sourceB) matches = false;
-      if (levelA && (levelA !== levelB && m.levelEnd !== levelB)) matches = false;
+      if (nameA && nameB && nameA !== nameB && !nameB.includes(nameA) && !nameA.includes(nameB)) matches = false;
+      if (categoryA && categoryB && !(categoryA === categoryB || citadelMatch)) matches = false;
+      if (typeA && typeB && typeA !== typeB) matches = false;
+      if (sourceA && sourceB && sourceA !== sourceB) matches = false;
+      if (
+        levelA && levelB &&
+        !(levelA === levelB || levelA.includes(levelB) || levelB.includes(levelA) || (!isNaN(numA) && !isNaN(numB) && numA === numB))
+      ) matches = false;
+      // Debug-Log für jede Mapping-Prüfung
+      if (categoryA === 'citadel' || categoryB === 'citadel' || nameA.includes('citadel') || nameB.includes('citadel')) {
+        console.log('[DEBUG][MappingCheck] Chest:', chest, 'Mapping:', m, {
+          idx,
+          nameA, nameB,
+          categoryA, categoryB,
+          typeA, typeB,
+          sourceA, sourceB,
+          levelA, levelB,
+          numA, numB,
+          matches, score
+        });
+      }
       if (matches && score > bestScore) {
         bestScore = score;
         bestMapping = m;

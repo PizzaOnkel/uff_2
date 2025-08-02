@@ -87,7 +87,21 @@ const verticalHeaders = [
       setPlayers(playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       setTroopStrengths(troopSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       const resultsArr = resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setChestMappings(chestMappingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const loadedMappings = chestMappingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setChestMappings(loadedMappings);
+      // Debug: Zeige alle Mapping-Namen/Kategorien im Browser an
+      if (loadedMappings && loadedMappings.length > 0) {
+        const mappingNames = loadedMappings.map(m => ({
+          name: m.chestName || m.Name || '',
+          category: m.category || '',
+          type: m.type || m.Type || '',
+          level: m.level || m.levelStart || m.Level || '',
+        }));
+        console.log('[DEBUG][MappingLoaded] Alle Mapping-Namen/Kategorien:', mappingNames);
+        // Zeige explizit alle Citadel-relevanten Mappings
+        const citadelMappings = mappingNames.filter(m => (m.name||'').toLowerCase().includes('citadel') || (m.category||'').toLowerCase().includes('citadel'));
+        console.log('[DEBUG][MappingLoaded] Citadel-relevante Mappings:', citadelMappings);
+      }
       setNorms(normsSnap.docs.map(doc => ({ troopStrength: doc.data().troopStrength, value: doc.data().value })));
       // Map: periodId -> uploadtime (neueste)
       const uploadMap = {};
@@ -261,15 +275,12 @@ const verticalHeaders = [
               const isBankChest = (chest.category === "Bank Chests" || typeB === "bank" || sourceB === "bank");
               let matches = true;
               if (isBankChest) {
-                // Name-Mapping: z.B. "Wooden Chest" <-> Level "Wooden"
                 if (nameA && nameB && nameB.includes(levelA)) score += 2;
                 if (nameA && nameA === nameB) score++;
                 if (categoryA && categoryA === categoryB) score++;
                 if (typeA && typeA === typeB) score++;
                 if (sourceA && sourceA === sourceB) score++;
-                // Level-Mapping: Level kann 0 sein, dann Name verwenden
                 if (levelA && (levelA === levelB || nameB.includes(levelA))) score++;
-                // Striktes Matching für Bank Chests
                 matches = (
                   (!categoryA || categoryA === categoryB) &&
                   (!typeA || typeA === typeB) &&
@@ -278,7 +289,6 @@ const verticalHeaders = [
                 );
               } else {
                 if (nameA && nameA === nameB) score++;
-                // Kategorie-Matching: Für Citadel akzeptiere auch 'Citadel' <-> 'Elven Chests'/'Cursed Chests'
                 let citadelMatch = false;
                 if ((categoryA === 'citadel' && (categoryB === 'elven chests' || categoryB === 'cursed chests')) ||
                     ((categoryA === 'elven chests' || categoryA === 'cursed chests') && categoryB === 'citadel')) {
@@ -299,6 +309,15 @@ const verticalHeaders = [
                 bestMapping = m;
               }
             });
+            // Debug-Log für Elven/Cursed Citadel Chests
+            if ((chest.Name||"").toLowerCase().includes("citadel")) {
+              // eslint-disable-next-line no-console
+              console.log("[DEBUG] Mapping für Citadel Chest:", {
+                chest,
+                bestMapping,
+                points: bestMapping ? bestMapping.points : undefined
+              });
+            }
             if (bestMapping && bestMapping.points !== undefined) {
               points = Number(bestMapping.points);
             }
@@ -984,8 +1003,25 @@ const verticalHeaders = [
                                   : (isElven || isCursed)
                                     ? row.chestDetails
                                         .filter(chest => {
-                                          if (chest.category !== cat.name) return false;
+                                          // Akzeptiere auch Citadel-Chests mit passendem Namen für Elven/Cursed Spalten, aber prüfe Level!
                                           const chestLevel = Number(chest.level ?? chest.Level ?? "");
+                                          if (cat.name === "Cursed Chests") {
+                                            if (chest.category === "Cursed Chests" || (chest.category === "Citadel" && (chest.Name || "").toLowerCase().includes("cursed"))) {
+                                              if (typeof level === "number") return chestLevel === level;
+                                              if (start !== null && end !== null) return chestLevel >= start && chestLevel <= end;
+                                              return false;
+                                            }
+                                            return false;
+                                          }
+                                          if (cat.name === "Elven Chests") {
+                                            if (chest.category === "Elven Chests" || (chest.category === "Citadel" && (chest.Name || "").toLowerCase().includes("elven"))) {
+                                              if (typeof level === "number") return chestLevel === level;
+                                              if (start !== null && end !== null) return chestLevel >= start && chestLevel <= end;
+                                              return false;
+                                            }
+                                            return false;
+                                          }
+                                          if (chest.category !== cat.name) return false;
                                           // Level exakt oder im Mapping-Range
                                           if (typeof level === "number") return chestLevel === level;
                                           if (start !== null && end !== null) return chestLevel >= start && chestLevel <= end;
@@ -1050,14 +1086,33 @@ const verticalHeaders = [
                                   : (isElven || isCursed)
                                     ? row.chestDetails
                                         .filter(chest => {
-                                          if (chest.category !== cat.name) return false;
+                                          // Akzeptiere auch Citadel-Chests mit passendem Namen für Elven/Cursed Spalten, aber prüfe Level!
                                           const chestLevel = Number(chest.level ?? chest.Level ?? "");
+                                          if (cat.name === "Cursed Chests") {
+                                            if (chest.category === "Cursed Chests" || (chest.category === "Citadel" && (chest.Name || "").toLowerCase().includes("cursed"))) {
+                                              if (typeof level === "number") return chestLevel === level;
+                                              if (start !== null && end !== null) return chestLevel >= start && chestLevel <= end;
+                                              return false;
+                                            }
+                                            return false;
+                                          }
+                                          if (cat.name === "Elven Chests") {
+                                            if (chest.category === "Elven Chests" || (chest.category === "Citadel" && (chest.Name || "").toLowerCase().includes("elven"))) {
+                                              if (typeof level === "number") return chestLevel === level;
+                                              if (start !== null && end !== null) return chestLevel >= start && chestLevel <= end;
+                                              return false;
+                                            }
+                                            return false;
+                                          }
+                                          if (chest.category !== cat.name) return false;
+                                          // Level exakt oder im Mapping-Range
                                           if (typeof level === "number") return chestLevel === level;
                                           if (start !== null && end !== null) return chestLevel >= start && chestLevel <= end;
                                           return false;
                                         })
                                         .reduce((sum, chest) => {
                                           let points = chest.points;
+                                          let debugInfo = {};
                                           if (points === undefined || points === null || points === "") {
                                             // Tolerantes Mapping suchen
                                             const mapping = chestMappings && chestMappings.find(m => {
@@ -1069,26 +1124,70 @@ const verticalHeaders = [
                                               const categoryB = (chest.category || "").trim().toLowerCase();
                                               const sourceA = (m.source || m.Source || "").trim().toLowerCase();
                                               const sourceB = (chest.Source || "").trim().toLowerCase();
+                                              // Level-Matching tolerant: Zahl/String und Range akzeptieren
                                               const chestLevel = Number(chest.level ?? chest.Level ?? 0);
-                                              let levelStart = m.levelStart !== undefined ? parseInt(m.levelStart) : (m.level !== undefined ? parseInt(m.level) : (m.Level !== undefined ? parseInt(m.Level) : 0));
-                                              let levelEnd = m.levelEnd !== undefined ? parseInt(m.levelEnd) : (m.level !== undefined ? parseInt(m.level) : (m.Level !== undefined ? parseInt(m.Level) : 0));
+                                              // Akzeptiere auch levelStart/levelEnd als Fallback für level
+                                              let levelStart = m.levelStart !== undefined ? Number(m.levelStart) : (m.level !== undefined ? Number(m.level) : (m.Level !== undefined ? Number(m.Level) : 0));
+                                              if (levelStart === 0 && m.level !== undefined) levelStart = Number(m.level);
+                                              if (levelStart === 0 && m.Level !== undefined) levelStart = Number(m.Level);
+                                              let levelEnd = m.levelEnd !== undefined ? Number(m.levelEnd) : (m.level !== undefined ? Number(m.level) : (m.Level !== undefined ? Number(m.Level) : 0));
+                                              if (levelEnd === 0 && m.level !== undefined) levelEnd = Number(m.level);
+                                              if (levelEnd === 0 && m.Level !== undefined) levelEnd = Number(m.Level);
                                               if (isNaN(levelStart)) levelStart = 0;
                                               if (isNaN(levelEnd)) levelEnd = levelStart;
                                               // Toleranter Vergleich: Name, Kategorie, Typ, Source dürfen auch Teilstrings sein
                                               const nameMatch = !nameA || nameA === nameB || nameB.includes(nameA) || nameA.includes(nameB);
-                                              const catMatch = !categoryA || categoryA === categoryB || categoryB.includes(categoryA) || categoryA.includes(categoryB);
+                                              // Kategorie-Matching: Citadel <-> Elven/Cursed Chests akzeptieren
+                                              const catMatch = !categoryA || categoryA === categoryB || categoryB.includes(categoryA) || categoryA.includes(categoryB)
+                                                || (["elven chests", "cursed chests"].includes(categoryB) && categoryA === "citadel")
+                                                || (["elven chests", "cursed chests"].includes(categoryA) && categoryB === "citadel");
                                               const typeMatch = !typeA || typeA === typeB || typeB.includes(typeA) || typeA.includes(typeB);
-                                              const sourceMatch = !sourceA || sourceA === sourceB || sourceB.includes(sourceA) || sourceA.includes(sourceB);
+                                              // Source-Matching: akzeptiere auch Teilstrings (z.B. 'Level 20 Citadel' matched 'Citadel')
+                                              const sourceMatch = !sourceA || !sourceB || sourceA === sourceB || sourceB.includes(sourceA) || sourceA.includes(sourceB);
+                                              const levelMatch = chestLevel >= levelStart && chestLevel <= levelEnd;
+                                              debugInfo = {
+                                                chest,
+                                                mapping: m,
+                                                nameA, nameB, nameMatch,
+                                                categoryA, categoryB, catMatch,
+                                                typeA, typeB, typeMatch,
+                                                sourceA, sourceB, sourceMatch,
+                                                chestLevel, levelStart, levelEnd, levelMatch
+                                              };
                                               return (
                                                 nameMatch &&
                                                 catMatch &&
                                                 typeMatch &&
                                                 sourceMatch &&
-                                                chestLevel >= levelStart && chestLevel <= levelEnd
+                                                levelMatch
                                               );
                                             });
-                                            if (mapping && mapping.points !== undefined) {
+                                            if (!mapping) {
+                                              // Kompaktes Debug-Log: pro Kategorie nur den ersten fehlgeschlagenen Mapping-Versuch loggen
+                                              if (!window.__chestDebugged) window.__chestDebugged = {};
+                                              const chestKey = ((chest.Name||"") + "|" + (chest.category||"Unbekannt")).toLowerCase();
+                                              if (!window.__chestDebugged[chestKey]) {
+                                                window.__chestDebugged[chestKey] = true;
+                                                // eslint-disable-next-line no-console
+                                                console.warn('[DEBUG][Punkte-Mapping] Chest:',
+                                                  (chest.Name||"-") + " | " + (chest.category||"-") + " | " + (chest.Type||"-") + " | " + (chest.Source||"-") + " | " + (chest.level ?? chest.Level ?? "-")
+                                                );
+                                                // Detailliertes Level-Debug
+                                                console.warn('[DEBUG][Level-Mapping] Kein Mapping gefunden:', {
+                                                  chestLevel: chest.level ?? chest.Level,
+                                                  mappingLevel: debugInfo.levelStart,
+                                                  mappingLevelEnd: debugInfo.levelEnd,
+                                                  chestLevelType: typeof (chest.level ?? chest.Level),
+                                                  mappingLevelType: typeof debugInfo.levelStart,
+                                                  mappingLevelEndType: typeof debugInfo.levelEnd,
+                                                  chest,
+                                                  mappingTried: debugInfo.mapping
+                                                });
+                                              }
+                                            } else if (mapping && mapping.points !== undefined) {
                                               points = Number(mapping.points);
+                                              // eslint-disable-next-line no-console
+                                              console.info('[DEBUG][Punkte-Mapping] Mapping gefunden:', { chest, mapping });
                                             }
                                           }
                                           points = Number(points) || 0;
