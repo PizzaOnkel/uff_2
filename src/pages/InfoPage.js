@@ -37,7 +37,7 @@ export default function InfoPage({ t, setCurrentPage }) {
         <p className="text-right text-blue-300 font-medium">{t.signature}</p>
       </div>
       {/* Audio-Player für Infoseite */}
-      <audio ref={audioRef} src="/info-audio.mp3" loop autoPlay />
+      <audio ref={audioRef} src={process.env.PUBLIC_URL + "/info-audio.mp3"} loop autoPlay />
 
       <button
         onClick={() => setCurrentPage("navigation")}
