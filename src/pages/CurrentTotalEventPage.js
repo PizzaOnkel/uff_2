@@ -856,8 +856,24 @@ const verticalHeaders = [
               </div>
               <div className="w-full bg-gray-700 rounded h-6 overflow-hidden">
                 <div
-                  className={`h-6 ${totalSoll > 0 && (totalIst / totalSoll) >= 1 ? 'bg-green-500' : 'bg-blue-500'}`}
-                  style={{ width: `${totalSoll > 0 ? Math.min(200, (totalIst / totalSoll) * 100) : 0}%` }}
+                  className="h-6"
+                  style={{
+                    width: `${totalSoll > 0 ? Math.min(200, (totalIst / totalSoll) * 100) : 0}%`,
+                    background: (() => {
+                      const percent = totalSoll > 0 ? (totalIst / totalSoll) * 100 : 0;
+                      if (percent >= 100) return '#22c55e'; // grün
+                      if (percent >= 90) return 'linear-gradient(90deg, #22c55e 0%, #16e0bd 100%)'; // grün-türkis
+                      if (percent >= 80) return 'linear-gradient(90deg, #16e0bd 0%, #22d3ee 100%)'; // türkis-blau
+                      if (percent >= 70) return 'linear-gradient(90deg, #22d3ee 0%, #3b82f6 100%)'; // blau
+                      if (percent >= 60) return 'linear-gradient(90deg, #3b82f6 0%, #a21caf 100%)'; // blau-lila
+                      if (percent >= 50) return 'linear-gradient(90deg, #a21caf 0%, #f472b6 100%)'; // lila-pink
+                      if (percent >= 40) return 'linear-gradient(90deg, #f472b6 0%, #fbbf24 100%)'; // pink-gelb
+                      if (percent >= 30) return 'linear-gradient(90deg, #fbbf24 0%, #f59e42 100%)'; // gelb-orange
+                      if (percent >= 20) return 'linear-gradient(90deg, #f59e42 0%, #ef4444 100%)'; // orange-rot
+                      if (percent >= 10) return 'linear-gradient(90deg, #ef4444 0%, #991b1b 100%)'; // rot-dunkelrot
+                      return '#991b1b'; // dunkelrot
+                    })()
+                  }}
                 />
               </div>
         <div className="mt-2 text-center" style={{ color: '#ff6666', fontWeight: 500, fontSize: '1.1em' }}>
