@@ -3,19 +3,20 @@ import React, { useEffect, useState } from "react";
 import StickyBackButton from '../components/StickyBackButton';
 import { ROUTES } from "../routes";
 import { getChestPoints, isIgnoredChest, fallbackCategory, fallbackLevel } from "../utils/logicZentrale";
+import { mapToMainName } from "../utils/aliasMapping";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { Doughnut } from "react-chartjs-2";
 import "./TopTen.css";
 
 const normCategories = [
-  { min: 0, max: 25, label: "0% - 25%", color: "#ef4444", icon: "❌" },
-  { min: 26, max: 50, label: "26% - 50%", color: "#f59e42", icon: "🟠" },
-  { min: 51, max: 75, label: "51% - 75%", color: "#fbbf24", icon: "🟡" },
-  { min: 76, max: 90, label: "76% - 90%", color: "#22d3ee", icon: "🟦" },
-  { min: 91, max: 100, label: "91% - 100%", color: "#22c55e", icon: "✅" },
-  { min: 101, max: 200, label: "101% - 200%", color: "#a21caf", icon: "💯" },
-  { min: 201, max: 10000, label: "> 200%", color: "#f472b6", icon: "🚀" },
+  { min: 0,   max: 25,   label: "0% - 25%",    color: "#ef4444", icon: "❌" },
+  { min: 26,  max: 50,   label: "26% - 50%",   color: "#f59e42", icon: "🟠" },
+  { min: 51,  max: 75,   label: "51% - 75%",   color: "#fbbf24", icon: "🟡" },
+  { min: 76,  max: 90,   label: "76% - 90%",   color: "#22d3ee", icon: "🟦" },
+  { min: 91,  max: 100,  label: "91% - 100%",  color: "#22c55e", icon: "✅" },
+  { min: 101, max: 200,  label: "101% - 200%", color: "#a21caf", icon: "💯" },
+  { min: 201, max: 10000,label: "> 200%",      color: "#f472b6", icon: "🚀" },
 ];
 
 export default function StandardsEvaluationPage({ t, setCurrentPage }) {
@@ -26,19 +27,22 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
   const [categorizedPlayers, setCategorizedPlayers] = useState([]);
 
   useEffect(() => {
+
     const fetchData = async () => {
       setLoading(true);
-      // Spieler, Normen, Ergebnisse, ChestMappings, Ignore-Liste laden
-      const [playersSnap, normsSnap, resultsSnap, chestMappingsSnap] = await Promise.all([
+      // Spieler, Normen, Ergebnisse, ChestMappings, Perioden, Ignore-Liste laden
+      const [playersSnap, normsSnap, resultsSnap, chestMappingsSnap, periodsSnap] = await Promise.all([
         getDocs(collection(db, "players")),
         getDocs(collection(db, "norms")),
         getDocs(collection(db, "results")),
         getDocs(collection(db, "chestMappings")),
+        getDocs(collection(db, "periods")),
       ]);
       const playersArr = playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const normsArr = normsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const resultsArr = resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const chestMappings = chestMappingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) || [];
+      const periodsArr = periodsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
       // Ignore-Liste laden (aus public/json-data/chest_mapping_ignore.csv)
       let ignoreChests = [];
@@ -53,15 +57,26 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
         }
       } catch (e) {}
 
-      // Aktuelle Veranstaltungsperiode bestimmen (letztes Ergebnis mit periodId)
-      let aktuellePeriode = null;
-      const periodIds = resultsArr.map(r => r.periodId).filter(Boolean);
-      if (periodIds.length > 0) {
-        aktuellePeriode = periodIds.sort().reverse()[0];
+      // Aktuelle Veranstaltungsperiode bestimmen wie in CurrentTotalEventPage.js
+      let now = new Date();
+      let currentPeriod = null;
+      let currentPeriodId = null;
+      // Finde die Periode, die aktuell ist (start <= jetzt && (end >= jetzt || end leer))
+      for (const p of periodsArr) {
+        if (p.start && new Date(p.start) <= now && (!p.end || new Date(p.end) >= now)) {
+          currentPeriod = p;
+          currentPeriodId = p.id;
+          break;
+        }
+      }
+      // Fallback: falls keine laufende Periode, nimm die mit dem neuesten start
+      if (!currentPeriod && periodsArr.length > 0) {
+        currentPeriod = periodsArr.reduce((a, b) => (!a.start || (b.start && new Date(b.start) > new Date(a.start))) ? b : a);
+        currentPeriodId = currentPeriod.id;
       }
       // Nur Ergebnisse der aktuellen Periode berücksichtigen
-      const filteredResults = aktuellePeriode
-        ? resultsArr.filter(r => r.periodId === aktuellePeriode)
+      const filteredResults = currentPeriodId
+        ? resultsArr.filter(r => r.periodId === currentPeriodId)
         : resultsArr;
 
       // Hilfsfunktionen wie in CurrentTotalEventPage.js
@@ -103,59 +118,43 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
         return ignored;
       }
 
-      // Aggregation und Normerfüllung wie in CurrentTotalEventPage.js
-      const playerMap = new Map();
-      filteredResults.forEach(result => {
-        const playerNameRaw = result.Clanmate;
-        const playerName = playersArr.find(p => p.name === playerNameRaw || (Array.isArray(p.aliases) && p.aliases.includes(playerNameRaw)))?.name || playerNameRaw;
-        const player = playersArr.find(p => p.name === playerNameRaw || (Array.isArray(p.aliases) && p.aliases.includes(playerNameRaw)));
-        let troopStrength = player?.troopStrength || result.troopStrength || '';
-        if (!troopStrength || troopStrength.trim() === '') {
-          troopStrength = 'nicht definiert';
-        }
-        const normPoints = getNormPoints(troopStrength);
-
-        // Mapping-Logik für Chests wie in CurrentTotalEventPage.js
-        const mappedChests = Array.isArray(result.chests)
-          ? result.chests.map(chest => {
-              if (!chest.category && chest.Type) chest.category = chest.Type;
-              let points = getChestPoints(chest, chestMappings || []);
-              // Fallback: Wenn kein Mapping gefunden, Standardwert 1 Punkt
-              if (!points || points === 0) points = 1;
-              return {
-                ...chest,
-                count: chest.count || 1,
-                points
-              };
-            })
-          : [];
-        // Filtere ignorierte Truhen raus (außer Arena)
-        const filteredChests = mappedChests.filter(chest => !isIgnoredChest(chest));
-        const ist = filteredChests.reduce((sum, chest) => sum + (chest.points || 0), 0);
-
-        if (playerMap.has(playerName)) {
-          const entry = playerMap.get(playerName);
-          entry.ist += ist;
-        } else {
-          playerMap.set(playerName, {
-            name: playerName,
-            troopStrength,
-            ist,
-            soll: normPoints,
-            normErfuellung: 0,
-          });
-        }
+      // Zentrale Normberechnung wie in CurrentTotalEventPage.js
+      const { calculatePlayerNorms } = await import("../utils/logicZentrale");
+      const playerNormData = calculatePlayerNorms({
+        playersArr,
+        resultsArr,
+        chestMappings,
+        normsArr,
+        ignoreChests,
+        periodsArr,
+        currentPeriodId
       });
-
-      // Normerfüllung berechnen
-      playerMap.forEach(entry => {
-        entry.normErfuellung = entry.soll > 0 ? Math.round((entry.ist / entry.soll) * 100) : 0;
+      // Nur eindeutige Hauptnamen zulassen (wie in CurrentTotalEventPage.js)
+      const seenMainNames = new Set();
+      const uniquePlayers = playerNormData.filter(player => {
+        if (seenMainNames.has(player.name)) return false;
+        seenMainNames.add(player.name);
+        return true;
       });
-      const playerNormData = Array.from(playerMap.values());
-      // Spieler in Kategorien einteilen
+      // Spieler in exakt abgegrenzte Kategorien einteilen (keine Überschneidungen)
       const categorized = normCategories.map(cat => ({ ...cat, players: [] }));
-      playerNormData.forEach(player => {
-        const cat = categorized.find(c => player.normErfuellung >= c.min && player.normErfuellung <= c.max);
+      uniquePlayers.forEach(player => {
+        let cat = null;
+        for (let i = 0; i < categorized.length; i++) {
+          const c = categorized[i];
+          if (i === 0 && player.normErfuellung >= c.min && player.normErfuellung <= c.max) {
+            cat = c;
+            break;
+          }
+          else if (i > 0 && i < categorized.length - 1 && player.normErfuellung >= c.min && player.normErfuellung <= c.max) {
+            cat = c;
+            break;
+          }
+          else if (i === categorized.length - 1 && player.normErfuellung > categorized[i].min) {
+            cat = c;
+            break;
+          }
+        }
         if (cat) cat.players.push(player);
       });
       // Sortiere Spieler in jeder Kategorie nach Normerfüllung absteigend
