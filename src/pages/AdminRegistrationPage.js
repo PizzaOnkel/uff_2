@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import StickyBackButton from "../components/StickyBackButton";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
 import { collection, addDoc, getDocs } from "firebase/firestore";
@@ -6,6 +7,7 @@ import { debugAdminRegistration } from "../firebase-test";
 import { sendAdminRequestEmail } from "../utils/emailService";
 
 export default function AdminRegistrationPage({ t, setCurrentPage }) {
+  const [currentCategoryIdx] = useState(0); // Dummy für On Top Button, falls benötigt
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -158,7 +160,20 @@ export default function AdminRegistrationPage({ t, setCurrentPage }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-4" style={{position:'relative'}}>
+      {/* Fixierte Buttons rechts mittig */}
+      <div style={{position:'fixed', right:'24px', top:'50%', transform:'translateY(-50%)', zIndex:1000, width:'200px', display:'flex', flexDirection:'column', alignItems:'center', pointerEvents:'auto'}}>
+        <div style={{width:'100%'}}>
+          <StickyBackButton onClick={() => setCurrentPage(ROUTES.NAVIGATION)} label={t?.backToNavigation || 'Zurück'} style={{width:'100px'}} />
+        </div>
+        <div style={{width:'100%'}}>
+          <StickyBackButton
+            onClick={() => window.scrollTo({top:0, behavior:'smooth'})}
+            label={"On Top"}
+            style={{ background: '#1976d2', width:'100px', marginTop:'34px' }}
+          />
+        </div>
+      </div>
       <div className="bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md">
         <h2 className="text-3xl font-bold mb-6 text-center text-green-400">
           Administrator-Registrierung
@@ -326,14 +341,7 @@ export default function AdminRegistrationPage({ t, setCurrentPage }) {
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <button
-            onClick={() => setCurrentPage(ROUTES.NAVIGATION)}
-            className="text-green-400 hover:text-green-300 text-sm underline"
-          >
-            Zurück zur Navigation
-          </button>
-        </div>
+        {/* Der alte Zurück-Link wurde entfernt, StickyBackButton übernimmt die Navigation */}
       </div>
       
       <footer className="mt-8 text-gray-500 text-sm">{t.copyright}</footer>

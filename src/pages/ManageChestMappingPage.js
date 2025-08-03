@@ -416,8 +416,20 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white p-4 pb-8">
-      <StickyBackButton onClick={() => setCurrentPage(ROUTES.ADMIN_PANEL)} label={t?.backToAdminPanel || "Zurück"} />
+    <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white p-4 pb-8" style={{position:'relative'}}>
+      {/* Fixierte Buttons rechts mittig */}
+      <div style={{position:'fixed', right:'24px', top:'50%', transform:'translateY(-50%)', zIndex:1000, width:'200px', display:'flex', flexDirection:'column', alignItems:'center', pointerEvents:'auto'}}>
+        <div style={{width:'100%'}}>
+          <StickyBackButton onClick={() => setCurrentPage(ROUTES.ADMIN_PANEL)} label={t?.backToAdminPanel || 'Zurück'} style={{width:'100px'}} />
+        </div>
+        <div style={{width:'100%'}}>
+          <StickyBackButton
+            onClick={() => window.scrollTo({top:0, behavior:'smooth'})}
+            label={"On Top"}
+            style={{ background: '#1976d2', width:'100px', marginTop:'34px' }}
+          />
+        </div>
+      </div>
       {/* Button für Vorschlagsliste */}
       <div className="w-full max-w-4xl flex flex-row gap-4 mb-4">
         <button onClick={() => setShowSuggestions(v => !v)} className="px-4 py-2 bg-yellow-700 rounded text-white font-semibold hover:bg-yellow-800 transition">{showSuggestions ? 'Vorschlagsliste ausblenden' : 'Vorschlagsliste anzeigen'}</button>

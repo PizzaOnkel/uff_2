@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import StickyBackButton from "../components/StickyBackButton";
 import { ROUTES } from "../routes";
 import { sendContactEmail } from "../utils/emailService";
 
 export default function ContactFormPage({ t, setCurrentPage }) {
+  const [currentCategoryIdx] = useState(0); // Dummy für On Top Button, falls benötigt
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -46,7 +48,20 @@ export default function ContactFormPage({ t, setCurrentPage }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white p-4 pb-8">
+    <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white p-4 pb-8" style={{position:'relative'}}>
+      {/* Fixierte Buttons rechts mittig */}
+      <div style={{position:'fixed', right:'24px', top:'50%', transform:'translateY(-50%)', zIndex:1000, width:'200px', display:'flex', flexDirection:'column', alignItems:'center', pointerEvents:'auto'}}>
+        <div style={{width:'100%'}}>
+          <StickyBackButton onClick={() => setCurrentPage(ROUTES.NAVIGATION)} label={t?.backToNavigation || 'Zurück'} style={{width:'100px'}} />
+        </div>
+        <div style={{width:'100%'}}>
+          <StickyBackButton
+            onClick={() => window.scrollTo({top:0, behavior:'smooth'})}
+            label={"On Top"}
+            style={{ background: '#1976d2', width:'100px', marginTop:'34px' }}
+          />
+        </div>
+      </div>
       <h2 className="text-4xl font-bold mb-6 text-center text-orange-400">{t.contactFormTitle}</h2>
       <form onSubmit={handleSubmit} className="w-full max-w-xl bg-gray-800 rounded-lg p-6 mb-8 shadow-lg">
         <label className="block mb-2 font-semibold">Name</label>
@@ -98,12 +113,7 @@ export default function ContactFormPage({ t, setCurrentPage }) {
           </p>
         )}
       </form>
-      <button
-        onClick={() => setCurrentPage(ROUTES.NAVIGATION)}
-        className="mt-8 text-orange-300 underline"
-      >
-        {t.backToNavigation}
-      </button>
+      {/* Der alte Zurück-Link wurde entfernt, StickyBackButton übernimmt die Navigation */}
       <footer className="mt-auto text-gray-500 text-sm">{t.copyright}</footer>
     </div>
   );

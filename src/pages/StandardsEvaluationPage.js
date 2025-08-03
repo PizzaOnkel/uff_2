@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+import StickyBackButton from '../components/StickyBackButton';
 import { ROUTES } from "../routes";
 import { getChestPoints, isIgnoredChest, fallbackCategory, fallbackLevel } from "../utils/logicZentrale";
 import { db } from "../firebase";
@@ -184,19 +185,19 @@ export default function StandardsEvaluationPage({ t, setCurrentPage }) {
 
   return (
     <div className="top-ten-container flex flex-col items-center min-h-screen pb-8 relative">
-      {/* Zurück-Button oben links */}
-      <button
-        onClick={() => setCurrentPage(ROUTES.NAVIGATION)}
-        className="absolute top-4 left-4 px-3 py-2 bg-gradient-to-r from-blue-500 to-cyan-600 text-white text-base font-medium rounded-lg shadow-md hover:from-blue-600 hover:to-cyan-700 transition-all duration-200 z-20 flex items-center"
-        style={{ minWidth: 0, minHeight: 0 }}
-        title="Zurück zur Navigation"
-      >
-        <svg className="mr-2 w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-          <line x1="19" y1="12" x2="5" y2="12" />
-          <polyline points="12 19 5 12 12 5" />
-        </svg>
-        {t.backToAdminPanel}
-      </button>
+      {/* Fixierte Buttons rechts mittig */}
+      <div style={{position:'fixed', right:'24px', top:'50%', transform:'translateY(-50%)', zIndex:1000, width:'200px', display:'flex', flexDirection:'column', alignItems:'center', pointerEvents:'auto'}}>
+        <div style={{width:'100%'}}>
+          <StickyBackButton onClick={() => setCurrentPage(ROUTES.NAVIGATION)} label={t?.backToNavigation || 'Zurück'} style={{width:'100px'}} />
+        </div>
+        <div style={{width:'100%'}}>
+          <StickyBackButton
+            onClick={() => window.scrollTo({top:0, behavior:'smooth'})}
+            label={"On Top"}
+            style={{ background: '#1976d2', width:'100px', marginTop:'34px' }}
+          />
+        </div>
+      </div>
 
       <div className="top-ten-header">
         <span className="crown-icon">🏆</span>

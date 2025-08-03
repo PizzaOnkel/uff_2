@@ -1,5 +1,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
+import StickyBackButton from "../components/StickyBackButton";
 import Papa from "papaparse";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
@@ -522,15 +523,18 @@ export default function EventArchivePage({ t, setCurrentPage }) {
   return (
     <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white p-4 pb-32">
       {/* ...TopTen-Liste entfernt... */}
-      {/* Zurück-Button ganz oben */}
-      <div className="w-full flex justify-start mb-4">
-        <button
-          onClick={() => setCurrentPage(ROUTES.NAVIGATION)}
-          className="px-6 py-2 bg-blue-600 rounded text-white font-semibold text-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transition"
-          style={{ minWidth: 120 }}
-        >
-          &larr; Zurück
-        </button>
+      {/* Fixierter Zurück-Button rechts mittig */}
+      <div style={{position:'fixed', right:'24px', top:'50%', transform:'translateY(200%)', zIndex:1000, width:'200px', display:'flex', flexDirection:'column', alignItems:'center', pointerEvents:'auto'}}>
+        <div style={{width:'100%'}}>
+          <StickyBackButton onClick={() => setCurrentPage(ROUTES.NAVIGATION)} label={t?.backToNavigation || "Zurück"} style={{width:'100px'}} />
+        </div>
+        <div style={{width:'100%'}}>
+          <StickyBackButton
+            onClick={() => window.scrollTo({top:0, behavior:'smooth'})}
+            label={"On Top"}
+            style={{ background: '#1976d2', width:'100px', marginTop:'34px' }}
+          />
+        </div>
       </div>
       {/* Dropdown für Eventperiode */}
       <div className="mb-4 w-full max-w-2xl flex flex-col items-center">
@@ -845,16 +849,7 @@ export default function EventArchivePage({ t, setCurrentPage }) {
           </div>
         </>
       )}
-      {/* Zurück-Button ganz unten als echter Button */}
-      <div className="w-full flex justify-start mt-8 mb-2">
-        <button
-          onClick={() => setCurrentPage(ROUTES.NAVIGATION)}
-          className="px-6 py-2 bg-blue-600 rounded text-white font-semibold text-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transition"
-          style={{ minWidth: 120 }}
-        >
-          &larr; Zurück
-        </button>
-      </div>
+
       {selectedPlayer && renderPlayerModal(selectedPlayer)}
       <footer className="mt-auto text-gray-500 text-sm">{t?.copyright}</footer>
     </div>

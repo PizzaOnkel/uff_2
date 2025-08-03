@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import StickyBackButton from '../components/StickyBackButton';
 import { mapToMainName } from '../utils/aliasMapping';
 import { getChestPoints, isIgnoredChest, fallbackCategory, fallbackLevel } from '../utils/logicZentrale';
 import { translations } from '../translations/translations';
@@ -15,13 +16,15 @@ const TopTen = ({ t, setCurrentPage }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [players, setPlayers] = useState([]); // Spieler für Alias-Mapping
-  // Startseite zeigt Gesamtsumme aller Kategorien
   const [selectedCategory, setSelectedCategory] = useState('ALL_CATEGORIES');
   const [topPlayers, setTopPlayers] = useState([]);
 
+  // ChestMappings für Punkteberechnung
+  const [chestMappings, setChestMappings] = useState([]);
+
   const headerStyle = { fontSize: '2.2em', fontWeight: 'bold', color: '#ff3b3b', marginBottom: '12px', letterSpacing: '2px' };
 
-  // Spieler laden (für Alias-Mapping)
+  // Spieler und ChestMappings laden (für Alias-Mapping und ggf. Punkte)
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
@@ -33,6 +36,17 @@ const TopTen = ({ t, setCurrentPage }) => {
       }
     };
     fetchPlayers();
+    // ChestMappings laden
+    const fetchChestMappings = async () => {
+      try {
+        const chestMappingsSnap = await getDocs(collection(db, "chestMappings"));
+        const mappings = chestMappingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setChestMappings(mappings);
+      } catch (e) {
+        setChestMappings([]);
+      }
+    };
+    fetchChestMappings();
   }, []);
 
   useEffect(() => {
@@ -289,45 +303,22 @@ const TopTen = ({ t, setCurrentPage }) => {
   }
 
   return (
-    <div className="top-ten-container">
+    <div className="top-ten-container" style={{ minHeight: '100vh', position: 'relative' }}>
+      {/* Fixierte Buttons rechts mittig */}
+      <div style={{position:'fixed', right:'24px', top:'50%', transform:'translateY(-50%)', zIndex:1000, width:'200px', display:'flex', flexDirection:'column', alignItems:'center', pointerEvents:'auto'}}>
+        <div style={{width:'100%'}}>
+          <StickyBackButton onClick={() => setCurrentPage(ROUTES.NAVIGATION)} label={t?.backToNavigation || 'Zurück'} style={{width:'100px'}} />
+        </div>
+        <div style={{width:'100%'}}>
+          <StickyBackButton
+            onClick={() => window.scrollTo({top:0, behavior:'smooth'})}
+            label={"On Top"}
+            style={{ background: '#1976d2', width:'100px', marginTop:'34px' }}
+          />
+        </div>
+      </div>
       <div style={headerStyle}></div>
       <div className="top-ten-header">
-        <button
-          onClick={() => setCurrentPage(ROUTES.NAVIGATION)}
-          className="back-button"
-          style={{
-            position: 'absolute',
-            top: '20px',
-            left: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '12px 20px',
-            background: 'linear-gradient(135deg, #1F2937 0%, #374151 100%)',
-            color: '#F9FAFB',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            zIndex: 10
-          }}
-          onMouseOver={(e) => {
-            e.target.style.background = 'linear-gradient(135deg, #374151 0%, #4B5563 100%)';
-            e.target.style.transform = 'translateY(-2px)';
-          }}
-          onMouseOut={(e) => {
-            e.target.style.background = 'linear-gradient(135deg, #1F2937 0%, #374151 100%)';
-            e.target.style.transform = 'translateY(0)';
-          }}
-        >
-          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-          </svg>
-          {t.backToNavigation || 'Zurück zur Navigation'}
-        </button>
         <h1 className="top-ten-title">
           <span className="crown-icon">👑</span>
           {t.topTenTitle}

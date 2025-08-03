@@ -1,3 +1,31 @@
+// Punkte-Mapping für Epic Chests (analog Rare Chests, aber Ancient Squad ausgeschlossen)
+export function getEpicChestPoints(chest, chestMappings) {
+  if (!chestMappings || chestMappings.length === 0) return 0;
+  const levelStr = String(chest.level ?? chest.Level ?? '').trim();
+  const typeLower = (chest.Type || '').toLowerCase();
+  const nameLower = (chest.Name || '').toLowerCase();
+  const categoryLower = (chest.category || '').toLowerCase();
+  // Epic Ancient squad explizit ausschließen
+  if (typeLower.includes('ancient squad') || nameLower.includes('ancient squad') || categoryLower.includes('ancient squad')) return 0;
+  const mapping = chestMappings.find(m => {
+    const mType = (m.type || m.Type || '').trim().toLowerCase();
+    const mName = (m.chestName || m.Name || '').trim().toLowerCase();
+    const mCategory = (m.category || '').trim().toLowerCase();
+    const mLevel = String(m.level || m.levelStart || m.Level || '').trim();
+    // Enthält Typ, Name oder Kategorie sowohl 'epic' als auch ('crypt' oder 'undead')?
+    const isEpic = (mType + mName + mCategory).includes('epic');
+    const isCryptOrUndead = (mType + mName + mCategory).includes('crypt') || (mType + mName + mCategory).includes('undead');
+    // Level-Vergleich tolerant (String/Number)
+    const levelMatch = mLevel === levelStr || Number(mLevel) === Number(levelStr);
+    // Epic Ancient squad explizit ausschließen
+    const isAncientSquad = (mType + mName + mCategory).includes('ancient squad');
+    return isEpic && isCryptOrUndead && levelMatch && !isAncientSquad;
+  });
+  if (mapping && mapping.points !== undefined) {
+    return Number(mapping.points);
+  }
+  return 0;
+}
 // Zentrale Utility für Chest-Mapping, Filter und Punkteberechnung
 // Hier werden alle Kernfunktionen gekapselt, die in mehreren Seiten benötigt werden
 
@@ -7,7 +35,8 @@ export function fallbackCategory(chest) {
   const type = (chest.Type || '').toLowerCase();
   const source = (chest.Source || '').toLowerCase();
   if (name.includes('arena') || type.includes('arena') || source.includes('arena')) return 'Arena Total';
-  if (name.includes('orc') || type.includes('common crypt')) return 'Common Total';
+  // Tolerant: auch "common chest" (Singular/Plural) in Name oder Typ akzeptieren
+  if (type.includes('common crypt') || name.includes('common chest') || type.includes('common chest')) return 'Common Total';
   if (name.includes('rare dragon') || type.includes('rare crypt')) return 'Rare Total';
   // Spezialfälle zuerst!
   if (name.includes('elven citadel chest')) return 'Elven Total';

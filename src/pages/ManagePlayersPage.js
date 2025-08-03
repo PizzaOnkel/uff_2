@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import StickyBackButton from "../components/StickyBackButton";
+import { ROUTES } from "../routes";
 import { db } from "../firebase";
 import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { getDocs } from "firebase/firestore";
@@ -15,6 +17,7 @@ const rankOrder = [
 ];
 
 export default function ManagePlayersPage({ t, setCurrentPage }) {
+  const [currentCategoryIdx] = useState(0); // Dummy für On Top Button, falls benötigt
   // Fallback für t, falls nicht übergeben
   const translations = {
     managePlayersTitle: 'Spieler verwalten',
@@ -22,6 +25,29 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
   };
   t = t || translations;
   const [players, setPlayers] = useState([]);
+
+  // CSS für Markierung dynamisch einfügen (nur einmal)
+  React.useEffect(() => {
+    if (!document.getElementById('selected-player-link-style')) {
+      const style = document.createElement('style');
+      style.id = 'selected-player-link-style';
+      style.innerHTML = `
+        .selected-player-link {
+          outline: 3px solid #FFD700 !important;
+          box-shadow: 0 0 0 4px #fff70055 !important;
+          background: #b45309 !important;
+          transition: background 0.2s, outline 0.2s;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
+
+  // --- Suchfeld States ---
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchInputRef = React.useRef(null);
 
   const [missingClanmates, setMissingClanmates] = useState([]);
   const [ranks, setRanks] = useState([]);
@@ -40,6 +66,52 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
     rank: "",
     troopStrength: ""
   });
+
+  // --- Hilfsfunktion: unscharfe Suche ---
+  function fuzzyMatchPlayers(term) {
+    if (!term) return [];
+    const lower = term.toLowerCase();
+    const allNames = players.map(p => p.name);
+    // 1. Exakte Übereinstimmung
+    if (allNames.includes(term)) return [term];
+    // 2. Enthält oder unscharf
+    return allNames.filter(name => name.toLowerCase().includes(lower));
+  }
+
+  // --- Suche ausführen ---
+  function handleSearchSubmit(e) {
+    e.preventDefault();
+    if (!searchTerm) return;
+    const matches = fuzzyMatchPlayers(searchTerm);
+    if (matches.length === 1) {
+      scrollToPlayer(matches[0]);
+      setShowDropdown(false);
+    } else if (matches.length > 1) {
+      setSearchResults(matches);
+      setShowDropdown(true);
+    } else {
+      setSearchResults([]);
+      setShowDropdown(false);
+    }
+  }
+
+  // --- Zu Spieler scrollen ---
+  function scrollToPlayer(playerName) {
+    setShowDropdown(false);
+    setSearchTerm("");
+    setTimeout(() => {
+      const el = document.querySelector(`[data-player-name="${playerName}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('highlight-podium');
+        el.classList.add('selected-player-link');
+        setTimeout(() => {
+          el.classList.remove('highlight-podium');
+          el.classList.remove('selected-player-link');
+        }, 2000);
+      }
+    }, 250);
+  }
 
   // Spieler laden und sortieren
   useEffect(() => {
@@ -220,14 +292,43 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-900 text-white p-4 pb-8 relative">
-      <div className="w-full flex justify-end mb-4">
-        <button
-          onClick={() => setCurrentPage("adminPanel")}
-          className="px-4 py-2 bg-blue-800 text-white rounded shadow hover:bg-blue-900 z-10"
-        >
-          Zurück zum Admin-Panel
-        </button>
+      {/* Fixierte Buttons rechts mittig */}
+      <div style={{position:'fixed', right:'24px', top:'50%', transform:'translateY(-50%)', zIndex:1000, width:'200px', display:'flex', flexDirection:'column', alignItems:'center', pointerEvents:'auto'}}>
+        <div style={{width:'100%'}}>
+          <StickyBackButton onClick={() => setCurrentPage("adminPanel")} label={t?.backToNavigation || 'Zurück'} style={{width:'100px'}} />
+        </div>
+        <div style={{width:'100%'}}>
+          <StickyBackButton
+            onClick={() => window.scrollTo({top:0, behavior:'smooth'})}
+            label={"On Top"}
+            style={{ background: '#1976d2', width:'100px', marginTop:'34px' }}
+          />
+        </div>
+        {/* Suchfeld für Spieler */}
+        <div style={{ height: 155 }} />
+        <form onSubmit={handleSearchSubmit} style={{width:'100%', marginTop: 0, display:'flex', flexDirection:'column', alignItems:'center'}} autoComplete="off">
+          <input
+            ref={searchInputRef}
+            type="text"
+            placeholder="Spieler suchen..."
+            value={searchTerm}
+            onChange={e => { setSearchTerm(e.target.value); setShowDropdown(false); }}
+            style={{ width:'100%', padding:'8px', borderRadius:8, border:'1px solid #888', marginBottom: showDropdown ? 0 : 12, fontSize:16, background:'#222', color:'#fff' }}
+            onFocus={() => searchTerm && setShowDropdown(true)}
+          />
+          {showDropdown && searchResults.length > 0 && (
+            <div style={{width:'100%', background:'#222', border:'1px solid #888', borderRadius:8, maxHeight:180, overflowY:'auto', marginBottom:12, zIndex:2000}}>
+              {searchResults.map(name => (
+                <div key={name} style={{padding:'8px 12px', cursor:'pointer', color:'#FFD700'}}
+                  onClick={() => scrollToPlayer(name)}
+                  onMouseDown={e => e.preventDefault()}
+                >{name}</div>
+              ))}
+            </div>
+          )}
+        </form>
       </div>
+      {/* Button oben rechts entfernt */}
       <div className="flex w-full max-w-7xl mx-auto">
         {/* Fehlende Clanmates links */}
         {missingClanmates.length > 0 && (
@@ -245,139 +346,155 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
           <div className="mb-6 text-center text-lg text-gray-300 font-semibold">
             Anzahl Spieler in der Datenbank: <span className="text-yellow-300">{players.length}</span>
           </div>
-          <div className="mb-8 w-full max-w-xl">
-        <input
-          type="text"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          placeholder="Spielername"
-          className="mb-2 px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 w-full"
-        />
-        <input
-          type="text"
-          name="aliases"
-          value={form.aliases}
-          onChange={handleChange}
-          placeholder="Aliase (Komma getrennt)"
-          className="mb-2 px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 w-full"
-        />
-        <select
-          name="rank"
-          value={form.rank}
-          onChange={handleChange}
-          className="mb-2 px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 w-full"
-        >
-          <option value="">Rang auswählen</option>
-          {ranks.map(rank => (
-            <option key={rank} value={rank}>{rank}</option>
-          ))}
-        </select>
-        <select
-          name="troopStrength"
-          value={form.troopStrength}
-          onChange={handleChange}
-          className="mb-2 px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 w-full"
-        >
-          <option value="">Truppenstärke auswählen</option>
-          {troopStrengths.map(strength => (
-            <option key={strength.name} value={strength.name}>
-              {strength.name}
-            </option>
-          ))}
-        </select>
-        <button
-          onClick={handleAddPlayer}
-          className="px-6 py-2 bg-blue-600 rounded text-white font-semibold hover:bg-blue-700 transition w-full"
-        >
-          Spieler hinzufügen
-        </button>
-      </div>
+          <div className="mb-6 w-full max-w-xl flex flex-col gap-1">
+            <input
+              type="text"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              placeholder="Spielername"
+              className="mb-1 px-2 py-1 rounded bg-gray-800 text-white border border-gray-600 w-full text-sm"
+              style={{ minHeight: 28 }}
+            />
+            <input
+              type="text"
+              name="aliases"
+              value={form.aliases}
+              onChange={handleChange}
+              placeholder="Aliase (Komma getrennt)"
+              className="mb-1 px-2 py-1 rounded bg-gray-800 text-white border border-gray-600 w-full text-sm"
+              style={{ minHeight: 28 }}
+            />
           <ul className="w-full max-w-xl">
-        {players.map(player => (
-          <li key={player.id} className="flex flex-col bg-gray-800 rounded p-2 mb-2">
-            {editId === player.id ? (
-              <>
-                <input
-                  type="text"
-                  name="name"
-                  value={editForm.name}
-                  onChange={handleEditChange}
-                  className="mb-2 px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 w-full"
-                />
-                <input
-                  type="text"
-                  name="aliases"
-                  value={editForm.aliases}
-                  onChange={handleEditChange}
-                  className="mb-2 px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 w-full"
-                />
-                <select
-                  name="rank"
-                  value={editForm.rank}
-                  onChange={handleEditChange}
-                  className="mb-2 px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 w-full"
-                >
-                  <option value="">Rang auswählen</option>
-                  {ranks.map(rank => (
-                    <option key={rank} value={rank}>{rank}</option>
-                  ))}
-                </select>
-                <select
-                  name="troopStrength"
-                  value={editForm.troopStrength}
-                  onChange={handleEditChange}
-                  className="mb-2 px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 w-full"
-                >
-                  <option value="">Truppenstärke auswählen</option>
-                  {troopStrengths.map(strength => (
-                    <option key={strength.name} value={strength.name}>
-                      {strength.name}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={handleUpdatePlayer}
-                  className="px-4 py-2 bg-green-600 rounded text-white font-semibold hover:bg-green-700 transition mb-2"
-                >
-                  Änderungen speichern
-                </button>
-                <button
-                  onClick={() => setEditId(null)}
-                  className="px-4 py-2 bg-gray-600 rounded text-white font-semibold hover:bg-gray-700 transition"
-                >
-                  Abbrechen
-                </button>
-              </>
-            ) : (
-              <>
-                <span><b>Name:</b> {player.name}</span>
-                <span><b>Aliase:</b> {player.aliases && player.aliases.join(", ")}</span>
-                <span><b>Rang:</b> {player.rank}</span>
-                <span><b>Truppenstärke:</b> {player.troopStrength}</span>
-                <span><b>Normen:</b> Truhen: {player.norms?.chests}, Punkte: {player.norms?.points}</span>
-                <span><b>ID:</b> {player.id}</span>
-                <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={() => handleEditClick(player)}
-                    className="px-3 py-1 bg-yellow-600 rounded text-white hover:bg-yellow-700"
-                  >
-                    Spieler bearbeiten
-                  </button>
-                  <button
-                    onClick={() => handleDeletePlayer(player.id)}
-                    className="px-3 py-1 bg-red-600 rounded text-white hover:bg-red-700"
-                  >
-                    Spieler löschen
-                  </button>
-                </div>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
-      {/* Der untere Zurück-Button entfällt, da oben platziert */}
+            {players.map(player => (
+              <li key={player.id} data-player-name={player.name} className="flex flex-row items-center justify-between bg-gray-800 rounded px-2 py-1 mb-1 text-sm player-list-item">
+                {editId === player.id ? (
+                  <div className="w-full flex flex-col gap-1">
+                    {/* ...bestehende Edit-Inputs... */}
+                    <input
+                      type="text"
+                      name="name"
+                      value={editForm.name}
+                      onChange={handleEditChange}
+                      className="mb-1 px-2 py-1 rounded bg-gray-700 text-white border border-gray-600 w-full text-sm"
+                      style={{ minHeight: 24 }}
+                    />
+                    <input
+                      type="text"
+                      name="aliases"
+                      value={editForm.aliases}
+                      onChange={handleEditChange}
+                      className="mb-1 px-2 py-1 rounded bg-gray-700 text-white border border-gray-600 w-full text-sm"
+                      style={{ minHeight: 24 }}
+                    />
+                    <select
+                      name="rank"
+                      value={editForm.rank}
+                      onChange={handleEditChange}
+                      className="mb-1 px-2 py-1 rounded bg-gray-700 text-white border border-gray-600 w-full text-sm"
+                      style={{ minHeight: 24 }}
+                    >
+                      <option value="">Rang auswählen</option>
+                      {ranks.map(rank => (
+                        <option key={rank} value={rank}>{rank}</option>
+                      ))}
+                    </select>
+                    <select
+                      name="troopStrength"
+                      value={editForm.troopStrength}
+                      onChange={handleEditChange}
+                      className="mb-1 px-2 py-1 rounded bg-gray-700 text-white border border-gray-600 w-full text-sm"
+                      style={{ minHeight: 24 }}
+                    >
+                      <option value="">Truppenstärke auswählen</option>
+                      {troopStrengths.map(strength => (
+                        <option key={strength.name} value={strength.name}>
+                          {strength.name}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="flex gap-1 mt-1">
+                      <button
+                        onClick={handleUpdatePlayer}
+                        className="px-2 py-1 bg-green-600 rounded text-white font-semibold hover:bg-green-700 transition text-xs"
+                        style={{ minWidth: 0, minHeight: 24 }}
+                      >
+                        Speichern
+                      </button>
+                      <button
+                        onClick={() => setEditId(null)}
+                        className="px-2 py-1 bg-gray-600 rounded text-white font-semibold hover:bg-gray-700 transition text-xs"
+                        style={{ minWidth: 0, minHeight: 24 }}
+                      >
+                        Abbrechen
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <span
+                      style={{ cursor: 'pointer', fontWeight: 600, color: '#FFD700', fontSize: '1em' }}
+                      onClick={() => handleEditClick(player)}
+                      title="Zum Bearbeiten klicken"
+                    >
+                      {player.name}
+                    </span>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => handleEditClick(player)}
+                        className="px-2 py-1 bg-yellow-600 rounded text-white hover:bg-yellow-700 text-xs"
+                        style={{ minWidth: 0, minHeight: 24 }}
+                      >
+                        Bearbeiten
+                      </button>
+                      <button
+                        onClick={() => handleDeletePlayer(player.id)}
+                        className="px-2 py-1 bg-red-600 rounded text-white hover:bg-red-700 text-xs"
+                        style={{ minWidth: 0, minHeight: 24 }}
+                      >
+                        Löschen
+                      </button>
+                    </div>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
         </div>
+        {/* Feste Tabelle oben rechts für Spieler mit nicht definiertem Rang/Truppenstärke */}
+        {players.filter(p => (String(p.rank).toLowerCase().includes('nicht definiert') || String(p.troopStrength).toLowerCase().includes('nicht definiert'))).length > 0 && (
+          <div style={{position:'fixed', top:24, right:24, zIndex:2001, width:'340px', maxHeight:'60vh', overflowY:'auto', background:'#7f1d1d', color:'#fff', borderRadius:'12px', boxShadow:'0 2px 12px #0008', padding:'18px 16px 12px 16px', border:'2px solid #b91c1c'}}>
+            <div style={{fontWeight:'bold', marginBottom:8, color:'#fca5a5', fontSize:'1.1em'}}>Spieler mit "nicht definiert" in Rang/Truppenstärke:</div>
+            <table style={{width:'100%', fontSize:'0.98em'}}>
+              <thead>
+                <tr style={{color:'#f87171'}}>
+                  <th style={{textAlign:'left'}}>Name</th>
+                  <th style={{textAlign:'left'}}>Rang</th>
+                  <th style={{textAlign:'left'}}>Truppenstärke</th>
+                </tr>
+              </thead>
+              <tbody>
+                {players.filter(p => (String(p.rank).toLowerCase().includes('nicht definiert') || String(p.troopStrength).toLowerCase().includes('nicht definiert'))).map(p => (
+                  <tr key={p.id} style={{borderBottom:'1px solid #991b1b'}}>
+                    <td>
+                      <span
+                        style={{color:'#fff', textDecoration:'underline', cursor:'pointer', fontWeight:'bold'}}
+                        onClick={() => scrollToPlayer(p.name)}
+                        title="Zu diesem Spieler scrollen und markieren"
+                      >
+                        {p.name}
+                      </span>
+                    </td>
+                    <td>{p.rank || <span style={{fontStyle:'italic', color:'#bbb'}}>-</span>}</td>
+                    <td>{p.troopStrength || <span style={{fontStyle:'italic', color:'#bbb'}}>-</span>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {/* Ende flex-Container */}
+      </div>
       </div>
       <footer className="mt-auto text-gray-500 text-sm">{t.copyright}</footer>
     </div>

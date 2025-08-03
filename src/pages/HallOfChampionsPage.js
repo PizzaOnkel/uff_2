@@ -1,47 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
+import StickyBackButton from "../components/StickyBackButton";
 import { ROUTES } from "../routes";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { mapToMainName } from "../utils/aliasMapping";
-import { getChestPoints, isIgnoredChest, fallbackCategory, fallbackLevel } from "../utils/logicZentrale";
+import { fallbackCategory } from "../utils/logicZentrale";
 import "./TopTen.css";
-import StickyBackButton from "../components/StickyBackButton";
-
-// --- Tartaros-Logik aus CurrentTotalEventPage.js ---
-function tartarosLevelFromChest(chest) {
-  let tartarosMatch = (chest.Name||"").match(/tartaros crypt level (\d+)/i);
-  if (!tartarosMatch && chest.Type) {
-    tartarosMatch = (chest.Type||"").match(/tartaros crypt level (\d+)/i);
-  }
-  if (!tartarosMatch && chest.Source) {
-    tartarosMatch = (chest.Source||"").match(/tartaros crypt level (\d+)/i);
-  }
-  if (tartarosMatch) {
-    return Number(tartarosMatch[1]);
-  } else if ([15,20,25,30,35].includes(Number(chest.level ?? chest.Level))) {
-    return Number(chest.level ?? chest.Level);
-  } else {
-    return Number(chest.level ?? chest.Level ?? 0);
-  }
-}
-
-function isTartarosChest(chest) {
-  return (
-    (chest.category === "Chests of Tartaros") ||
-    (chest.Name||"").toLowerCase().includes("tartaros") ||
-    (chest.Type||"").toLowerCase().includes("tartaros") ||
-    (chest.Source||"").toLowerCase().includes("tartaros")
-  );
-}
-
-function isArenaChest(chest) {
-  return (
-    (chest.category && chest.category === "Arena Chests") ||
-    chest.Type === "Arena" ||
-    chest.Source === "Arena"
-  );
-}
-// --- Ende Tartaros-Logik ---
 
 // Kategorien wie in TopTen.js
 const categories = [
@@ -64,6 +28,7 @@ const categories = [
 ];
 
 export default function HallOfChampionsPage({ t, setCurrentPage }) {
+
   const [data, setData] = useState([]);
   const [periods, setPeriods] = useState([]);
   const [currentPeriodId, setCurrentPeriodId] = useState(null);
@@ -73,8 +38,10 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
   const [audioPlaying, setAudioPlaying] = useState(true);
   const [currentCategoryIdx, setCurrentCategoryIdx] = useState(0);
   const [ignoreChests, setIgnoreChests] = useState([]);
+  const [chestMappings, setChestMappings] = useState([]);
   const audioRef = useRef(null);
   const intervalRef = useRef(null);
+
   // Kategorie automatisch wechseln wie ein Spielautomat
   useEffect(() => {
     if (loading) return;
@@ -84,11 +51,11 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
     return () => clearInterval(intervalRef.current);
   }, [loading]);
 
+  // Daten laden
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Lade alle Ergebnisse, Spieler, Ignore-Liste
         const [resultsSnap, playersSnap, ignoreSnap, chestMappingsSnap] = await Promise.all([
           getDocs(collection(db, "results")),
           getDocs(collection(db, "players")),
@@ -99,65 +66,35 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
         const playersArr = playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const ignoreList = ignoreSnap.docs.map(doc => doc.data());
         const chestMappings = chestMappingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setData(resultsArr); // ALLE Ergebnisse, keine Filterung auf Periode
+        setData(resultsArr);
         setPlayers(playersArr);
         setIgnoreChests(ignoreList);
         setChestMappings(chestMappings);
       } catch (error) {
-        setData([]);
-        setPlayers([]);
-        setIgnoreChests([]);
-        setChestMappings([]);
+        console.error("Fehler beim Laden der Daten:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     fetchData();
   }, []);
 
-  // Aggregiere für jede Kategorie die Top 3 Spieler (über alle Daten)
-  // Ignore-Logik wie in StandardsEvaluationPage.js
-  function isIgnoredChest(chest) {
-    for (const ignore of ignoreChests) {
-      if (ignore.Name && ignore.Name.trim().toLowerCase() !== (chest.Name || "").trim().toLowerCase()) continue;
-      if (ignore.Level && ignore.Level.trim() !== "" && String(ignore.Level).trim() !== String(chest.level ?? chest.Level ?? "").trim()) continue;
-      if (ignore.Type && ignore.Type.trim() !== "") {
-        if (!chest.Type) continue;
-        const t1 = ignore.Type.trim().toLowerCase();
-        const t2 = (chest.Type || "").trim().toLowerCase();
-        if (!(t2.includes(t1))) continue;
-      }
-      if (ignore.Source && ignore.Source.trim() !== "") {
-        if (!chest.Source) continue;
-        const s1 = ignore.Source.trim().toLowerCase();
-        const s2 = (chest.Source || "").trim().toLowerCase();
-        if (!(s2.includes(s1))) continue;
-      }
-      return true;
-    }
-    return false;
-  }
-
-  // Mapping-/Filter-/Aggregation-Logik wie in CurrentTotalEventPage.js
-  const [chestMappings, setChestMappings] = useState([]);
+  // Top 3 je Kategorie berechnen, sobald Daten geladen sind
   useEffect(() => {
-    if (data.length === 0 || players.length === 0) return;
+    if (!data.length || !players.length) return;
     const playerMap = new Map();
-    data.forEach(row => {
-      if (!row.Clanmate || row.Clanmate.trim() === '') return;
-      const mainName = mapToMainName(players, row.Clanmate);
-      const key = (row.playerId && String(row.playerId).trim() !== '')
-        ? String(row.playerId).trim()
-        : (mainName || '').trim().normalize('NFKC').toLowerCase();
-      if (!playerMap.has(key)) {
-        playerMap.set(key, {
+    data.forEach(result => {
+      const mainName = mapToMainName(players, result.Clanmate);
+      if (!playerMap.has(mainName)) {
+        playerMap.set(mainName, {
           Clanmate: mainName,
-          _aggKey: key,
+          _aggKey: mainName,
           ...Object.fromEntries(categories.map(c => [c.key, 0]))
         });
       }
-      const entry = playerMap.get(key);
-      if (Array.isArray(row.chests)) {
-        row.chests.forEach(chest => {
+      const entry = playerMap.get(mainName);
+      if (Array.isArray(result.chests)) {
+        result.chests.forEach(chest => {
           const cat = fallbackCategory(chest);
           if (cat && entry.hasOwnProperty(cat)) {
             entry[cat] += Number(chest.count || 1);
@@ -166,7 +103,7 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
         });
       }
     });
-    // Für jede Kategorie Top 3 berechnen
+    // Für jede Kategorie Top 3 berechnen (nach Punkten)
     const result = {};
     categories.forEach(cat => {
       const arr = Array.from(playerMap.values()).filter(p => p[cat.key] > 0);
@@ -209,61 +146,39 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
   const currentCategory = categories[currentCategoryIdx];
 
   return (
-    <div className="top-ten-container" style={{ minHeight: '100vh', paddingBottom: 0 }}>
-      <StickyBackButton onClick={() => setCurrentPage(ROUTES.NAVIGATION)} label={t?.backToNavigation || 'Zurück zur Navigation'} />
+    <div className="top-ten-container" style={{ minHeight: '100vh', paddingBottom: 0, position: 'relative' }}>
+      {/* Fixierte Buttons rechts mittig */}
+      <div style={{position:'fixed', right:'24px', top:'50%', transform:'translateY(-50%)', zIndex:1000, width:'260px', display:'flex', flexDirection:'column', alignItems:'center', pointerEvents:'auto'}}>
+        <div style={{width:'100%'}}>
+          <StickyBackButton onClick={() => setCurrentPage(ROUTES.NAVIGATION)} label={t?.backToNavigation || 'Zurück'} style={{width:'100px'}} />
+        </div>
+        <div style={{width:'100%'}}>
+          <StickyBackButton
+            onClick={() => window.scrollTo({top:0, behavior:'smooth'})}
+            label={"On Top"}
+            style={{ background: '#1976d2', width:'100px', marginTop:'34px' }}
+          />
+        </div>
+      </div>
       <div className="top-ten-header" style={{ marginBottom: 0 }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexDirection: 'column',
-            position: 'relative',
-            zIndex: 10,
-          }}>
-            <button
-              onClick={() => {
-                setCurrentPage(ROUTES.NAVIGATION);
-                setTimeout(() => {
-                  const el = document.querySelector('.top-ten-container');
-                  if (el) {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                }, 50);
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = 'scale(1.1)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = '0 2px 8px #0007';
-              }}
-              aria-label={t.backToNavigation || 'Zurück zur Navigation'}
-            >
-              <svg width="32" height="32" fill="none" stroke="#FFD700" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="11" fill="#23223a" stroke="#8B5CF6" strokeWidth="2" />
-                <path d="M16 12H8M12 16l-4-4 4-4" />
-              </svg>
-            </button>
-            <span style={{
-              color: '#b0b0b0',
-              fontSize: 18,
-              fontWeight: 500,
-              letterSpacing: 0.2,
-              userSelect: 'none',
-              textShadow: 'none',
-              whiteSpace: 'nowrap',
-              paddingLeft: 2,
-              paddingRight: 8,
-            }}>{t.backToNavigation || 'Zurück zur Navigation'}</span>
-          </div>
+        {/* Header-Wrapper nach Button-Entfernung */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'column',
+          position: 'relative',
+          zIndex: 10,
+        }}>
+          {/* Hier war der Zurück-Button, jetzt leer für saubere Struktur */}
+        </div>
           <h1 className="top-ten-title" style={{ fontSize: '3.5rem', marginTop: 30, textShadow: 'none', color: '#e0e0e0' }}>
             <span className="crown-icon">👑</span> Hall of Champions <span className="crown-icon">👑</span>
           </h1>
           <p className="top-ten-subtitle" style={{ fontSize: '1.5rem', marginBottom: 0, textShadow: 'none', color: '#b0b0b0' }}>Die ewigen Legenden unseres Clans – Kategorie für 10 Sekunden im Rampenlicht!</p>
           <div style={{ marginTop: 24, marginBottom: 0 }}>
             <button onClick={handleAudio} className="category-btn" style={{ fontSize: 22, padding: '12px 32px', background: audioPlaying ? '#FFD700' : '#374151', color: audioPlaying ? '#1a1f2e' : '#FFD700', border: '2px solid #FFD700', borderRadius: 16, marginRight: 12 }} disabled={!audioPlaying}>
-              {'⏸️ Fanfare stoppen'}
+              {'⏸️ Audio stoppen'}
             </button>
             <audio ref={audioRef} src={process.env.PUBLIC_URL + "/fanfare.mp3"} preload="auto" autoPlay />
           </div>
@@ -317,21 +232,27 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
                       ? 'linear-gradient(135deg, #b0b0b0 70%, #23223a 100%)'
                       : 'linear-gradient(135deg, #a97a50 70%, #23223a 100%)';
                     const crown = idx === 0 ? '👑' : idx === 1 ? '🥈' : '🥉';
+                    const mainName = mapToMainName(players, player.Clanmate);
                     return (
-                      <div key={player._aggKey + '-' + idx} className={`podium-place place-${idx + 1}`} style={{
-                        background: bg,
-                        borderRadius: 20,
-                        boxShadow: '0 2px 4px 0 rgba(0,0,0,0.10)',
-                        minWidth: 150,
-                        minHeight: idx === 0 ? 170 : 120,
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end',
-                        position: 'relative',
-                        transform: idx === 0 ? 'scale(1.04)' : 'scale(1)',
-                        zIndex: 3 - idx,
-                        transition: 'all 0.7s cubic-bezier(.4,2,.6,1)'
-                      }}>
+                      <div
+                        key={player._aggKey + '-' + idx}
+                        className={`podium-place place-${idx + 1}`}
+                        data-player-podium={mainName}
+                        style={{
+                          background: bg,
+                          borderRadius: 20,
+                          boxShadow: '0 2px 4px 0 rgba(0,0,0,0.10)',
+                          minWidth: 150,
+                          minHeight: idx === 0 ? 170 : 120,
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end',
+                          position: 'relative',
+                          transform: idx === 0 ? 'scale(1.04)' : 'scale(1)',
+                          zIndex: 3 - idx,
+                          transition: 'all 0.7s cubic-bezier(.4,2,.6,1)'
+                        }}
+                      >
                         <div style={{ fontSize: 32, marginBottom: 4, filter: 'none' }}>{crown}</div>
-                        <div style={{ fontWeight: 600, fontSize: 20, marginBottom: 2, textShadow: 'none', color: '#e0e0e0' }}>{mapToMainName(players, player.Clanmate)}</div>
+                        <div style={{ fontWeight: 600, fontSize: 20, marginBottom: 2, textShadow: 'none', color: '#e0e0e0' }}>{mainName}</div>
                         <div style={{ fontSize: 18, color: '#bbb', fontWeight: 600, marginBottom: 4 }}>{player[currentCategory.key].toLocaleString()}</div>
                         <div style={{ fontSize: 14, color: '#666', marginBottom: 8 }}>{currentCategory.label}</div>
                       </div>
