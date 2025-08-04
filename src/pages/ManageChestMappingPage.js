@@ -526,7 +526,7 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
               {(() => {
                 // Wenn Kategorie "Chests of Tartaros" gewählt ist, spezielle Typen anbieten
                 if (newMapping.category === "Chests of Tartaros") {
-                  const tartarosTypes = [15,20,25,30,35].map(lvl => `Tartaros Crypt Level ${lvl}`);
+                  const tartarosTypes = [10,15,20,25,30,35].map(lvl => `Tartaros Crypt Level ${lvl}`);
                   return tartarosTypes.map(type => (
                     <option key={type} value={type}>{type}</option>
                   ));
@@ -768,7 +768,7 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
                             <option value="">Bitte wählen...</option>
                             {(() => {
                               if (editingMapping.category === "Chests of Tartaros") {
-                                const tartarosTypes = [15,20,25,30,35].map(lvl => `Tartaros Crypt Level ${lvl}`);
+                                const tartarosTypes = [10,15,20,25,30,35].map(lvl => `Tartaros Crypt Level ${lvl}`);
                                 return tartarosTypes.map(type => (
                                   <option key={type} value={type}>{type}</option>
                                 ));

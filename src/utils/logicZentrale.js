@@ -16,8 +16,10 @@ export function calculatePlayerNorms({ playersArr, resultsArr, chestMappings, no
     );
   }
   function isIgnoredChest(chest) {
+    // Fallback: ignoreChests immer als Array behandeln
+    const ignoreArr = Array.isArray(ignoreChests) ? ignoreChests : [];
     if (isArenaChest(chest)) return false;
-    for (const ignore of ignoreChests) {
+    for (const ignore of ignoreArr) {
       if (ignore.Name && ignore.Name.trim().toLowerCase() !== (chest.Name || "").trim().toLowerCase()) continue;
       if (
         ignore.Level &&
@@ -56,6 +58,23 @@ export function calculatePlayerNorms({ playersArr, resultsArr, chestMappings, no
     const mappedChests = Array.isArray(result.chests)
       ? result.chests.map(chest => {
           if (!chest.category && chest.Type) chest.category = chest.Type;
+          // --- Patch: Tartaros-Level aus Type/Source extrahieren, wenn Level leer oder 0 ---
+          let levelRaw = chest.level ?? chest.Level ?? chest.levelStart ?? chest.levelEnd ?? "";
+          let levelStr = String(levelRaw).trim();
+          if (levelStr === "" || levelStr === "0" || levelStr === 0) {
+            // Versuche Level aus Type oder Source zu extrahieren
+            let found = null;
+            if (typeof chest.Type === "string") {
+              found = chest.Type.match(/level\s*(\d+)/i);
+            }
+            if (!found && typeof chest.Source === "string") {
+              found = chest.Source.match(/level\s*(\d+)/i);
+            }
+            if (found && found[1]) {
+              levelStr = found[1];
+            }
+          }
+          // Restliche Logik verwendet jetzt levelStr statt levelB
           let points = 0;
           let bestMapping = null;
           let bestScore = -1;
@@ -70,7 +89,8 @@ export function calculatePlayerNorms({ playersArr, resultsArr, chestMappings, no
               const sourceA = (m.source || m.Source || "").trim().toLowerCase();
               const sourceB = (chest.Source || chest.source || "").trim().toLowerCase();
               const levelA = String(m.levelStart || m.level || m.Level || m.levelEnd || "").trim().toLowerCase();
-              const levelB = String(chest.level ?? chest.Level ?? chest.levelStart ?? chest.levelEnd ?? "").trim().toLowerCase();
+              // Patch: levelB jetzt aus levelStr
+              const levelB = String(levelStr).toLowerCase();
               let score = 0;
               const isBankChest = (chest.category === "Bank Chests" || typeB === "bank" || sourceB === "bank");
               // --- Tartaros Spezial-Matching ---
@@ -357,41 +377,60 @@ export function calculatePlayerNorms({ playersArr, resultsArr, chestMappings, no
           return {
             ...chest,
             category,
-            level,
+            // Nutze das extrahierte Level für die Rückgabe (wichtig für Filter und Anzeige)
+            level: levelStr !== undefined && levelStr !== null && levelStr !== "" ? levelStr : (level ?? 0),
             count: chest.count || 1,
             points
           };
         })
       : [];
-    // Filtere ignorierte Truhen raus (außer Arena) UND Tartaros < 11
+    // Filtere nur ignorierte Truhen raus (außer Arena)
     const filteredChests = mappedChests.filter(chest => {
-      if (isIgnoredChest(chest)) return false;
-      if (
-        (chest.category === "Chests of Tartaros" || (chest.Name||"").toLowerCase().includes("tartaros"))
-      ) {
-        const lvl = String(chest.level ?? chest.Level ?? "").trim();
-        if (/^\d+$/.test(lvl) && Number(lvl) < 11) {
-          return false;
-        }
-      }
-      return true;
+      return !isIgnoredChest(chest);
     });
     const ist = filteredChests.reduce((sum, chest) => sum + (chest.points || 0), 0);
+    // Timestamp-Logik: Versuche result.timestamp oder result.uploadtime zu verwenden
+    let resultTimestamp = result.timestamp || result.uploadtime || null;
+    // Versuche, String in Date umwandeln, falls vorhanden
+    let tsDate = resultTimestamp ? new Date(resultTimestamp) : null;
     if (playerMap.has(mainName)) {
       const entry = playerMap.get(mainName);
       entry.ist += ist;
+      // chestDetails anhängen (falls mehrere Ergebnisse pro Spieler)
+      entry.chestDetails = (entry.chestDetails || []).concat(filteredChests);
+      entry.chests = (entry.chests || 0) + filteredChests.length;
+      // Timestamp: immer den neuesten Wert nehmen
+      if (tsDate && (!entry.timestamp || new Date(entry.timestamp) < tsDate)) {
+        entry.timestamp = resultTimestamp;
+      }
     } else {
       playerMap.set(mainName, {
         name: mainName,
         troopStrength,
+        rank: player?.rank || "", // Rang ergänzen!
         ist,
         soll: normPoints,
         normErfuellung: 0,
+        chestDetails: filteredChests,
+        chests: filteredChests.length,
+        timestamp: resultTimestamp || ""
       });
     }
   });
   playerMap.forEach(entry => {
     entry.normErfuellung = entry.soll > 0 ? Math.round((entry.ist / entry.soll) * 100) : 0;
+    entry.percent = entry.normErfuellung; // Für Kompatibilität mit Tabelle
+    entry.differenz = (entry.ist || 0) - (entry.soll || 0);
+    // Fallback: leeres Array, falls keine Truhen
+    if (!entry.chestDetails) entry.chestDetails = [];
+    // Timestamp-Format: yyyy-mm-dd / hh:mm
+    if (entry.timestamp) {
+      let d = new Date(entry.timestamp);
+      if (!isNaN(d.getTime())) {
+        const pad = n => n.toString().padStart(2, '0');
+        entry.timestamp = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} / ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      }
+    }
   });
   return Array.from(playerMap.values());
 }
@@ -489,8 +528,10 @@ export function isArenaChest(chest) {
 
 // Ignore-Logik
 export function isIgnoredChest(chest, ignoreChests) {
+  // Fallback: ignoreChests immer als Array behandeln
+  const ignoreArr = Array.isArray(ignoreChests) ? ignoreChests : [];
   if (isArenaChest(chest)) return false;
-  for (const ignore of ignoreChests) {
+  for (const ignore of ignoreArr) {
     if (ignore.Name && ignore.Name.trim().toLowerCase() !== (chest.Name || "").trim().toLowerCase()) continue;
     if (
       ignore.Level &&
