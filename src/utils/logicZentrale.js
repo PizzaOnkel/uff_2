@@ -73,20 +73,34 @@ export function calculatePlayerNorms({ playersArr, resultsArr, chestMappings, no
               const levelB = String(chest.level ?? chest.Level ?? chest.levelStart ?? chest.levelEnd ?? "").trim().toLowerCase();
               let score = 0;
               const isBankChest = (chest.category === "Bank Chests" || typeB === "bank" || sourceB === "bank");
+              // --- Tartaros Spezial-Matching ---
+              const isTartarosChest = (categoryB === "chests of tartaros" || nameB.includes("tartaros"));
+              const isTartarosMapping = categoryA.startsWith("tartaros crypt level") || typeA.startsWith("tartaros crypt level");
+              let tartarosMatch = false;
+              if (isTartarosChest && isTartarosMapping) {
+                // Level muss übereinstimmen
+                const mappingLevel = (categoryA.match(/level (\d+)/) || typeA.match(/level (\d+)/));
+                if (mappingLevel && mappingLevel[1] && levelB === mappingLevel[1]) {
+                  tartarosMatch = true;
+                  score += 10; // Priorisiere Tartaros-Match
+                }
+              }
               let matches = true;
               if (isBankChest) {
                 if (nameA && nameB && nameB.includes(levelA)) score += 2;
                 if (nameA && nameA === nameB) score++;
-                if (categoryA && categoryA === categoryB) score++;
+                if (categoryA && categoriesMatchTolerant(categoryA, categoryB)) score++;
                 if (typeA && typeA === typeB) score++;
                 if (sourceA && sourceA === sourceB) score++;
                 if (levelA && (levelA === levelB || nameB.includes(levelA))) score++;
                 matches = (
-                  (!categoryA || categoryA === categoryB) &&
+                  (!categoryA || categoriesMatchTolerant(categoryA, categoryB)) &&
                   (!typeA || typeA === typeB) &&
                   (!sourceA || sourceA === sourceB) &&
                   ((levelA && (levelA === levelB || nameB.includes(levelA))) || (!levelA))
                 );
+              } else if (tartarosMatch) {
+                matches = true;
               } else {
                 if (nameA && nameA === nameB) score++;
                 let citadelMatch = false;
@@ -94,12 +108,12 @@ export function calculatePlayerNorms({ playersArr, resultsArr, chestMappings, no
                     ((categoryA === 'elven chests' || categoryA === 'cursed chests') && categoryB === 'citadel')) {
                   citadelMatch = true;
                 }
-                if (categoryA && (categoryA === categoryB || citadelMatch)) score++;
+                if (categoryA && (categoriesMatchTolerant(categoryA, categoryB) || citadelMatch)) score++;
                 if (typeA && typeA === typeB) score++;
                 if (sourceA && sourceA === sourceB) score++;
                 if (levelA && (levelA === levelB || m.levelEnd === levelB)) score++;
                 if (nameA && nameA !== nameB) matches = false;
-                if (categoryA && !(categoryA === categoryB || citadelMatch)) matches = false;
+                if (categoryA && !(categoriesMatchTolerant(categoryA, categoryB) || citadelMatch)) matches = false;
                 if (typeA && typeA !== typeB) matches = false;
                 if (sourceA && sourceA !== sourceB) matches = false;
                 if (levelA && (levelA !== levelB && m.levelEnd !== levelB)) matches = false;
@@ -111,6 +125,14 @@ export function calculatePlayerNorms({ playersArr, resultsArr, chestMappings, no
             });
             if (bestMapping && bestMapping.points !== undefined) {
               points = Number(bestMapping.points);
+              // Debug-Ausgabe für Tartaros Chests
+              if ((chest.category && chest.category.toLowerCase().includes('tartaros')) || (chest.Name && chest.Name.toLowerCase().includes('tartaros'))) {
+                console.log('[TARTAROS-MAPPING]', {
+                  chest,
+                  bestMapping,
+                  points
+                });
+              }
             }
           }
           // --- Common Chests Mapping zentralisiert ---
@@ -275,6 +297,25 @@ export function calculatePlayerNorms({ playersArr, resultsArr, chestMappings, no
                 level = Number(chest.level ?? chest.Level);
               } else {
                 level = chest.level ?? chest.Level ?? 0;
+              }
+              // --- Patch: Tolerantes Mapping für Tartaros Chests ---
+              if ((points === 0 || points === undefined) && chestMappings.length > 0) {
+                const levelStr = String(level).trim();
+                const generic = chestMappings.find(m => {
+                  const mType = (m.type || m.Type || '').trim().toLowerCase();
+                  const mName = (m.chestName || m.Name || '').trim().toLowerCase();
+                  const mCategory = (m.category || '').trim().toLowerCase();
+                  const mLevel = String(m.level || m.levelStart || m.Level || '').trim();
+                  // Enthält Typ, Name oder Kategorie 'tartaros' und 'crypt level'
+                  const isTartaros = (mType + mName + mCategory).includes('tartaros');
+                  const isCryptLevel = (mType + mName + mCategory).includes('crypt level');
+                  // Level-Vergleich tolerant (String/Number)
+                  const levelMatch = mLevel === levelStr || Number(mLevel) === Number(levelStr);
+                  return isTartaros && isCryptLevel && levelMatch;
+                });
+                if (generic && generic.points !== undefined) {
+                  points = Number(generic.points);
+                }
               }
             }
             else if (nameLower.includes("jormungandr") || typeLower.includes("jormungandr") || sourceLower.includes("jormungandr")) {
@@ -474,6 +515,35 @@ export function isIgnoredChest(chest, ignoreChests) {
 }
 
 // Mapping-Logik: Weist einer Chest das passende Mapping zu und gibt die Punkte zurück
+// Hilfsfunktion für toleranten Kategorie-Vergleich (z.B. Tartaros)
+function categoriesMatchTolerant(catA, catB) {
+  if (!catA || !catB) return false;
+  const a = catA.toLowerCase();
+  const b = catB.toLowerCase();
+  // Tolerant für Tartaros
+  if ((a.includes('tartaros') && b.includes('tartaros'))) return true;
+  // Tolerant für Elven/Cursed/Citadel
+  if ((a.includes('elven') && b.includes('elven')) || (a.includes('cursed') && b.includes('cursed')) || (a.includes('citadel') && b.includes('citadel'))) return true;
+  // Tolerant für Epic
+  if (a.includes('epic') && b.includes('epic')) return true;
+  // Tolerant für Rare
+  if (a.includes('rare') && b.includes('rare')) return true;
+  // Tolerant für Bank
+  if (a.includes('bank') && b.includes('bank')) return true;
+  // Tolerant für Runic
+  if (a.includes('runic') && b.includes('runic')) return true;
+  // Tolerant für Heroic
+  if (a.includes('heroic') && b.includes('heroic')) return true;
+  // Tolerant für Jormungandr
+  if (a.includes('jormungandr') && b.includes('jormungandr')) return true;
+  // Tolerant für Union
+  if (a.includes('union') && b.includes('union')) return true;
+  // Tolerant für ROTA
+  if (a.includes('rota') && b.includes('rota')) return true;
+  // Sonst exakter Vergleich
+  return a === b;
+}
+
 export function getChestPoints(chest, chestMappings) {
   let points = 0;
   if (chestMappings.length > 0) {
@@ -497,12 +567,12 @@ export function getChestPoints(chest, chestMappings) {
       if (isBankChest) {
         if (nameA && nameB && nameB.includes(levelA)) score += 2;
         if (nameA && nameA === nameB) score++;
-        if (categoryA && categoryA === categoryB) score++;
+        if (categoryA && categoriesMatchTolerant(categoryA, categoryB)) score++;
         if (typeA && typeA === typeB) score++;
         if (sourceA && sourceA === sourceB) score++;
         if (levelA && (levelA === levelB || nameB.includes(levelA))) score++;
         matches = (
-          (!categoryA || categoryA === categoryB) &&
+          (!categoryA || categoriesMatchTolerant(categoryA, categoryB)) &&
           (!typeA || typeA === typeB) &&
           (!sourceA || sourceA === sourceB) &&
           ((levelA && (levelA === levelB || nameB.includes(levelA))) || (!levelA))
@@ -514,12 +584,12 @@ export function getChestPoints(chest, chestMappings) {
             ((categoryA === 'elven chests' || categoryA === 'cursed chests') && categoryB === 'citadel')) {
           citadelMatch = true;
         }
-        if (categoryA && (categoryA === categoryB || citadelMatch)) score++;
+        if (categoryA && (categoriesMatchTolerant(categoryA, categoryB) || citadelMatch)) score++;
         if (typeA && typeA === typeB) score++;
         if (sourceA && sourceA === sourceB) score++;
         if (levelA && (levelA === levelB || m.levelEnd === levelB)) score++;
         if (nameA && nameA !== nameB) matches = false;
-        if (categoryA && !(categoryA === categoryB || citadelMatch)) matches = false;
+        if (categoryA && !(categoriesMatchTolerant(categoryA, categoryB) || citadelMatch)) matches = false;
         if (typeA && typeA !== typeB) matches = false;
         if (sourceA && sourceA !== sourceB) matches = false;
         if (levelA && (levelA !== levelB && m.levelEnd !== levelB)) matches = false;

@@ -166,7 +166,7 @@ export default function StandardsArchivePage({ t, setCurrentPage }) {
       setLoading(false);
     };
     fetchData();
-  }, []);
+  }, [selectedPeriodId]);
 
   // Chart-Daten für Donut
   const donutData = {

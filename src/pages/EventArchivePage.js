@@ -479,6 +479,25 @@ const verticalHeaders = [
               } else {
                 level = chest.level ?? chest.Level ?? 0;
               }
+              // --- Patch: Tolerantes Mapping für Tartaros Chests ---
+              if ((points === 0 || points === undefined) && chestMappings.length > 0) {
+                const levelStr = String(level).trim();
+                const generic = chestMappings.find(m => {
+                  const mType = (m.type || m.Type || '').trim().toLowerCase();
+                  const mName = (m.chestName || m.Name || '').trim().toLowerCase();
+                  const mCategory = (m.category || '').trim().toLowerCase();
+                  const mLevel = String(m.level || m.levelStart || m.Level || '').trim();
+                  // Enthält Typ, Name oder Kategorie 'tartaros' und 'crypt level'
+                  const isTartaros = (mType + mName + mCategory).includes('tartaros');
+                  const isCryptLevel = (mType + mName + mCategory).includes('crypt level');
+                  // Level-Vergleich tolerant (String/Number)
+                  const levelMatch = mLevel === levelStr || Number(mLevel) === Number(levelStr);
+                  return isTartaros && isCryptLevel && levelMatch;
+                });
+                if (generic && generic.points !== undefined) {
+                  points = Number(generic.points);
+                }
+              }
             }
             else if (nameLower.includes("jormungandr") || typeLower.includes("jormungandr") || sourceLower.includes("jormungandr")) {
               category = "Jormungandr Chests";

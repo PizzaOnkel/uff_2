@@ -215,15 +215,17 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
   const [editingIgnoreId, setEditingIgnoreId] = useState(null);
   const [editingIgnore, setEditingIgnore] = useState({});
   // Dynamisch generierte Kategorien (Fallback auf statisch falls leer)
-  const categories = allCategories.length > 0 ? allCategories : [
+  // Kategorien-Logik: Immer "Chests of Tartaros" im Dropdown anbieten
+  let categories = allCategories.length > 0 ? [...allCategories] : [
     "Arena", "Common", "Rare", "Epic", "Tartaros",
     "Elven", "Elven Chests", "Cursed", "Cursed Chests", "Bank", "Runic", "Heroic",
     "Vota", "Quick March", "Ancients", "ROTA", "Epic Ancient",
     "Union", "Jormungandr"
   ];
-  // Doppelt sicherstellen, dass die beiden Kategorien immer dabei sind
-  if (!categories.includes("Cursed Chests")) categories.push("Cursed Chests");
-  if (!categories.includes("Elven Chests")) categories.push("Elven Chests");
+  // Doppelt sicherstellen, dass die wichtigsten Kategorien immer dabei sind
+  ["Cursed Chests", "Elven Chests", "Chests of Tartaros"].forEach(cat => {
+    if (!categories.includes(cat)) categories.push(cat);
+  });
   useEffect(() => {
     // chestMappings abonnieren
     const unsub1 = onSnapshot(collection(db, "chestMappings"), snapshot => {
@@ -521,11 +523,21 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
               className="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-purple-500 focus:outline-none"
             >
               <option value="">Bitte wählen...</option>
-            {allTypes.length > 0
-              ? allTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))
-              : Array.from(new Set([
+              {(() => {
+                // Wenn Kategorie "Chests of Tartaros" gewählt ist, spezielle Typen anbieten
+                if (newMapping.category === "Chests of Tartaros") {
+                  const tartarosTypes = [15,20,25,30,35].map(lvl => `Tartaros Crypt Level ${lvl}`);
+                  return tartarosTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ));
+                }
+                // Standard-Typen
+                if (allTypes.length > 0) {
+                  return allTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ));
+                }
+                return Array.from(new Set([
                   ...CHEST_TYPES,
                   "Elven Citadel",
                   "Cursed Citadel",
@@ -537,7 +549,8 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
                   "Magic"
                 ])).map(type => (
                   <option key={type} value={type}>{type}</option>
-                ))}
+                ));
+              })()}
             </select>
           </div>
           <div>
@@ -753,19 +766,27 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
                             className="w-full px-2 py-1 rounded bg-gray-700 text-white border border-gray-600"
                           >
                             <option value="">Bitte wählen...</option>
-                            {Array.from(new Set([
-                              ...CHEST_TYPES,
-                              "Elven Citadel",
-                              "Cursed Citadel",
-                              "Wooden",
-                              "Bronze",
-                              "Silver",
-                              "Golden",
-                              "Precious",
-                              "Magic"
-                            ])).map(type => (
-                              <option key={type} value={type}>{type}</option>
-                            ))}
+                            {(() => {
+                              if (editingMapping.category === "Chests of Tartaros") {
+                                const tartarosTypes = [15,20,25,30,35].map(lvl => `Tartaros Crypt Level ${lvl}`);
+                                return tartarosTypes.map(type => (
+                                  <option key={type} value={type}>{type}</option>
+                                ));
+                              }
+                              return Array.from(new Set([
+                                ...CHEST_TYPES,
+                                "Elven Citadel",
+                                "Cursed Citadel",
+                                "Wooden",
+                                "Bronze",
+                                "Silver",
+                                "Golden",
+                                "Precious",
+                                "Magic"
+                              ])).map(type => (
+                                <option key={type} value={type}>{type}</option>
+                              ));
+                            })()}
                           </select>
                         ) : (
                           mapping.type || ""
