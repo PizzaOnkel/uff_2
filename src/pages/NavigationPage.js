@@ -35,44 +35,57 @@ export default function NavigationPage({ t, setCurrentPage }) {
       <h2 className="text-4xl font-bold mb-10 text-center text-blue-400 mt-12">
         {t.navigationTitle}
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl w-full mb-12">
-        {/* Buttons */}
-        <button onClick={() => setCurrentPage("currentTotalEvent")} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("green")}`}> 
+      {/* Erste Zeile: Aktuelle Eventperiode & Event-Archiv nebeneinander */}
+      <div className="flex flex-row gap-6 max-w-3xl w-full mb-6 justify-center">
+        <button onClick={() => setCurrentPage("currentTotalEvent")} className={`flex flex-col items-center justify-center p-6 w-64 h-48 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("green")}`}> 
           {icons.Calendar}
           <span className="text-xl font-semibold text-white text-center mb-1">{t.currentEventPeriod}</span>
           <span className="text-sm text-gray-400 text-center">{t.currentEventPeriodDesc}</span>
         </button>
-        <button onClick={() => setCurrentPage("standardsEvaluation")} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("yellow")}`}> 
-          {icons.ListTodo}
-          <span className="text-xl font-semibold text-white text-center mb-1">{t.standardsEvaluation}</span>
-          <span className="text-sm text-gray-400 text-center">{t.standardsEvaluationDesc}</span>
-        </button>
-        <button onClick={() => setCurrentPage("eventArchive")} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("blue")}`}> 
+        <button onClick={() => setCurrentPage("eventArchive")} className={`flex flex-col items-center justify-center p-6 w-64 h-48 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("blue")}`}> 
           {icons.Archive}
           <span className="text-xl font-semibold text-white text-center mb-1">{t.eventArchive}</span>
           <span className="text-sm text-gray-400 text-center">{t.eventArchiveDesc}</span>
         </button>
-        <button onClick={() => setCurrentPage("topTen")} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("red")}`}> 
+      </div>
+      {/* Restliche Buttons im Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl w-full mb-12">
+        <button onClick={() => setCurrentPage("standardsEvaluation")} className={`flex flex-col items-center justify-center p-6 w-64 h-48 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("yellow")}`}> 
+          {icons.ListTodo}
+          <span className="text-xl font-semibold text-white text-center mb-1">{t.standardsEvaluation}</span>
+          <span className="text-sm text-gray-400 text-center">{t.standardsEvaluationDesc}</span>
+        </button>
+        <button onClick={() => setCurrentPage("standardsArchive")} className={`flex flex-col items-center justify-center p-6 w-64 h-48 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("yellow")}`}> 
+          {icons.ListTodo}
+          <span className="text-xl font-semibold text-white text-center mb-1">UFF_2 Standards Archiv</span>
+          <span className="text-sm text-gray-400 text-center">Archivierte Normerfüllung nach Periode</span>
+        </button>
+        <button onClick={() => setCurrentPage("topTen")} className={`flex flex-col items-center justify-center p-6 w-64 h-48 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("red")}`}> 
           {icons.Award}
           <span className="text-xl font-semibold text-white text-center mb-1">{t.topTen}</span>
           <span className="text-sm text-gray-400 text-center">{t.topTenDesc}</span>
         </button>
-        <button onClick={() => setCurrentPage("hallOfChampions")} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("purple")}`}> 
+        <button onClick={() => setCurrentPage("topTenArchive")} className={`flex flex-col items-center justify-center p-6 w-64 h-48 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("red")}`}> 
+          {icons.Award}
+          <span className="text-xl font-semibold text-white text-center mb-1">TopTen Archiv</span>
+          <span className="text-sm text-gray-400 text-center">Archivierte TopTen nach Periode</span>
+        </button>
+        <button onClick={() => setCurrentPage("hallOfChampions")} className={`flex flex-col items-center justify-center p-6 w-64 h-48 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("purple")}`}> 
           {icons.Trophy}
           <span className="text-xl font-semibold text-white text-center mb-1">{t.hallOfChampions}</span>
           <span className="text-sm text-gray-400 text-center">{t.hallOfChampionsDesc}</span>
         </button>
-        <button onClick={() => setCurrentPage("contactForm")} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("orange")}`}> 
+        <button onClick={() => setCurrentPage("contactForm")} className={`flex flex-col items-center justify-center p-6 w-64 h-48 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("orange")}`}> 
           {icons.Mail}
           <span className="text-xl font-semibold text-white text-center mb-1">{t.contactForm}</span>
           <span className="text-sm text-gray-400 text-center">{t.contactFormDesc}</span>
         </button>
-        <button onClick={() => setCurrentPage("adminPanel")} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("white", true)}`}> 
+        <button onClick={() => setCurrentPage("adminPanel")} className={`flex flex-col items-center justify-center p-6 w-64 h-48 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("white", true)}`}> 
           {icons.Shield}
           <span className="text-xl font-semibold text-white text-center mb-1">{t.adminPanel}</span>
           <span className="text-sm text-gray-200 text-center">{t.adminPanelDesc}</span>
         </button>
-        <button onClick={() => setCurrentPage("adminRegistration")} className={`flex flex-col items-center justify-center p-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("green")}`}> 
+        <button onClick={() => setCurrentPage("adminRegistration")} className={`flex flex-col items-center justify-center p-6 w-64 h-48 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 border ${getButtonBgClasses("green")}`}> 
           <svg className="w-12 h-12 text-green-400 mb-2" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
             <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
             <circle cx="8.5" cy="7" r="4" />

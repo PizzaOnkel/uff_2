@@ -18,7 +18,9 @@ export const ROUTES = {
   CURRENT_TOTAL_EVENT: 'currentTotalEvent',
   STANDARDS_EVALUATION: 'standardsEvaluation',
   EVENT_ARCHIVE: 'eventArchive',
+  STANDARDS_ARCHIVE: 'standardsArchive',
   TOP_TEN: 'topTen',
+  TOP_TEN_ARCHIVE: 'topTenArchive',
   // TopTen Kategorie-Seiten
   TOP_TEN_ARENA: 'topTenArena',
   TOP_TEN_COMMON: 'topTenCommon',

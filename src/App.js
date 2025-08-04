@@ -21,7 +21,9 @@ import ContactFormPage from './pages/ContactFormPage';
 import EmailTestPage from './pages/EmailTestPage';
 import ComingSoonPage from './pages/ComingSoonPage';
 import StandardsEvaluationPage from './pages/StandardsEvaluationPage';
+import StandardsArchivePage from './pages/StandardsArchivePage';
 import EventArchivePage from './pages/EventArchivePage';
+import TopTenArchivePage from './pages/TopTenArchivePage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import CurrentTotalEventPage from './pages/CurrentTotalEventPage';
 import TopTen from './pages/TopTen';
@@ -99,8 +101,12 @@ class AppContent extends React.Component {
         return <StandardsEvaluationPage t={t} setCurrentPage={this.setCurrentPage} />;
       case 'eventArchive':
         return <EventArchivePage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'standardsArchive':
+        return <StandardsArchivePage t={t} setCurrentPage={this.setCurrentPage} />;
       case 'topTen':
         return <TopTen t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'topTenArchive':
+        return <TopTenArchivePage t={t} setCurrentPage={this.setCurrentPage} />;
       case 'topTenArena':
         return <TopTenCategory setCurrentPage={this.setCurrentPage} category="Arena Total" categoryInfo={{ label: 'Arena Chests', icon: '⚔️', color: '#7C3AED' }} />;
       case 'topTenCommon':

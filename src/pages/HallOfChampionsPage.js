@@ -56,20 +56,39 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [resultsSnap, playersSnap, ignoreSnap, chestMappingsSnap] = await Promise.all([
+        const [resultsSnap, playersSnap, ignoreSnap, chestMappingsSnap, periodsSnap] = await Promise.all([
           getDocs(collection(db, "results")),
           getDocs(collection(db, "players")),
           getDocs(collection(db, "chestMappingIgnore")),
           getDocs(collection(db, "chestMappings")),
+          getDocs(collection(db, "periods")),
         ]);
         const resultsArr = resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const playersArr = playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const ignoreList = ignoreSnap.docs.map(doc => doc.data());
         const chestMappings = chestMappingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setData(resultsArr);
+        const periodsArr = periodsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setPlayers(playersArr);
         setIgnoreChests(ignoreList);
         setChestMappings(chestMappings);
+        setPeriods(periodsArr);
+        // Aktuelle Periode bestimmen (start <= jetzt && (end >= jetzt || end leer))
+        let now = new Date();
+        let currentPeriod = null;
+        for (const p of periodsArr) {
+          if (p.start && new Date(p.start) <= now && (!p.end || new Date(p.end) >= now)) {
+            currentPeriod = p;
+            break;
+          }
+        }
+        // Fallback: falls keine laufende Periode, nimm die mit dem neuesten start
+        if (!currentPeriod && periodsArr.length > 0) {
+          currentPeriod = periodsArr.reduce((a, b) => (!a.start || (b.start && new Date(b.start) > new Date(a.start))) ? b : a);
+        }
+        setCurrentPeriodId(currentPeriod?.id || null);
+        // Filtere Results nach aktueller Periode
+        const filteredResults = currentPeriod ? resultsArr.filter(r => r.periodId === currentPeriod.id) : [];
+        setData(filteredResults);
       } catch (error) {
         console.error("Fehler beim Laden der Daten:", error);
       } finally {

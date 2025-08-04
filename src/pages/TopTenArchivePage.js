@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+// Periodenanzeige wie in StandardsArchivePage
 import StickyBackButton from '../components/StickyBackButton';
 import { mapToMainName } from '../utils/aliasMapping';
 import { getChestPoints, isIgnoredChest, fallbackCategory, fallbackLevel } from '../utils/logicZentrale';
@@ -14,12 +15,15 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 
 const TopTen = ({ t, setCurrentPage }) => {
   const [data, setData] = useState([]);
-  const [periods, setPeriods] = useState([]);
-  const [currentPeriodId, setCurrentPeriodId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [players, setPlayers] = useState([]); // Spieler für Alias-Mapping
   const [selectedCategory, setSelectedCategory] = useState('ALL_CATEGORIES');
   const [topPlayers, setTopPlayers] = useState([]);
+  const [periods, setPeriods] = useState([]);
+  const [selectedPeriodId, setSelectedPeriodId] = useState("");
+  const [currentPeriodName, setCurrentPeriodName] = useState("");
+  const [currentPeriodStart, setCurrentPeriodStart] = useState("");
+  const [currentPeriodEnd, setCurrentPeriodEnd] = useState("");
 
   // ChestMappings für Punkteberechnung
   const [chestMappings, setChestMappings] = useState([]);
@@ -62,31 +66,26 @@ const TopTen = ({ t, setCurrentPage }) => {
         const resultsArr = resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const periodsArr = periodsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setPeriods(periodsArr);
-        // Aktuelle Periode bestimmen (start <= jetzt && (end >= jetzt || end leer))
-        let now = new Date();
-        let currentPeriod = null;
-        for (const p of periodsArr) {
-          if (p.start && new Date(p.start) <= now && (!p.end || new Date(p.end) >= now)) {
-            currentPeriod = p;
-            break;
-          }
+        // Nur abgeschlossene Perioden
+        const archivePeriods = periodsArr.filter(p => p.end && new Date(p.end) < new Date());
+        if (!selectedPeriodId && archivePeriods.length > 0) {
+          setSelectedPeriodId(archivePeriods[archivePeriods.length - 1].id);
         }
-        // Fallback: falls keine laufende Periode, nimm die mit dem neuesten start
-        if (!currentPeriod && periodsArr.length > 0) {
-          currentPeriod = periodsArr.reduce((a, b) => (!a.start || (b.start && new Date(b.start) > new Date(a.start))) ? b : a);
-        }
-        setCurrentPeriodId(currentPeriod?.id || null);
-        // Filtere Results nach aktueller Periode
-        const filteredResults = currentPeriod ? resultsArr.filter(r => r.periodId === currentPeriod.id) : [];
+        // Periodeninfo für Anzeige
+        const selectedPeriod = periodsArr.find(p => p.id === selectedPeriodId);
+        setCurrentPeriodName(selectedPeriod?.name || "");
+        setCurrentPeriodStart(selectedPeriod?.start || "");
+        setCurrentPeriodEnd(selectedPeriod?.end || "");
+        // Filtere Ergebnisse nach gewählter Periode
+        const filteredResults = resultsArr.filter(r => r.periodId === selectedPeriodId);
         setData(filteredResults);
       } catch (error) {
-        console.error('[TopTen] Fehler beim Laden der Firestore-Daten:', error);
         setData([]);
       }
       setLoading(false);
     };
     fetchData();
-  }, []);
+  }, [selectedPeriodId]);
 
   // Noch robustere Aggregation: Spielernamen werden normalisiert (trim, lowercase), nur gewählte Kategorie, Top 10
   const [allAggregatedPlayers, setAllAggregatedPlayers] = useState([]);
@@ -341,6 +340,39 @@ const TopTen = ({ t, setCurrentPage }) => {
         </div>
       </div>
       <div style={headerStyle}></div>
+      {/* --- Auswahlmenü für Eventperioden (Dropdown) --- */}
+      <div className="w-full flex flex-col items-center mb-4 mt-4">
+        <label htmlFor="period-select" className="mb-1 text-lg text-blue-200 font-semibold">Eventperiode auswählen:</label>
+        <select
+          id="period-select"
+          className="bg-gray-800 text-white px-4 py-2 rounded border border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+          value={selectedPeriodId}
+          onChange={e => setSelectedPeriodId(e.target.value)}
+          style={{ minWidth: 220 }}
+        >
+          {periods
+            .filter(p => p.end && new Date(p.end) < new Date())
+            .map(period => (
+              <option key={period.id} value={period.id}>
+                {period.name} {period.start ? `(${new Date(period.start).toLocaleDateString('de-DE')}` : ''}{period.end ? ` - ${new Date(period.end).toLocaleDateString('de-DE')})` : ''}
+              </option>
+            ))}
+        </select>
+      </div>
+      <div className="w-full flex flex-col items-center">
+        {!loading && currentPeriodName && (
+          <div className="mb-2 text-2xl font-bold text-purple-300 text-center">
+            {currentPeriodName}
+            {(currentPeriodStart || currentPeriodEnd) && (
+              <span className="block text-lg font-normal text-purple-200 mt-1">
+                {currentPeriodStart ? new Date(currentPeriodStart).toLocaleDateString('de-DE') : ''}
+                {currentPeriodStart && currentPeriodEnd ? ' – ' : ''}
+                {currentPeriodEnd ? new Date(currentPeriodEnd).toLocaleDateString('de-DE') : ''}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
       <div className="top-ten-header">
         <h1 className="top-ten-title">
           <span className="crown-icon">👑</span>
