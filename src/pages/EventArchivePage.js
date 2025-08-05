@@ -68,8 +68,29 @@ export default function EventArchivePage({ t, setCurrentPage }) {
   const [sliderValue, setSliderValue] = useState(0);
   const playerRowRefs = useRef({});
 
-  // Lade Daten (nur abgeschlossene Perioden, Archiv-Logik)
+
+  // 1. Lade alle Perioden und setze ggf. Default-Periode
   useEffect(() => {
+    let ignore = false;
+    async function fetchPeriodsOnly() {
+      const periodsSnap = await getDocs(collection(db, "periods"));
+      if (ignore) return;
+      const periodsArr = periodsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const archivePeriods = periodsArr.filter(p => p.end && new Date(p.end) < new Date());
+      setPeriods(archivePeriods);
+      if (!selectedPeriodId && archivePeriods.length > 0) {
+        setSelectedPeriodId(archivePeriods[archivePeriods.length - 1].id);
+      }
+    }
+    fetchPeriodsOnly();
+    return () => { ignore = true; };
+    // eslint-disable-next-line
+  }, []);
+
+  // 2. Lade alle Daten, wenn Periode gesetzt ist
+  useEffect(() => {
+    if (!selectedPeriodId) return;
+    let ignore = false;
     async function fetchData() {
       setLoading(true);
       const [playersSnap, resultsSnap, chestMappingsSnap, normsSnap, periodsSnap, ignoreSnap] = await Promise.all([
@@ -80,31 +101,26 @@ export default function EventArchivePage({ t, setCurrentPage }) {
         getDocs(collection(db, "periods")),
         getDocs(collection(db, "chestMappingIgnore")),
       ]);
+      if (ignore) return;
       const playersArr = playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setPlayers(playersArr);
       setNorms(normsSnap.docs.map(doc => ({ troopStrength: doc.data().troopStrength, value: doc.data().value })));
       setChestMappings(chestMappingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       setIgnoreChests(ignoreSnap.docs.map(doc => doc.data()));
       const periodsArr = periodsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      // Nur abgeschlossene Perioden (end < heute)
       const archivePeriods = periodsArr.filter(p => p.end && new Date(p.end) < new Date());
       setPeriods(archivePeriods);
-      // Default: letzte abgeschlossene Periode
-      if (!selectedPeriodId && archivePeriods.length > 0) {
-        setSelectedPeriodId(archivePeriods[archivePeriods.length - 1].id);
-      }
-      // Periodeninfo für Anzeige
-      const selectedPeriod = archivePeriods.find(p => p.id === (selectedPeriodId || (archivePeriods[archivePeriods.length - 1]?.id)));
+      const selectedPeriod = archivePeriods.find(p => p.id === selectedPeriodId);
       setCurrentPeriodName(selectedPeriod?.name || "");
       setCurrentPeriodStart(selectedPeriod?.start || "");
       setCurrentPeriodEnd(selectedPeriod?.end || "");
-      // Ergebnisse filtern
       const resultsArr = resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const filteredResults = selectedPeriod ? resultsArr.filter(r => r.periodId === selectedPeriod.id) : [];
       setResults(filteredResults);
       setLoading(false);
     }
     fetchData();
+    return () => { ignore = true; };
     // eslint-disable-next-line
   }, [selectedPeriodId]);
 

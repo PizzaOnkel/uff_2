@@ -208,37 +208,68 @@ function AdminDashboard2({ setCurrentPage }) {
   };
   // Zusätzliche States für Delete-Dialog und JSON-Dateien
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [jsonFiles, setJsonFiles] = useState([]);
-  const [eventDates, setEventDates] = useState([]);
-  const handleDeleteJsonFile = async (fileId) => {
+  // Für Dropdown: Alle (fileId,eventDate)-Kombis als Einträge
+  const [jsonFileEntries, setJsonFileEntries] = useState([]); // [{fileId, eventDate, count, filename}]
+  const [selectedDeleteEntry, setSelectedDeleteEntry] = useState(null);
+  const handleDeleteJsonFile = async (fileId, eventDate) => {
     try {
       setDeleteLoading(true);
       let q, snapshot;
-      if (fileId === 'ohneDatei') {
-        // Lösche alle Ergebnisse ohne fileId
+      const isOhneDatei = fileId === 'ohneDatei';
+      const isKeinEventDate = eventDate === '[kein EventDate]';
+      const batch = writeBatch(db);
+      if (isKeinEventDate) {
+        // Lösche ALLE Dokumente (mit oder ohne fileId), bei denen eventDate fehlt oder leer ist
         q = query(collection(db, 'results'));
         snapshot = await getDocs(q);
-        const batch = writeBatch(db);
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
-          if (!data.fileId) batch.delete(docSnap.ref);
+          // Wenn fileId und eventDate beide fehlen/leer: Alt-Alt-Daten
+          if (isOhneDatei && (!data.fileId) && (!data.eventDate || data.eventDate === '')) batch.delete(docSnap.ref);
+          // Wenn fileId passt und eventDate fehlt/leer: Alt-Daten mit fileId
+          else if (!isOhneDatei && data.fileId === fileId && (!data.eventDate || data.eventDate === '')) batch.delete(docSnap.ref);
         });
-        await batch.commit();
-      } else {
-        // Lösche alle Ergebnisse mit dieser fileId
-        q = query(collection(db, 'results'), where('fileId', '==', fileId));
+      } else if (isOhneDatei) {
+        // Lösche alle ohne fileId, aber mit eventDate
+        q = query(collection(db, 'results'), where('eventDate', '==', eventDate));
         snapshot = await getDocs(q);
-        const batch = writeBatch(db);
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          if (!data.fileId && data.eventDate === eventDate) batch.delete(docSnap.ref);
+        });
+      } else {
+        // Normale Löschung: fileId + eventDate
+        q = query(collection(db, 'results'), where('fileId', '==', fileId), where('eventDate', '==', eventDate));
+        snapshot = await getDocs(q);
         snapshot.forEach(docSnap => {
           batch.delete(docSnap.ref);
         });
-        await batch.commit();
       }
-      // Nach dem Löschen: lokale Liste aktualisieren (ALLE Einträge mit fileId entfernen)
-      setJsonFiles(prev => prev.filter(f => f.fileId !== fileId));
-      setEventDates(prev => prev.filter(e => e.fileId !== fileId));
+      await batch.commit();
+
+      // Nach dem Löschen: Ergebnisse neu laden, damit das Dropdown aktuell ist
+      const newSnapshot = await getDocs(collection(db, 'results'));
+      const allResults = newSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      const entryMap = {};
+      allResults.forEach(r => {
+        const fileId = r.fileId || 'ohneDatei';
+        let eventDate = r.eventDate;
+        if (!eventDate || eventDate === '') eventDate = '[kein EventDate]';
+        const key = `${fileId}__${eventDate}`;
+        if (!entryMap[key]) {
+          entryMap[key] = {
+            fileId,
+            eventDate,
+            count: 0,
+            filename: r.filename || (fileId === 'ohneDatei' ? 'Ergebnisse ohne Datei' : fileId)
+          };
+        }
+        entryMap[key].count++;
+      });
+      setJsonFileEntries(Object.values(entryMap));
       setDeleteLoading(false);
       setShowDeleteDialog(false);
+      setSelectedDeleteEntry(null);
     } catch (e) {
       setDeleteLoading(false);
       setDeleteError('Fehler beim Löschen der Datei!');
@@ -317,56 +348,25 @@ function AdminDashboard2({ setCurrentPage }) {
       const snapshot = await getDocs(collection(db, "results"));
       const allResults = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       setResults(allResults);
-      // Gruppiere Ergebnisse nach Periode und Datum
-      const groups = {};
-      allResults.forEach(result => {
-        const key = `${result.periodId}_${result.eventDate}`;
-        if (!groups[key]) {
-          groups[key] = {
-            periodId: result.periodId,
-            eventDate: result.eventDate,
-            playerCount: 0,
-            documentIds: []
+      // Gruppiere für Dropdown: JEDES (fileId,eventDate) als Eintrag
+      const entryMap = {};
+      allResults.forEach(r => {
+        const fileId = r.fileId || 'ohneDatei';
+        // Zeige auch Einträge ohne eventDate (alte Daten) mit Platzhalter an
+        let eventDate = r.eventDate;
+        if (!eventDate || eventDate === '') eventDate = '[kein EventDate]';
+        const key = `${fileId}__${eventDate}`;
+        if (!entryMap[key]) {
+          entryMap[key] = {
+            fileId,
+            eventDate,
+            count: 0,
+            filename: r.filename || (fileId === 'ohneDatei' ? 'Ergebnisse ohne Datei' : fileId)
           };
         }
-        groups[key].playerCount++;
-        groups[key].documentIds.push(result.id);
+        entryMap[key].count++;
       });
-      setGroupedResults(Object.values(groups));
-      // Dateiliste und EventDates initialisieren
-      // Gruppiere nach fileId
-      const fileMap = {};
-      allResults.forEach(r => {
-        if (!r.fileId) return;
-        if (!fileMap[r.fileId]) fileMap[r.fileId] = { fileId: r.fileId, eventDates: new Set(), count: 0 };
-        if (r.eventDate) fileMap[r.fileId].eventDates.add(r.eventDate);
-        fileMap[r.fileId].count++;
-      });
-      // Dummy-Eintrag für Ergebnisse ohne fileId
-      const resultsWithoutFileId = allResults.filter(r => !r.fileId);
-      let jsonFileArray = Object.values(fileMap).map(f => ({ ...f, eventDates: Array.from(f.eventDates) }));
-      if (resultsWithoutFileId.length > 0) {
-        // Sammle alle EventDates aus den Ergebnissen ohne fileId
-        const eventDatesSet = new Set();
-        resultsWithoutFileId.forEach(r => {
-          if (r.eventDate) eventDatesSet.add(r.eventDate);
-        });
-        jsonFileArray.push({
-          fileId: 'ohneDatei',
-          filename: 'Ergebnisse ohne Datei',
-          eventDates: Array.from(eventDatesSet),
-          count: resultsWithoutFileId.length
-        });
-      }
-      setJsonFiles(jsonFileArray);
-      // Flache EventDates-Liste für schnelle Anzeige
-      const allEventDates = [];
-      Object.values(fileMap).forEach(f => {
-        f.eventDates.forEach(date => {
-          allEventDates.push({ fileId: f.fileId, eventDate: date });
-        });
-      });
-      setEventDates(allEventDates);
+      setJsonFileEntries(Object.values(entryMap));
       setLoading(false);
     }
     fetchResults();
@@ -669,12 +669,12 @@ useEffect(() => {
         <h2 className="text-xl font-bold mb-4">JSON-Datei löschen</h2>
         {loading ? (
           <p className="text-gray-400">Lade Daten...</p>
-        ) : jsonFiles.length === 0 ? (
+        ) : jsonFileEntries.length === 0 ? (
           <>
             <p className="text-gray-400">Keine JSON-Dateien vorhanden.</p>
             <div className="flex justify-end space-x-2 mt-4">
               <button
-                onClick={() => { setShowDeleteDialog(false); setSelectedGroup(null); setDeleteStep(1); setDeleteError(''); }}
+                onClick={() => { setShowDeleteDialog(false); setSelectedDeleteEntry(null); setDeleteStep(1); setDeleteError(''); }}
                 className="bg-gray-800 hover:bg-gray-900 text-gray-100 px-4 py-2 rounded shadow font-bold focus:outline-none focus:ring-2 focus:ring-gray-500"
               >
                 Schließen
@@ -683,54 +683,52 @@ useEffect(() => {
           </>
         ) : (
           <>
-            <ul className="mb-6 max-h-96 overflow-y-auto">
-              {jsonFiles.map((file, index) => (
-                <li
-                  key={file.fileId}
-                  className={`flex flex-col border-b border-gray-700 py-3 cursor-pointer ${selectedGroup && selectedGroup.fileId === file.fileId ? "bg-red-900/40" : ""}`}
-                  onClick={() => setSelectedGroup(file)}
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="font-semibold text-white">
-                        Datei: <span className="text-green-300">{file.fileId}</span>
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        {(() => {
-                          const sorted = [...file.eventDates].sort();
-                          if (sorted.length === 0) return <>Enthaltene EventDates: <span className="ml-2 text-yellow-300">keine</span></>;
-                          if (sorted.length === 1) return <>Enthaltene EventDates: <span className="ml-2 text-yellow-300">{sorted[0]}</span></>;
-                          return <>Enthaltene EventDates: <span className="ml-2 text-yellow-300">{sorted[0]} bis {sorted[sorted.length - 1]}</span></>;
-                        })()}
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        Spieleranzahl: {file.count}
-                      </div>
-                    </div>
-                    {selectedGroup && selectedGroup.fileId === file.fileId && (
-                      <span className="ml-2 text-red-400 font-bold">Ausgewählt</span>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-            {selectedGroup && (
+            <label className="block mb-2">Datei auswählen:</label>
+            <select
+              className="w-full p-2 mb-4 rounded bg-gray-900 text-gray-100 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-400"
+              value={selectedDeleteEntry ? `${selectedDeleteEntry.fileId}__${selectedDeleteEntry.eventDate}` : ''}
+              onChange={e => {
+                const val = e.target.value;
+                const found = jsonFileEntries.find(entry => `${entry.fileId}__${entry.eventDate}` === val);
+                setSelectedDeleteEntry(found || null);
+              }}
+            >
+              <option value="">Bitte wählen...</option>
+              {jsonFileEntries.map(entry => {
+                const isOhneDatei = entry.fileId === 'ohneDatei';
+                const isKeinEventDate = entry.eventDate === '[kein EventDate]';
+                let label = '';
+                if (isOhneDatei && isKeinEventDate) {
+                  label = '[ohne Datei] | [kein EventDate] | Spieler: ' + entry.count;
+                } else if (isOhneDatei) {
+                  label = `[ohne Datei] | EventDate: ${entry.eventDate} | Spieler: ${entry.count}`;
+                } else if (isKeinEventDate) {
+                  label = `${entry.filename} | [kein EventDate] | Spieler: ${entry.count}`;
+                } else {
+                  label = `${entry.filename} | EventDate: ${entry.eventDate} | Spieler: ${entry.count}`;
+                }
+                return (
+                  <option key={`${entry.fileId}__${entry.eventDate}`} value={`${entry.fileId}__${entry.eventDate}`}>{label}</option>
+                );
+              })}
+            </select>
+            {selectedDeleteEntry && (
               <div className="mb-4 p-3 bg-gray-800 rounded">
-                <div className="mb-1"><b>Dateiname:</b> <span className="text-green-300">{selectedGroup.fileId}</span></div>
-                <div className="mb-1"><b>EventDate(s):</b> <span className="text-yellow-300">{selectedGroup.eventDates.join(', ')}</span></div>
-                <div className="mb-1"><b>Spieleranzahl:</b> {selectedGroup.count}</div>
+                <div className="mb-1"><b>Dateiname:</b> <span className="text-green-300">{selectedDeleteEntry.filename}</span></div>
+                <div className="mb-1"><b>EventDate:</b> <span className="text-yellow-300">{selectedDeleteEntry.eventDate}</span></div>
+                <div className="mb-1"><b>Spieleranzahl:</b> {selectedDeleteEntry.count}</div>
               </div>
             )}
             <div className="flex justify-end space-x-2 mt-2">
               <button
-                onClick={() => handleDeleteJsonFile(selectedGroup.fileId)}
+                onClick={() => selectedDeleteEntry && handleDeleteJsonFile(selectedDeleteEntry.fileId, selectedDeleteEntry.eventDate)}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow font-bold focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!selectedGroup || deleteSuccess}
+                disabled={!selectedDeleteEntry || deleteSuccess}
               >
                 {deleteSuccess ? 'Gelöscht!' : 'Löschen'}
               </button>
               <button
-                onClick={() => { setShowDeleteDialog(false); setSelectedGroup(null); setDeleteStep(1); setDeleteError(''); }}
+                onClick={() => { setShowDeleteDialog(false); setSelectedDeleteEntry(null); setDeleteStep(1); setDeleteError(''); }}
                 className="bg-gray-800 hover:bg-gray-900 text-gray-100 px-4 py-2 rounded shadow font-bold focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={deleteSuccess}
               >
