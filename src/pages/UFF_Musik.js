@@ -66,19 +66,33 @@ export default function UFF_Musik({ t, setCurrentPage }) {
       setAudioErrorIdx(null);
     }
   };
+  async function reloadVotes() {
+    setLoadingVotes(true);
+    const snap = await getDocs(collection(db, "uff_songs"));
+    const votes = {};
+    snap.forEach(doc => {
+      votes[doc.id] = doc.data();
+    });
+    setSongs(songs => songs.map(song => {
+      const v = votes[song.title];
+      return v ? { ...song, likes: v.likes || 0, dislikes: v.dislikes || 0 } : song;
+    }));
+    setLoadingVotes(false);
+  }
+
   const handleLike = async idx => {
     const song = songs[idx];
     const newLikes = song.likes + 1;
-    setSongs(songs => songs.map((s, i) => i === idx ? { ...s, likes: newLikes } : s));
     const ref = doc(db, "uff_songs", song.title);
     await setDoc(ref, { likes: newLikes, dislikes: song.dislikes }, { merge: true });
+    await reloadVotes();
   };
   const handleDislike = async idx => {
     const song = songs[idx];
     const newDislikes = song.dislikes + 1;
-    setSongs(songs => songs.map((s, i) => i === idx ? { ...s, dislikes: newDislikes } : s));
     const ref = doc(db, "uff_songs", song.title);
     await setDoc(ref, { likes: song.likes, dislikes: newDislikes }, { merge: true });
+    await reloadVotes();
   };
 
   // Für die grafische Auswertung
