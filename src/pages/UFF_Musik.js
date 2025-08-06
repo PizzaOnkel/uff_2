@@ -1,5 +1,7 @@
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import { db } from "../firebase";
+import { collection, getDocs, doc, setDoc } from "firebase/firestore";
 import StickyBackButton from "../components/StickyBackButton";
 import { ROUTES } from "../routes";
 
@@ -22,7 +24,26 @@ export default function UFF_Musik({ t, setCurrentPage }) {
   const [songs, setSongs] = useState(initialSongs.map(song => ({ ...song, likes: 0, dislikes: 0 })));
   const [playingIdx, setPlayingIdx] = useState(null);
   const [audioErrorIdx, setAudioErrorIdx] = useState(null);
+  const [loadingVotes, setLoadingVotes] = useState(true);
   const audioRefs = useRef([]);
+
+  // Votes aus Firestore laden
+  useEffect(() => {
+    async function fetchVotes() {
+      setLoadingVotes(true);
+      const snap = await getDocs(collection(db, "uff_songs"));
+      const votes = {};
+      snap.forEach(doc => {
+        votes[doc.id] = doc.data();
+      });
+      setSongs(songs => songs.map(song => {
+        const v = votes[song.title];
+        return v ? { ...song, likes: v.likes || 0, dislikes: v.dislikes || 0 } : song;
+      }));
+      setLoadingVotes(false);
+    }
+    fetchVotes();
+  }, []);
 
   const handlePlay = idx => {
     if (audioRefs.current[idx]) {
@@ -45,11 +66,19 @@ export default function UFF_Musik({ t, setCurrentPage }) {
       setAudioErrorIdx(null);
     }
   };
-  const handleLike = idx => {
-    setSongs(songs => songs.map((s, i) => i === idx ? { ...s, likes: s.likes + 1 } : s));
+  const handleLike = async idx => {
+    const song = songs[idx];
+    const newLikes = song.likes + 1;
+    setSongs(songs => songs.map((s, i) => i === idx ? { ...s, likes: newLikes } : s));
+    const ref = doc(db, "uff_songs", song.title);
+    await setDoc(ref, { likes: newLikes, dislikes: song.dislikes }, { merge: true });
   };
-  const handleDislike = idx => {
-    setSongs(songs => songs.map((s, i) => i === idx ? { ...s, dislikes: s.dislikes + 1 } : s));
+  const handleDislike = async idx => {
+    const song = songs[idx];
+    const newDislikes = song.dislikes + 1;
+    setSongs(songs => songs.map((s, i) => i === idx ? { ...s, dislikes: newDislikes } : s));
+    const ref = doc(db, "uff_songs", song.title);
+    await setDoc(ref, { likes: song.likes, dislikes: newDislikes }, { merge: true });
   };
 
   // Für die grafische Auswertung
@@ -69,6 +98,7 @@ export default function UFF_Musik({ t, setCurrentPage }) {
         <h2 className="text-4xl font-bold mb-6 text-center text-blue-400">UFF Musik</h2>
         <div className="mb-8 w-full max-w-2xl bg-gray-800 rounded p-4 flex flex-col items-center">
           <h3 className="text-2xl font-semibold mb-2 text-blue-300">Hört euch diese Songs an und stimmt ab!</h3>
+          {loadingVotes && <div className="text-lg text-blue-200 mb-4">Lade Abstimmungen...</div>}
           <table className="w-full text-center mb-6">
             <thead>
               <tr className="bg-gray-700">
