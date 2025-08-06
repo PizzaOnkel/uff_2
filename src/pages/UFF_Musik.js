@@ -4,9 +4,9 @@ import StickyBackButton from "../components/StickyBackButton";
 import { ROUTES } from "../routes";
 
 const initialSongs = [
-  { title: "Union for Friends 1", src: "/musik/Union for Friends 1.mp3", hymn: "UFF-Hymn 1" },
-  { title: "Union For Friends engl 001", src: "/musik/Union For Friends_engl_001.mp3", hymn: "UFF-Hymn 2" },
-  { title: "Union For Friends engl 002", src: "/musik/Union For Friends_engl_002.mp3", hymn: "UFF Hymn 3" }
+  { title: "Union_for_Friends_1", src: "/musik/Union_for_Friends_1.mp3", hymn: "UFF-Hymn 1" },
+  { title: "Union_For_Friends_engl_001", src: "/musik/Union_For_Friends_engl_001.mp3", hymn: "UFF-Hymn 2" },
+  { title: "Union_For_Friends_engl_002", src: "/musik/Union_For_Friends_engl_002.mp3", hymn: "UFF Hymn 3" }
 ];
 
 export default function UFF_Musik({ t, setCurrentPage }) {
@@ -72,12 +72,13 @@ export default function UFF_Musik({ t, setCurrentPage }) {
             </thead>
             <tbody>
               {songs.map((song, idx) => (
-                <tr key={idx}>
+                <tr key={idx} style={playingIdx === idx ? { background: '#1976d2', color: '#fff', fontWeight: 'bold' } : {}}>
                   <td className="p-2">{song.hymn}</td>
                   <td className="p-2">{song.title}</td>
                   <td className="p-2">
                     <audio ref={el => audioRefs.current[idx] = el} src={song.src} onEnded={() => setPlayingIdx(null)} />
                     <button onClick={() => handlePlay(idx)} disabled={playingIdx === idx} style={{marginRight:8}}>▶️</button>
+                    {playingIdx === idx && <span style={{marginLeft:8, color:'#fff', fontWeight:'bold'}}>Wird abgespielt…</span>}
                   </td>
                   <td className="p-2">
                     <button onClick={() => handleStop(idx)} disabled={playingIdx !== idx}>⏹️</button>
