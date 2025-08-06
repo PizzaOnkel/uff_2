@@ -38,6 +38,7 @@ export const ROUTES = {
   TOP_TEN_UNION: 'topTenUnion',
   TOP_TEN_JORMUNGANDR: 'topTenJormungandr',
   HALL_OF_CHAMPIONS: 'hallOfChampions',
+  UFF_MUSIK: 'uffMusik',
   CONTACT_FORM: 'contactForm',
   CURRENT_TOTAL_EVENT_ADMIN: 'currentTotalEventAdmin',
   EVENT_ARCHIVE_ADMIN: 'eventArchiveAdmin',

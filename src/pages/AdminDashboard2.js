@@ -604,11 +604,22 @@ useEffect(() => {
                 onChange={(e) => setSelectedPeriod(e.target.value)}
               >
                 <option value="">Bitte wählen...</option>
-                {periods.map((period) => (
-                  <option key={period.id} value={period.id} className="bg-gray-900 text-gray-100">
-                    {period.name ? `${period.name} (${formatPeriod(period)})` : formatPeriod(period)}
-                  </option>
-                ))}
+                {periods
+                  .slice()
+                  .sort((a, b) => {
+                    // [kein EventDate] immer ganz unten (falls vorhanden)
+                    if (!a.end) return 1;
+                    if (!b.end) return -1;
+                    const dateA = new Date(a.end);
+                    const dateB = new Date(b.end);
+                    if (!isNaN(dateA) && !isNaN(dateB)) return dateB - dateA;
+                    return String(b.end).localeCompare(String(a.end));
+                  })
+                  .map((period) => (
+                    <option key={period.id} value={period.id} className="bg-gray-900 text-gray-100">
+                      {period.name ? `${period.name} (${formatPeriod(period)})` : formatPeriod(period)}
+                    </option>
+                  ))}
               </select>
             </>
           ) : periods.length === 1 ? (
@@ -694,23 +705,36 @@ useEffect(() => {
               }}
             >
               <option value="">Bitte wählen...</option>
-              {jsonFileEntries.map(entry => {
-                const isOhneDatei = entry.fileId === 'ohneDatei';
-                const isKeinEventDate = entry.eventDate === '[kein EventDate]';
-                let label = '';
-                if (isOhneDatei && isKeinEventDate) {
-                  label = '[ohne Datei] | [kein EventDate] | Spieler: ' + entry.count;
-                } else if (isOhneDatei) {
-                  label = `[ohne Datei] | EventDate: ${entry.eventDate} | Spieler: ${entry.count}`;
-                } else if (isKeinEventDate) {
-                  label = `${entry.filename} | [kein EventDate] | Spieler: ${entry.count}`;
-                } else {
-                  label = `${entry.filename} | EventDate: ${entry.eventDate} | Spieler: ${entry.count}`;
-                }
-                return (
-                  <option key={`${entry.fileId}__${entry.eventDate}`} value={`${entry.fileId}__${entry.eventDate}`}>{label}</option>
-                );
-              })}
+              {jsonFileEntries
+                .slice()
+                .sort((a, b) => {
+                  // [kein EventDate] immer ganz unten
+                  if (a.eventDate === '[kein EventDate]') return 1;
+                  if (b.eventDate === '[kein EventDate]') return -1;
+                  // ISO/DE-Datum oder Zahl vergleichen
+                  const dateA = new Date(a.eventDate);
+                  const dateB = new Date(b.eventDate);
+                  if (!isNaN(dateA) && !isNaN(dateB)) return dateB - dateA;
+                  // Fallback: String-Vergleich absteigend
+                  return String(b.eventDate).localeCompare(String(a.eventDate));
+                })
+                .map(entry => {
+                  const isOhneDatei = entry.fileId === 'ohneDatei';
+                  const isKeinEventDate = entry.eventDate === '[kein EventDate]';
+                  let label = '';
+                  if (isOhneDatei && isKeinEventDate) {
+                    label = '[ohne Datei] | [kein EventDate] | Spieler: ' + entry.count;
+                  } else if (isOhneDatei) {
+                    label = `[ohne Datei] | EventDate: ${entry.eventDate} | Spieler: ${entry.count}`;
+                  } else if (isKeinEventDate) {
+                    label = `${entry.filename} | [kein EventDate] | Spieler: ${entry.count}`;
+                  } else {
+                    label = `${entry.filename} | EventDate: ${entry.eventDate} | Spieler: ${entry.count}`;
+                  }
+                  return (
+                    <option key={`${entry.fileId}__${entry.eventDate}`} value={`${entry.fileId}__${entry.eventDate}`}>{label}</option>
+                  );
+                })}
             </select>
             {selectedDeleteEntry && (
               <div className="mb-4 p-3 bg-gray-800 rounded">

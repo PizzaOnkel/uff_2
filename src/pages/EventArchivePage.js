@@ -205,7 +205,8 @@ export default function EventArchivePage({ t, setCurrentPage }) {
           category: chest.category,
           level: chest.level,
           count: 0,
-          points: 0
+          points: 0,
+          name: chest.Name // für Spezialanzeige
         };
       }
       grouped[key].count += chest.count || 1;
@@ -238,9 +239,17 @@ export default function EventArchivePage({ t, setCurrentPage }) {
             <div style={{maxHeight: '40vh',overflowY: 'auto',marginBottom: '8px',paddingRight: '4px'}}>
               {groupedList.length > 0 ? (
                 <ul className="list-disc ml-5">
-                  {groupedList.map((chest, idx) => (
-                    <li key={idx}>{chest.category} {chest.level ? `LV ${chest.level}` : ""}: {chest.count}x, {chest.points} Punkte</li>
-                  ))}
+                  {groupedList.map((chest, idx) => {
+                    let displayName = chest.category;
+                    if (chest.category === "Epic Chests" && (chest.level === 0 || chest.level === "0")) {
+                      displayName = chest.name || "Golden Guardian Epic Chest";
+                    }
+                    return (
+                      <li key={idx}>
+                        {displayName} {chest.category === "Epic Chests" && (chest.level === 0 || chest.level === "0") ? "" : (chest.level ? `LV ${chest.level}` : "")}: {chest.count}x, {chest.points} Punkte
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : (
                 <div className="text-gray-400">Keine Truhen-Daten vorhanden.</div>
