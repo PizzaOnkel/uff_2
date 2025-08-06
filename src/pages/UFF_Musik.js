@@ -9,9 +9,19 @@ const initialSongs = [
   { title: "Union_For_Friends_engl_002", src: "/musik/Union_For_Friends_engl_002.mp3", hymn: "UFF Hymn 3" }
 ];
 
+function getAudioSrc(src) {
+  // Versuche Original, dann /audio/, dann Root
+  if (window && window.location) {
+    // Die Datei wird im Browser geladen, also ist window verfügbar
+    return [src, src.replace("/musik/", "/audio/"), src.replace("/musik/", "/")];
+  }
+  return [src];
+}
+
 export default function UFF_Musik({ t, setCurrentPage }) {
   const [songs, setSongs] = useState(initialSongs.map(song => ({ ...song, likes: 0, dislikes: 0 })));
   const [playingIdx, setPlayingIdx] = useState(null);
+  const [audioErrorIdx, setAudioErrorIdx] = useState(null);
   const audioRefs = useRef([]);
 
   const handlePlay = idx => {
@@ -22,6 +32,7 @@ export default function UFF_Musik({ t, setCurrentPage }) {
           audio.currentTime = 0;
         }
       });
+      setAudioErrorIdx(null);
       audioRefs.current[idx].play();
       setPlayingIdx(idx);
     }
@@ -31,6 +42,7 @@ export default function UFF_Musik({ t, setCurrentPage }) {
       audioRefs.current[idx].pause();
       audioRefs.current[idx].currentTime = 0;
       setPlayingIdx(null);
+      setAudioErrorIdx(null);
     }
   };
   const handleLike = idx => {
@@ -76,9 +88,32 @@ export default function UFF_Musik({ t, setCurrentPage }) {
                   <td className="p-2">{song.hymn}</td>
                   <td className="p-2">{song.title}</td>
                   <td className="p-2">
-                    <audio ref={el => audioRefs.current[idx] = el} src={song.src} onEnded={() => setPlayingIdx(null)} />
+                    {/* Versuche verschiedene Pfade, nimm den ersten, der funktioniert */}
+                    <audio
+                      ref={el => audioRefs.current[idx] = el}
+                      src={getAudioSrc(song.src)[0]}
+                      onEnded={() => setPlayingIdx(null)}
+                      onError={() => {
+                        // Versuche Fallbacks
+                        const fallbacks = getAudioSrc(song.src);
+                        let found = false;
+                        for (let i = 1; i < fallbacks.length; i++) {
+                          const testAudio = document.createElement('audio');
+                          testAudio.src = fallbacks[i];
+                          testAudio.oncanplaythrough = () => {
+                            audioRefs.current[idx].src = fallbacks[i];
+                            audioRefs.current[idx].play();
+                            setAudioErrorIdx(null);
+                          };
+                          testAudio.onerror = () => {};
+                          testAudio.load();
+                        }
+                        setAudioErrorIdx(idx);
+                      }}
+                    />
                     <button onClick={() => handlePlay(idx)} disabled={playingIdx === idx} style={{marginRight:8}}>▶️</button>
                     {playingIdx === idx && <span style={{marginLeft:8, color:'#fff', fontWeight:'bold'}}>Wird abgespielt…</span>}
+                    {audioErrorIdx === idx && <span style={{marginLeft:8, color:'#ff6666', fontWeight:'bold'}}>Datei nicht gefunden!</span>}
                   </td>
                   <td className="p-2">
                     <button onClick={() => handleStop(idx)} disabled={playingIdx !== idx}>⏹️</button>
