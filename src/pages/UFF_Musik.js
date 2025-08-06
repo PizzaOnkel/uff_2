@@ -4,9 +4,9 @@ import StickyBackButton from "../components/StickyBackButton";
 import { ROUTES } from "../routes";
 
 const initialSongs = [
-  { title: "Union_for_Friends_1", src: "/musik/Union_for_Friends_1.mp3", hymn: "UFF-Hymn 1" },
-  { title: "Union_For_Friends_engl_001", src: "/musik/Union_For_Friends_engl_001.mp3", hymn: "UFF-Hymn 2" },
-  { title: "Union_For_Friends_engl_002", src: "/musik/Union_For_Friends_engl_002.mp3", hymn: "UFF Hymn 3" }
+  { title: "Union_for_Friends_1", src: process.env.PUBLIC_URL + "/musik/Union_for_Friends_1.mp3", hymn: "UFF-Hymn 1" },
+  { title: "Union_For_Friends_engl_001", src: process.env.PUBLIC_URL + "/musik/Union_For_Friends_engl_001.mp3", hymn: "UFF-Hymn 2" },
+  { title: "Union_For_Friends_engl_002", src: process.env.PUBLIC_URL + "/musik/Union_For_Friends_engl_002.mp3", hymn: "UFF Hymn 3" }
 ];
 
 function getAudioSrc(src) {
