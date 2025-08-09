@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, getDocs, deleteDoc, doc, setDoc, addDoc } from 'firebase/firestore';
+import { v4 as uuidv4 } from 'uuid';
 import { query, where, writeBatch } from 'firebase/firestore';
 import Papa from 'papaparse';
 // Hilfsfunktion: aggregatedData als CSV exportieren und auf Server speichern
@@ -208,73 +209,59 @@ function AdminDashboard2({ setCurrentPage }) {
   };
   // Zusätzliche States für Delete-Dialog und JSON-Dateien
   const [deleteLoading, setDeleteLoading] = useState(false);
-  // Für Dropdown: Alle (fileId,eventDate)-Kombis als Einträge
-  const [jsonFileEntries, setJsonFileEntries] = useState([]); // [{fileId, eventDate, count, filename}]
+  // Für Dropdown: Sessions (uploadId) als Einträge
+  const [jsonFileEntries, setJsonFileEntries] = useState([]); // [{uploadId, uploadtime, periodId, count, filename}]
   const [selectedDeleteEntry, setSelectedDeleteEntry] = useState(null);
-  const handleDeleteJsonFile = async (fileId, eventDate) => {
+  // Neue Löschfunktion: komplette Session (uploadId) löschen oder Altbestände ohne uploadId
+  const handleDeleteSession = async (uploadId) => {
     try {
       setDeleteLoading(true);
-      let q, snapshot;
-      const isOhneDatei = fileId === 'ohneDatei';
-      const isKeinEventDate = eventDate === '[kein EventDate]';
       const batch = writeBatch(db);
-      if (isKeinEventDate) {
-        // Lösche ALLE Dokumente (mit oder ohne fileId), bei denen eventDate fehlt oder leer ist
+      let q, snapshot;
+      if (!uploadId || uploadId === 'ohneUploadId') {
+        // Lösche alle Einträge ohne uploadId (Altbestände)
         q = query(collection(db, 'results'));
         snapshot = await getDocs(q);
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
-          // Wenn fileId und eventDate beide fehlen/leer: Alt-Alt-Daten
-          if (isOhneDatei && (!data.fileId) && (!data.eventDate || data.eventDate === '')) batch.delete(docSnap.ref);
-          // Wenn fileId passt und eventDate fehlt/leer: Alt-Daten mit fileId
-          else if (!isOhneDatei && data.fileId === fileId && (!data.eventDate || data.eventDate === '')) batch.delete(docSnap.ref);
-        });
-      } else if (isOhneDatei) {
-        // Lösche alle ohne fileId, aber mit eventDate
-        q = query(collection(db, 'results'), where('eventDate', '==', eventDate));
-        snapshot = await getDocs(q);
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
-          if (!data.fileId && data.eventDate === eventDate) batch.delete(docSnap.ref);
+          if (!data.uploadId) batch.delete(docSnap.ref);
         });
       } else {
-        // Normale Löschung: fileId + eventDate
-        q = query(collection(db, 'results'), where('fileId', '==', fileId), where('eventDate', '==', eventDate));
+        // Alle Events mit dieser uploadId finden und löschen
+        q = query(collection(db, 'results'), where('uploadId', '==', uploadId));
         snapshot = await getDocs(q);
         snapshot.forEach(docSnap => {
           batch.delete(docSnap.ref);
         });
       }
       await batch.commit();
-
       // Nach dem Löschen: Ergebnisse neu laden, damit das Dropdown aktuell ist
       const newSnapshot = await getDocs(collection(db, 'results'));
       const allResults = newSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      const entryMap = {};
+      // Sessions neu berechnen
+      const sessionMap = {};
       allResults.forEach(r => {
-        const fileId = r.fileId || 'ohneDatei';
-        let eventDate = r.eventDate;
-        if (!eventDate || eventDate === '') eventDate = '[kein EventDate]';
-        const key = `${fileId}__${eventDate}`;
-        if (!entryMap[key]) {
-          entryMap[key] = {
-            fileId,
-            eventDate,
-            count: 0,
-            filename: r.filename || (fileId === 'ohneDatei' ? 'Ergebnisse ohne Datei' : fileId)
+        const uploadId = r.uploadId || 'ohneUploadId';
+        if (!sessionMap[uploadId]) {
+          sessionMap[uploadId] = {
+            uploadId,
+            uploadtime: r.uploadtime,
+            periodId: r.periodId,
+            count: 0
           };
         }
-        entryMap[key].count++;
+        sessionMap[uploadId].count++;
       });
-      setJsonFileEntries(Object.values(entryMap));
+      setJsonFileEntries(Object.values(sessionMap));
       setDeleteLoading(false);
       setShowDeleteDialog(false);
       setSelectedDeleteEntry(null);
     } catch (e) {
       setDeleteLoading(false);
-      setDeleteError('Fehler beim Löschen der Datei!');
+      setDeleteError('Fehler beim Löschen der Session!');
     }
   };
+// (alte Löschfunktion entfernt, nur noch Session-Löschung aktiv)
   const [toast, setToast] = useState("");
   const { currentAdmin } = useAuth();
   // Alle States am Anfang deklarieren!
@@ -494,12 +481,14 @@ useEffect(() => {
       }
       console.log('[DEBUG] FlatEntries für Upload:', flatEntries);
 
-      // === NEU: Schreibe Uploadzeitpunkt in Collection 'uploadtime' ===
+      // === NEU: Schreibe Uploadzeitpunkt und uploadId in Collection 'uploadtime' ===
       const uploadtime = new Date().toISOString();
+      const uploadId = uuidv4();
       try {
         const uploadtimeDocRef = await addDoc(collection(db, "uploadtime"), {
           periodId: selectedPeriod,
-          uploadtime
+          uploadtime,
+          uploadId
         });
         console.log('[DEBUG] uploadtime-Dokument erfolgreich geschrieben:', uploadtimeDocRef.id);
       } catch (err) {
@@ -510,7 +499,7 @@ useEffect(() => {
         return;
       }
 
-      // Schreibe jeden Eintrag als Dokument in die Collection 'results'
+      // Schreibe jeden Eintrag als Dokument in die Collection 'results', mit uploadId
       let uploaded = 0;
       for (const entry of flatEntries) {
         // periodId aus Auswahl ergänzen
@@ -518,7 +507,7 @@ useEffect(() => {
           console.warn('[DEBUG] Überspringe Eintrag ohne eventDate:', entry);
           continue;
         }
-        const docData = { ...entry, periodId: selectedPeriod, uploadtime };
+        const docData = { ...entry, periodId: selectedPeriod, uploadtime, uploadId };
         try {
           await addDoc(collection(db, 'results'), docData);
         } catch (err) {
@@ -538,8 +527,8 @@ useEffect(() => {
           setUploadStatus('');
           setUploadStep(1);
           setSelectedFile(null);
-        }, 2000);
-      }, 400);
+        }, 1500);
+      }, 500);
     } catch (e) {
       setUploadError('Fehler beim Hochladen!');
       setUploadStep(1);
@@ -745,7 +734,7 @@ useEffect(() => {
             )}
             <div className="flex justify-end space-x-2 mt-2">
               <button
-                onClick={() => selectedDeleteEntry && handleDeleteJsonFile(selectedDeleteEntry.fileId, selectedDeleteEntry.eventDate)}
+                onClick={() => selectedDeleteEntry && handleDeleteSession(selectedDeleteEntry.uploadId)}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow font-bold focus:outline-none focus:ring-2 focus:ring-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!selectedDeleteEntry || deleteSuccess}
               >

@@ -183,8 +183,20 @@ const verticalHeaders = [
   }
 
   // --- Zentrale Auswertung mit calculatePlayerNorms aus logicZentrale.js ---
+  // Nur Spieler anzeigen, die in den aktuellen results (JSON-Uploads) vorkommen
+  // Extrahiere die Namen aus dem flachen results-Array
+  // Extrahiere die Namen aus dem flachen results-Array
+  const clanmateNamesRaw = results.map(r => (r.Clanmate || r.playerName || r.name || "").trim().toLowerCase()).filter(Boolean);
+  const clanmateNames = Array.from(new Set(clanmateNamesRaw));
+  // Debug: Zeige alle Namen aus der JSON (results)
+  console.log('[DEBUG][ClanmateNames aus JSON]:', clanmateNames);
+  // Filtere die Spieler aus der DB, die exakt zu diesen Namen passen (case-insensitive)
+  const filteredPlayers = players.filter(p => clanmateNames.includes((p.name || "").trim().toLowerCase()));
+  // Debug: Zeige alle Spielernamen aus der Datenbank, die gematcht wurden
+  console.log('[DEBUG][Gefilterte Spieler aus DB]:', filteredPlayers.map(p => p.name));
+  // Für die Auswertung nur die aktuellen Ergebnisse verwenden
   const auswertung = calculatePlayerNorms({
-    playersArr: players,
+    playersArr: filteredPlayers,
     resultsArr: results,
     chestMappings,
     normsArr: norms,
@@ -192,6 +204,9 @@ const verticalHeaders = [
     periodsArr: periods,
     currentPeriodId: periods.find(p => p.name === currentPeriodName)?.id || (periods[0]?.id ?? null)
   });
+  // Debug: Zeige finale Auswertung (Tabellenzeilen)
+  console.log('[DEBUG][Tabellenzeilen]:', auswertung.map(row => row.name));
+  // ...entfernt, da oben bereits korrekt deklariert...
 
   // Summen für Gesamtergebnis berechnen
   let totalIst = auswertung.reduce((sum, row) => sum + row.ist, 0);
@@ -208,7 +223,18 @@ const verticalHeaders = [
     "Veteran",
     "Soldat"
   ];
-  auswertung.sort((a, b) => {
+  // Nur eindeutige Spieler (nach Name) anzeigen
+  const uniqueAuswertung = [];
+  const seenNames = new Set();
+  for (const row of auswertung) {
+    const normName = (row.name || "").trim().toLowerCase();
+    if (!seenNames.has(normName)) {
+      uniqueAuswertung.push(row);
+      seenNames.add(normName);
+    }
+  }
+
+  uniqueAuswertung.sort((a, b) => {
     const rankA = rankOrder.indexOf(a.rank);
     const rankB = rankOrder.indexOf(b.rank);
     // Unbekannte Ränge kommen ans Ende
@@ -227,11 +253,11 @@ const verticalHeaders = [
     // Beide sind "andere" Ränge: nach Truppenstärke absteigend
     return Number(b.troopStrength) - Number(a.troopStrength);
   });
-  const tableRows = auswertung;
+  const tableRows = uniqueAuswertung;
 
   function renderPlayerModal(playerRow) {
     // Nur nicht-ignorierte Truhen anzeigen
-    const visibleChests = playerRow.chestDetails.filter(chest => {
+    const visibleChests = (playerRow.chestDetails || []).filter(chest => {
       return !isIgnoredChest(chest);
     });
     // Zusammenfassen nach Kategorie+Level

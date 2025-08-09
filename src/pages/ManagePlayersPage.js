@@ -59,6 +59,7 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
     rank: "",
     troopStrength: ""
   });
+  const [addError, setAddError] = useState("");
   const [editId, setEditId] = useState(null);
   const [editForm, setEditForm] = useState({
     name: "",
@@ -212,7 +213,11 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
 
   // Spieler zu Firestore hinzufügen
   const handleAddPlayer = async () => {
-    if (!form.name || !form.rank || !form.troopStrength) return;
+    setAddError("");
+    if (!form.name || !form.rank || !form.troopStrength) {
+      setAddError("Bitte alle Pflichtfelder ausfüllen (Name, Rang, Truppenstärke).");
+      return;
+    }
 
     // Prüfe auf Namens- oder Alias-Kollision
     const lowerName = form.name.trim().toLowerCase();
@@ -225,7 +230,6 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
       if (!proceed) return;
     }
 
-
     // Normen aus der gewählten Truppenstärke holen (inkl. Punkte aus norms)
     const selectedTroop = troopStrengths.find(ts => ts.name === form.troopStrength);
     const playerNorms = selectedTroop?.norm || {};
@@ -237,13 +241,17 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
       troopStrength: form.troopStrength,
       norms: playerNorms
     };
-    await addDoc(collection(db, "players"), newPlayer);
-    setForm({
-      name: "",
-      aliases: "",
-      rank: "",
-      troopStrength: ""
-    });
+    try {
+      await addDoc(collection(db, "players"), newPlayer);
+      setForm({
+        name: "",
+        aliases: "",
+        rank: "",
+        troopStrength: ""
+      });
+    } catch (err) {
+      setAddError("Fehler beim Anlegen des Spielers: " + (err.message || err.code || err.toString()));
+    }
   };
 
   // Spieler bearbeiten
@@ -347,6 +355,7 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
             Anzahl Spieler in der Datenbank: <span className="text-yellow-300">{players.length}</span>
           </div>
           <div className="mb-6 w-full max-w-xl flex flex-col gap-1">
+            {addError && <div style={{color:'#ff6666', fontWeight:'bold', marginBottom:8}}>{addError}</div>}
             <input
               type="text"
               name="name"
@@ -365,6 +374,38 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
               className="mb-1 px-2 py-1 rounded bg-gray-800 text-white border border-gray-600 w-full text-sm"
               style={{ minHeight: 28 }}
             />
+            <select
+              name="rank"
+              value={form.rank}
+              onChange={handleChange}
+              className="mb-1 px-2 py-1 rounded bg-gray-800 text-white border border-gray-600 w-full text-sm"
+              style={{ minHeight: 28 }}
+            >
+              <option value="">Rang auswählen</option>
+              {ranks.map(rank => (
+                <option key={rank} value={rank}>{rank}</option>
+              ))}
+            </select>
+            <select
+              name="troopStrength"
+              value={form.troopStrength}
+              onChange={handleChange}
+              className="mb-1 px-2 py-1 rounded bg-gray-800 text-white border border-gray-600 w-full text-sm"
+              style={{ minHeight: 28 }}
+            >
+              <option value="">Truppenstärke auswählen</option>
+              {troopStrengths.map(strength => (
+                <option key={strength.name} value={strength.name}>{strength.name}</option>
+              ))}
+            </select>
+            <button
+              onClick={handleAddPlayer}
+              className="mt-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded font-bold shadow focus:outline-none focus:ring-2 focus:ring-green-400 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!form.name || !form.rank || !form.troopStrength}
+              type="button"
+            >
+              Speichern
+            </button>
           <ul className="w-full max-w-xl">
             {players.map(player => (
               <li key={player.id} data-player-name={player.name} className="flex flex-row items-center justify-between bg-gray-800 rounded px-2 py-1 mb-1 text-sm player-list-item">
