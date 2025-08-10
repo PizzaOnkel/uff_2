@@ -423,6 +423,7 @@ const verticalHeaders = [
             style={{ background: '#1976d2', width:'100px', marginTop:'34px' }}
           />
         </div>
+        {/* Platz für weitere Buttons */}
       </div>
       <div className="w-full flex flex-col items-center">
         {/* Name und Zeitraum der aktuellen Veranstaltungsperiode (aus Firestore-Perioden) */}

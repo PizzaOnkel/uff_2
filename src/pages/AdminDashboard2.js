@@ -335,25 +335,29 @@ function AdminDashboard2({ setCurrentPage }) {
       const snapshot = await getDocs(collection(db, "results"));
       const allResults = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       setResults(allResults);
-      // Gruppiere für Dropdown: JEDES (fileId,eventDate) als Eintrag
+      // Gruppiere nach uploadId (jede Datei = 1 Eintrag)
       const entryMap = {};
       allResults.forEach(r => {
-        const fileId = r.fileId || 'ohneDatei';
-        // Zeige auch Einträge ohne eventDate (alte Daten) mit Platzhalter an
-        let eventDate = r.eventDate;
-        if (!eventDate || eventDate === '') eventDate = '[kein EventDate]';
-        const key = `${fileId}__${eventDate}`;
-        if (!entryMap[key]) {
-          entryMap[key] = {
-            fileId,
-            eventDate,
+        const uploadId = r.uploadId || 'ohneUploadId';
+        if (!entryMap[uploadId]) {
+          entryMap[uploadId] = {
+            uploadId,
+            filename: r.filename || r.fileId || 'Unbekannt',
+            uploadtime: r.uploadtime || '',
+            periodId: r.periodId || '',
             count: 0,
-            filename: r.filename || (fileId === 'ohneDatei' ? 'Ergebnisse ohne Datei' : fileId)
+            eventDates: new Set(),
           };
         }
-        entryMap[key].count++;
+        entryMap[uploadId].count++;
+        if (r.eventDate) entryMap[uploadId].eventDates.add(r.eventDate);
       });
-      setJsonFileEntries(Object.values(entryMap));
+      // Umwandeln in Array und Eventdates als Array
+      const fileEntries = Object.values(entryMap).map(e => ({
+        ...e,
+        eventDates: Array.from(e.eventDates).sort()
+      }));
+      setJsonFileEntries(fileEntries);
       setLoading(false);
     }
     fetchResults();
@@ -686,10 +690,10 @@ useEffect(() => {
             <label className="block mb-2">Datei auswählen:</label>
             <select
               className="w-full p-2 mb-4 rounded bg-gray-900 text-gray-100 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-400"
-              value={selectedDeleteEntry ? `${selectedDeleteEntry.fileId}__${selectedDeleteEntry.eventDate}` : ''}
+              value={selectedDeleteEntry ? selectedDeleteEntry.uploadId : ''}
               onChange={e => {
                 const val = e.target.value;
-                const found = jsonFileEntries.find(entry => `${entry.fileId}__${entry.eventDate}` === val);
+                const found = jsonFileEntries.find(entry => entry.uploadId === val);
                 setSelectedDeleteEntry(found || null);
               }}
             >
@@ -697,38 +701,23 @@ useEffect(() => {
               {jsonFileEntries
                 .slice()
                 .sort((a, b) => {
-                  // [kein EventDate] immer ganz unten
-                  if (a.eventDate === '[kein EventDate]') return 1;
-                  if (b.eventDate === '[kein EventDate]') return -1;
-                  // ISO/DE-Datum oder Zahl vergleichen
-                  const dateA = new Date(a.eventDate);
-                  const dateB = new Date(b.eventDate);
-                  if (!isNaN(dateA) && !isNaN(dateB)) return dateB - dateA;
-                  // Fallback: String-Vergleich absteigend
-                  return String(b.eventDate).localeCompare(String(a.eventDate));
+                  // Neueste oben
+                  return (b.uploadtime || '').localeCompare(a.uploadtime || '');
                 })
                 .map(entry => {
-                  const isOhneDatei = entry.fileId === 'ohneDatei';
-                  const isKeinEventDate = entry.eventDate === '[kein EventDate]';
-                  let label = '';
-                  if (isOhneDatei && isKeinEventDate) {
-                    label = '[ohne Datei] | [kein EventDate] | Spieler: ' + entry.count;
-                  } else if (isOhneDatei) {
-                    label = `[ohne Datei] | EventDate: ${entry.eventDate} | Spieler: ${entry.count}`;
-                  } else if (isKeinEventDate) {
-                    label = `${entry.filename} | [kein EventDate] | Spieler: ${entry.count}`;
-                  } else {
-                    label = `${entry.filename} | EventDate: ${entry.eventDate} | Spieler: ${entry.count}`;
-                  }
+                  let label = `${entry.filename} | Spieler: ${entry.count}`;
+                  if (entry.uploadtime) label += ` | Hochgeladen: ${new Date(entry.uploadtime).toLocaleString('de-DE')}`;
+                  if (entry.eventDates && entry.eventDates.length > 0) label += ` | EventDates: ${entry.eventDates.join(', ')}`;
                   return (
-                    <option key={`${entry.fileId}__${entry.eventDate}`} value={`${entry.fileId}__${entry.eventDate}`}>{label}</option>
+                    <option key={entry.uploadId} value={entry.uploadId}>{label}</option>
                   );
                 })}
             </select>
             {selectedDeleteEntry && (
               <div className="mb-4 p-3 bg-gray-800 rounded">
                 <div className="mb-1"><b>Dateiname:</b> <span className="text-green-300">{selectedDeleteEntry.filename}</span></div>
-                <div className="mb-1"><b>EventDate:</b> <span className="text-yellow-300">{selectedDeleteEntry.eventDate}</span></div>
+                <div className="mb-1"><b>Uploadzeit:</b> <span className="text-yellow-300">{selectedDeleteEntry.uploadtime ? new Date(selectedDeleteEntry.uploadtime).toLocaleString('de-DE') : '-'}</span></div>
+                <div className="mb-1"><b>EventDates:</b> <span className="text-blue-300">{selectedDeleteEntry.eventDates && selectedDeleteEntry.eventDates.length > 0 ? selectedDeleteEntry.eventDates.join(', ') : '-'}</span></div>
                 <div className="mb-1"><b>Spieleranzahl:</b> {selectedDeleteEntry.count}</div>
               </div>
             )}

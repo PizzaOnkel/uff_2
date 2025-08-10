@@ -189,8 +189,15 @@ root.configure(bg="#232946")
 # Breiteres Fenster
 root.geometry("1200x900")
 
+
 main_frame = tk.Frame(root, bg="#232946", padx=24, pady=24)
 main_frame.pack(fill="both", expand=True)
+
+# --- Online React öffnen ---
+import webbrowser
+def open_online_react():
+    webbrowser.open('https://pizzaonkel.github.io/uff_2/')
+tk.Button(main_frame, text="Online React öffnen", width=36, bg="#43a047", fg="white", font=("Segoe UI", 11, "bold"), command=open_online_react).pack(pady=(0, 16))
 
 # --- GIT STATUS & SICHERHEIT ---
 git_frame = tk.LabelFrame(main_frame, text="Git-Status & Sicherheit", fg="#ff595e", bg="#232946", font=("Segoe UI", 12, "bold"), bd=2, relief="ridge", padx=16, pady=12, labelanchor="n")
