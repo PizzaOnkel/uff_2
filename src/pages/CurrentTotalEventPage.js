@@ -85,11 +85,15 @@ const verticalHeaders = [
         getDocs(collection(db, "periods")),
         getDocs(collection(db, "chestMappingIgnore")),
       ]);
-      setPlayers(playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      setTroopStrengths(troopSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      const resultsArr = resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const loadedMappings = chestMappingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setChestMappings(loadedMappings);
+  const loadedPlayers = playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const loadedTroops = troopSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const resultsArr = resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const loadedMappings = chestMappingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  console.log('[DEBUG][RAW PLAYERS]:', loadedPlayers);
+  console.log('[DEBUG][RAW RESULTS]:', resultsArr);
+  setPlayers(loadedPlayers);
+  setTroopStrengths(loadedTroops);
+  setChestMappings(loadedMappings);
       // Debug: Zeige alle Mapping-Namen/Kategorien im Browser an
       if (loadedMappings && loadedMappings.length > 0) {
         const mappingNames = loadedMappings.map(m => ({
@@ -581,7 +585,9 @@ const verticalHeaders = [
                       return Array.isArray(cat.levels) && cat.levels.length > 0
                         ? cat.levels.map(level => (
                             <th key={cat.name + level} colSpan="2" className="text-xs">
-                              <VerticalHeader>LV {level}</VerticalHeader>
+                              <VerticalHeader>
+                                {cat.name === "Bank Chests" ? level : `LV ${level}`}
+                              </VerticalHeader>
                             </th>
                           )).concat([
                             <th key={cat.name + 'sum'} className="text-xs">
@@ -695,72 +701,130 @@ const verticalHeaders = [
                                 key={row.name + '-' + idx + '-' + cat.name + '-' + level + '-count-' + levelIdx}
                                 className={`p-2 ${catBg}`}
                               >
-                                {cat.name === "Epic Ancient squad" || cat.name === "EAs Total"
-                                  ? row.chestDetails
-                                      .filter(chest => (
-                                        chest.Name === "Golden Guardian Epic Chest" &&
-                                        chest.Type === "Epic Ancient squad" &&
-                                        chest.Source === "Epic Ancient squad"
-                                      ))
-                                      .reduce((sum, chest) => sum + (chest.count || 0), 0)
-                                  : (isVault || isRunic)
-                                    ? row.chestDetails
-                                        .filter(chest => {
-                                          if (chest.category !== cat.name) return false;
-                                          const chestLevel = Number(chest.level ?? chest.Level ?? "");
-                                          return chestLevel >= start && chestLevel <= end;
-                                        })
-                                        .reduce((sum, chest) => sum + (chest.count || 0), 0)
-                                  : isBank
-                                    ? row.chestDetails
-                                        .filter(chest => chest.category === cat.name && String(chest.level ?? chest.Level ?? "").toLowerCase() === String(level).toLowerCase())
-                                        .reduce((sum, chest) => sum + (chest.count || 0), 0)
-                                  : (isElven || isCursed)
-                                    ? row.chestDetails
-                                        .filter(chest => {
-                                          // Akzeptiere auch Citadel-Chests mit passendem Namen für Elven/Cursed Spalten, aber prüfe Level!
-                                          const chestLevel = Number(chest.level ?? chest.Level ?? "");
-                                          if (cat.name === "Cursed Chests") {
-                                            if (chest.category === "Cursed Chests" || (chest.category === "Citadel" && (chest.Name || "").toLowerCase().includes("cursed"))) {
-                                              if (typeof level === "number") return chestLevel === level;
-                                              if (start !== null && end !== null) return chestLevel >= start && chestLevel <= end;
-                                              return false;
-                                            }
+                                {/* Levelspalten-Logik für alle relevanten Kategorien */}
+                                {(() => {
+                                  // Common Chests
+                                  if (cat.name === "Common Chests") {
+                                    return row.chestDetails
+                                      .filter(chest => {
+                                        const catA = (chest.category || "").toLowerCase();
+                                        const levelA = String(chest.level ?? chest.Level ?? "").toLowerCase();
+                                        return catA === "common chests" && levelA === String(level).toLowerCase();
+                                      })
+                                      .reduce((sum, chest) => sum + (chest.count || 0), 0);
+                                  }
+                                  // Rare Chests
+                                  if (cat.name === "Rare Chests") {
+                                    return row.chestDetails
+                                      .filter(chest => {
+                                        const catA = (chest.category || "").toLowerCase();
+                                        const levelA = String(chest.level ?? chest.Level ?? "").toLowerCase();
+                                        return catA === "rare chests" && levelA === String(level).toLowerCase();
+                                      })
+                                      .reduce((sum, chest) => sum + (chest.count || 0), 0);
+                                  }
+                                  // Bank Chests
+                                  if (cat.name === "Bank Chests") {
+                                    // Filter nach Name, nicht nach Level!
+                                    const nameMap = {
+                                      Wooden: "Wooden Chest",
+                                      Bronze: "Bronze Chest",
+                                      Silver: "Silver Chest",
+                                      Golden: "Golden Chest",
+                                      Precious: "Precious Chest",
+                                      Magic: "Magic Chest"
+                                    };
+                                    const expectedName = nameMap[level] || level + " Chest";
+                                    const filtered = row.chestDetails.filter(chest => {
+                                      const catA = (chest.category || "").toLowerCase();
+                                      const nameA = (chest.Name || "").toLowerCase();
+                                      return catA === "bank chests" && nameA === expectedName.toLowerCase();
+                                    });
+                                    console.log('[BANK CHEST DEBUG]', {
+                                      player: row.name,
+                                      level,
+                                      expectedName,
+                                      filteredCount: filtered.length,
+                                      filtered,
+                                      allChestDetails: row.chestDetails.map(chest => ({
+                                        category: chest.category,
+                                        level: chest.level ?? chest.Level,
+                                        Name: chest.Name,
+                                        Type: chest.Type
+                                      }))
+                                    });
+                                    return filtered.reduce((sum, chest) => sum + (chest.count || 0), 0);
+                                  }
+                                  // Heroic Chests
+                                  if (cat.name === "Heroic Chests") {
+                                    return row.chestDetails
+                                      .filter(chest => {
+                                        const catA = (chest.category || "").toLowerCase();
+                                        const levelA = String(chest.level ?? chest.Level ?? "").toLowerCase();
+                                        return catA === "heroic chests" && levelA === String(level).toLowerCase();
+                                      })
+                                      .reduce((sum, chest) => sum + (chest.count || 0), 0);
+                                  }
+                                  // Standard-Logik für alle anderen Kategorien
+                                  if (isVault || isRunic) {
+                                    return row.chestDetails
+                                      .filter(chest => {
+                                        if (chest.category !== cat.name) return false;
+                                        const chestLevel = Number(chest.level ?? chest.Level ?? "");
+                                        return chestLevel >= start && chestLevel <= end;
+                                      })
+                                      .reduce((sum, chest) => sum + (chest.count || 0), 0);
+                                  }
+                                  if (isBank) {
+                                    return row.chestDetails
+                                      .filter(chest => chest.category === cat.name && String(chest.level ?? chest.Level ?? "").toLowerCase() === String(level).toLowerCase())
+                                      .reduce((sum, chest) => sum + (chest.count || 0), 0);
+                                  }
+                                  if (isElven || isCursed) {
+                                    return row.chestDetails
+                                      .filter(chest => {
+                                        const chestLevel = Number(chest.level ?? chest.Level ?? "");
+                                        if (cat.name === "Cursed Chests") {
+                                          if (chest.category === "Cursed Chests" || (chest.category === "Citadel" && (chest.Name || "").toLowerCase().includes("cursed"))) {
+                                            if (typeof level === "number") return chestLevel === level;
+                                            if (start !== null && end !== null) return chestLevel >= start && chestLevel <= end;
                                             return false;
                                           }
-                                          if (cat.name === "Elven Chests") {
-                                            if (chest.category === "Elven Chests" || (chest.category === "Citadel" && (chest.Name || "").toLowerCase().includes("elven"))) {
-                                              if (typeof level === "number") return chestLevel === level;
-                                              if (start !== null && end !== null) return chestLevel >= start && chestLevel <= end;
-                                              return false;
-                                            }
-                                            return false;
-                                          }
-                                          if (chest.category !== cat.name) return false;
-                                          // Level exakt oder im Mapping-Range
-                                          if (typeof level === "number") return chestLevel === level;
-                                          if (start !== null && end !== null) return chestLevel >= start && chestLevel <= end;
                                           return false;
-                                        })
-                                        .reduce((sum, chest) => sum + (chest.count || 0), 0)
-                                  : cat.name === "Epic Chests"
-                                    ? row.chestDetails
-                                        .filter(chest => {
-                                          // Epic Chests, aber NICHT Epic Ancient squad
-                                          const catName = (chest.category || "").toLowerCase();
-                                          const typeName = (chest.Type || "").toLowerCase();
-                                          if (catName !== "epic chests") return false;
-                                          if (typeName === "epic ancient squad") return false;
-                                          // Level tolerant vergleichen (Zahl/String)
-                                          const chestLevel = Number(chest.level ?? chest.Level ?? "");
-                                          const levelNum = Number(level);
-                                          return chestLevel === levelNum;
-                                        })
-                                        .reduce((sum, chest) => sum + (chest.count || 0), 0)
-                                  : row.chestDetails
-                                        .filter(chest => chest.category === cat.name && chest.level === level)
-                                        .reduce((sum, chest) => sum + (chest.count || 0), 0)
-                                }
+                                        }
+                                        if (cat.name === "Elven Chests") {
+                                          if (chest.category === "Elven Chests" || (chest.category === "Citadel" && (chest.Name || "").toLowerCase().includes("elven"))) {
+                                            if (typeof level === "number") return chestLevel === level;
+                                            if (start !== null && end !== null) return chestLevel >= start && chestLevel <= end;
+                                            return false;
+                                          }
+                                          return false;
+                                        }
+                                        if (chest.category !== cat.name) return false;
+                                        if (typeof level === "number") return chestLevel === level;
+                                        if (start !== null && end !== null) return chestLevel >= start && chestLevel <= end;
+                                        return false;
+                                      })
+                                      .reduce((sum, chest) => sum + (chest.count || 0), 0);
+                                  }
+                                  if (cat.name === "Epic Chests") {
+                                    return row.chestDetails
+                                      .filter(chest => {
+                                        const catName = (chest.category || "").toLowerCase();
+                                        const typeName = (chest.Type || "").toLowerCase();
+                                        if (catName !== "epic chests") return false;
+                                        if (typeName === "epic ancient squad") return false;
+                                        const chestLevel = Number(chest.level ?? chest.Level ?? "");
+                                        const levelNum = Number(level);
+                                        return chestLevel === levelNum;
+                                      })
+                                      .reduce((sum, chest) => sum + (chest.count || 0), 0);
+                                  }
+                                  // Fallback: Standard pro Kategorie und Level
+                                  return row.chestDetails
+                                    .filter(chest => chest.category === cat.name && chest.level === level)
+                                    .reduce((sum, chest) => sum + (chest.count || 0), 0);
+                                })()}
                               </td>,
                               <td
                                 key={row.name + '-' + idx + '-' + cat.name + '-' + level + '-points-' + levelIdx}
@@ -784,7 +848,17 @@ const verticalHeaders = [
                                         .reduce((sum, chest) => sum + (chest.points || 0), 0)
                                   : isBank
                                     ? row.chestDetails
-                                        .filter(chest => chest.category === cat.name && String(chest.level ?? chest.Level ?? "").toLowerCase() === String(level).toLowerCase())
+                                        .filter(chest => {
+                                          const catA = (chest.category || "").toLowerCase();
+                                          const levelA = String(chest.level ?? chest.Level ?? "").toLowerCase();
+                                          const nameA = (chest.Name || "").toLowerCase();
+                                          const typeA = (chest.Type || "").toLowerCase();
+                                          return catA === "bank chests" && (
+                                            levelA === String(level).toLowerCase() ||
+                                            nameA === String(level).toLowerCase() ||
+                                            typeA === String(level).toLowerCase()
+                                          );
+                                        })
                                         .reduce((sum, chest) => {
                                           let points = chest.points;
                                           if (points === undefined || points === null || points === "") {
