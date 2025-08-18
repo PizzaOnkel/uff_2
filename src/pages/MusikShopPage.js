@@ -7,8 +7,8 @@ import React, { useRef } from "react";
 // Stripe initialisieren (Public Key aus Stripe Dashboard!)
 // const stripePromise = loadStripe("pk_test_1234567890"); // <-- DEIN PUBLIC KEY HIER
 
-// Basis-URL für GitHub Pages Deployment (mit abschließendem "/")
-const baseUrl = "/musik/";
+// Absolute Basis-URL für GitHub Pages Deployment (angepasst auf dein Repo)
+const baseUrl = "https://pizzaonkel.github.io/uff_2/musik/";
 
 // Tracks mit Preisen und Dateipfaden (korrekte Zuordnung: Track 1 = Track_0.mp3 ... Track 18 = Track_17.mp3)
 const tracks = Array.from({ length: 18 }, (_, i) => ({
@@ -21,9 +21,9 @@ const tracks = Array.from({ length: 18 }, (_, i) => ({
 
 const album = {
   title: "Complete Live Concert Album",
-  cover: `${baseUrl}Image_2025-08-17.png`,
+  cover: "https://pizzaonkel.github.io/uff_2/musik/Image_2025-08-17.png",
   price: "14,99 €",
-  downloadUrl: `${baseUrl}Album_Complete.zip`,
+  downloadUrl: "https://pizzaonkel.github.io/uff_2/musik/Album_Complete.zip",
   description: "Vollständiges LiveKonzert inklusive Bonustracks."
 };
 
