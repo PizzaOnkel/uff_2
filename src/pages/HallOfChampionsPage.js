@@ -86,9 +86,8 @@ export default function HallOfChampionsPage({ t, setCurrentPage }) {
           currentPeriod = periodsArr.reduce((a, b) => (!a.start || (b.start && new Date(b.start) > new Date(a.start))) ? b : a);
         }
         setCurrentPeriodId(currentPeriod?.id || null);
-        // Filtere Results nach aktueller Periode
-        const filteredResults = currentPeriod ? resultsArr.filter(r => r.periodId === currentPeriod.id) : [];
-        setData(filteredResults);
+  // Aggregiere ALLE Results (keine Filterung nach Periode)
+  setData(resultsArr);
       } catch (error) {
         console.error("Fehler beim Laden der Daten:", error);
       } finally {

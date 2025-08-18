@@ -190,13 +190,9 @@ const verticalHeaders = [
   const clanmateNames = Array.from(new Set(clanmateNamesRaw));
   // Debug: Zeige alle Namen aus der JSON (results)
   console.log('[DEBUG][ClanmateNames aus JSON]:', clanmateNames);
-  // Filtere die Spieler aus der DB, die exakt zu diesen Namen passen (case-insensitive)
-  const filteredPlayers = players.filter(p => clanmateNames.includes((p.name || "").trim().toLowerCase()));
-  // Debug: Zeige alle Spielernamen aus der Datenbank, die gematcht wurden
-  console.log('[DEBUG][Gefilterte Spieler aus DB]:', filteredPlayers.map(p => p.name));
-  // Für die Auswertung nur die aktuellen Ergebnisse verwenden
+  // Übergebe ALLE Spielerobjekte an die zentrale Auswertung, damit Aliase/Hauptnamen korrekt gemappt werden
   const auswertung = calculatePlayerNorms({
-    playersArr: filteredPlayers,
+    playersArr: players,
     resultsArr: results,
     chestMappings,
     normsArr: norms,
@@ -314,7 +310,7 @@ const verticalHeaders = [
           >
             &times;
           </button>
-          <h3 className="text-2xl font-bold mb-4 text-blue-300" style={{fontSize:'1.25rem'}}>{playerRow.name}</h3>
+          <h3 className="text-2xl font-bold mb-4 text-blue-300" style={{fontSize:'1.25rem'}}>{mapToMainName(players, playerRow.name)}</h3>
           <div className="mb-2" style={{fontSize:'0.95rem'}}>Rang: <b>{playerRow.rank}</b></div>
           <div className="mb-2" style={{fontSize:'0.95rem'}}>Truppenstärke: <b>{playerRow.troopStrength}</b></div>
           <div className="mb-2" style={{fontSize:'0.95rem'}}>Clantruhen: <b>{playerRow.chests}</b></div>
@@ -633,7 +629,7 @@ const verticalHeaders = [
                           style={{ minWidth: "120px", minHeight: "40px" }}
                           onClick={() => setSelectedPlayer(row)}
                         >
-                          {row.name}
+                          {mapToMainName(players, row.name)}
                         </button>
                       </td>
                       <td className="p-2">{row.rank}</td>

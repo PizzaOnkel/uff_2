@@ -504,7 +504,7 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
         </div>
         {/* Feste Tabelle oben rechts für Spieler mit nicht definiertem Rang/Truppenstärke */}
         {players.filter(p => (String(p.rank).toLowerCase().includes('nicht definiert') || String(p.troopStrength).toLowerCase().includes('nicht definiert'))).length > 0 && (
-          <div style={{position:'fixed', top:24, right:24, zIndex:2001, width:'340px', maxHeight:'60vh', overflowY:'auto', background:'#7f1d1d', color:'#fff', borderRadius:'12px', boxShadow:'0 2px 12px #0008', padding:'18px 16px 12px 16px', border:'2px solid #b91c1c'}}>
+          <div style={{position:'fixed', top:24, right:24, zIndex:2001, width:'340px', maxHeight:'40vh', overflowY:'auto', background:'#7f1d1d', color:'#fff', borderRadius:'12px', boxShadow:'0 2px 12px #0008', padding:'18px 16px 60px 16px', border:'2px solid #b91c1c', boxSizing:'border-box'}}>
             <div style={{fontWeight:'bold', marginBottom:8, color:'#fca5a5', fontSize:'1.1em'}}>Spieler mit "nicht definiert" in Rang/Truppenstärke:</div>
             <table style={{width:'100%', fontSize:'0.98em'}}>
               <thead>
