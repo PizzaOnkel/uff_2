@@ -1,3 +1,5 @@
+                            // Debug: Zeige alle relevanten chestDetails für diese Kategorie und Level
+                            // (Logik direkt in die map-Funktion einbauen, z.B. vor der Rückgabe der Table-Zellen)
 
 
 import React, { useEffect, useRef, useState } from "react";
@@ -163,6 +165,17 @@ export default function EventArchivePage({ t, setCurrentPage }) {
     periodsArr: periods,
     currentPeriodId: selectedPeriodId
   });
+  // Debug: Zeige gefilterte Ergebnisse und gemappte Truhen im Browser
+  if (window && window.console) {
+    console.log('DEBUG: selectedPeriodId', selectedPeriodId);
+    console.log('DEBUG: results (gefiltert)', results);
+    console.log('DEBUG: auswertung', auswertung);
+    if (auswertung && auswertung.length > 0) {
+      auswertung.forEach((row, idx) => {
+        console.log(`DEBUG: Spieler ${row.name} - chestDetails`, row.chestDetails);
+      });
+    }
+  }
   let totalIst = auswertung.reduce((sum, row) => sum + row.ist, 0);
   let totalSoll = auswertung.reduce((sum, row) => sum + row.soll, 0);
   const rankOrder = [
@@ -359,16 +372,46 @@ export default function EventArchivePage({ t, setCurrentPage }) {
                       else catBg = catIdx % 2 === 0 ? 'bg-gray-800' : 'bg-gray-700';
                       if (cat.name === "Rise of the Ancients" && cat.subChests) {
                         return (
-                          <th key={cat.name} colSpan={cat.subChests.length} className={`text-xs text-center ${catBg}`} style={{ verticalAlign: 'middle' }}>{cat.name}</th>
+                          <th
+                            key={cat.name}
+                            colSpan={cat.subChests.length}
+                            className={`text-xs text-center ${catBg}`}
+                            style={{ verticalAlign: 'middle' }}
+                          >
+                            {cat.name}
+                          </th>
                         );
                       }
                       let colSpan = Array.isArray(cat.levels) && cat.levels.length > 0 ? cat.levels.length * 2 + 1 : 1;
+                      if (cat.name === "Common Chests") colSpan += 1;
+                      if (cat.name === "Rare Chests") colSpan += 1;
+                      if (cat.name === "Epic Chests") colSpan += 1;
                       if (cat.name === "Chests of Tartaros") colSpan += 1;
+                      if (cat.name === "Elven Chests") colSpan += 1;
+                      if (cat.name === "Cursed Chests") colSpan += 1;
+                      if (cat.name === "Bank Chests") colSpan += 1;
+                      if (cat.name === "Runic Chests") colSpan += 1;
+                      if (cat.name === "Heroic Chests") colSpan += 1;
+                      if (cat.name === "Vault of the Ancients") colSpan += 1;
                       const cells = [
-                        <th key={cat.name} colSpan={colSpan} className={`text-xs text-center ${catBg}`} style={{ verticalAlign: 'middle' }}>{cat.name}</th>
+                        <th
+                          key={cat.name}
+                          colSpan={colSpan}
+                          className={`text-xs text-center ${catBg}`}
+                          style={{ verticalAlign: 'middle' }}
+                        >
+                          {cat.name}
+                        </th>
                       ];
                       if (cat.name === "Jormungandr Total") {
-                        cells.push(<th key="empty-after-jormungandr" className="text-xs text-center bg-gray-700" style={{ verticalAlign: 'middle', width: '50px', minWidth: '50px', maxWidth: '50px' }}></th>);
+                        cells.push(
+                          <th
+                            key="empty-after-jormungandr"
+                            className="text-xs text-center bg-gray-700"
+                            style={{ verticalAlign: 'middle', width: '50px', minWidth: '50px', maxWidth: '50px' }}
+                          >
+                          </th>
+                        );
                       }
                       return cells.flat();
                     })}
@@ -377,15 +420,33 @@ export default function EventArchivePage({ t, setCurrentPage }) {
                     {chestCategories.map((cat, catIdx) => {
                       const catBg = catIdx % 2 === 0 ? 'bg-gray-800' : 'bg-gray-700';
                       if (cat.name === "Arena Chests") {
-                        return (<th key={cat.name + 'arenaTotal'} className="text-xs" colSpan={1}><VerticalHeader>Arena Total</VerticalHeader></th>);
+                        return (
+                          <th key={cat.name + 'arenaTotal'} className="text-xs" colSpan={1}>
+                            <VerticalHeader>Arena Total</VerticalHeader>
+                          </th>
+                        );
                       }
                       if (cat.name === "Rise of the Ancients" && cat.subChests) {
-                        return cat.subChests.map(sub => (<th key={cat.name + sub.name} className={`text-xs ${catBg}`}><VerticalHeader>{sub.name}</VerticalHeader></th>));
+                        return cat.subChests.map(sub => (
+                          <th key={cat.name + sub.name} className={`text-xs ${catBg}`}>
+                            <VerticalHeader>{sub.name}</VerticalHeader>
+                          </th>
+                        ));
                       }
                       return Array.isArray(cat.levels) && cat.levels.length > 0
-                        ? cat.levels.map(level => (<th key={cat.name + level} colSpan="2" className="text-xs"><VerticalHeader>LV {level}</VerticalHeader></th>)).concat([
-                            <th key={cat.name + 'sum'} className="text-xs"><VerticalHeader>Anzahl gesamt</VerticalHeader></th>,
-                            <th key={cat.name + 'sumPoints'} className="text-xs"><VerticalHeader>Punkte gesamt</VerticalHeader></th>
+                        ? cat.levels.map(level => (
+                            <th key={cat.name + level} colSpan="2" className="text-xs">
+                              <VerticalHeader>
+                                {cat.name === "Bank Chests" ? level : `LV ${level}`}
+                              </VerticalHeader>
+                            </th>
+                          )).concat([
+                            <th key={cat.name + 'sum'} className="text-xs">
+                              <VerticalHeader>Anzahl gesamt</VerticalHeader>
+                            </th>,
+                            <th key={cat.name + 'sumPoints'} className="text-xs">
+                              <VerticalHeader>Punkte gesamt</VerticalHeader>
+                            </th>
                           ])
                         : <th key={cat.name + 'single'} className="text-xs"></th>;
                     })}
@@ -394,8 +455,12 @@ export default function EventArchivePage({ t, setCurrentPage }) {
                     {chestCategories.map(cat =>
                       Array.isArray(cat.levels) && cat.levels.length > 0
                         ? cat.levels.map(level => [
-                            <th key={cat.name + level + 'count'} className="text-xs"><VerticalHeader>Anzahl</VerticalHeader></th>,
-                            <th key={cat.name + level + 'points'} className="text-xs"><VerticalHeader>Punkte</VerticalHeader></th>
+                            <th key={cat.name + level + 'count'} className="text-xs">
+                              <VerticalHeader>Anzahl</VerticalHeader>
+                            </th>,
+                            <th key={cat.name + level + 'points'} className="text-xs">
+                              <VerticalHeader>Punkte</VerticalHeader>
+                            </th>
                           ]).flat().concat([
                             <th key={cat.name + 'sum2'} className="text-xs"></th>,
                             <th key={cat.name + 'sumPoints2'} className="text-xs"></th>
@@ -440,21 +505,60 @@ export default function EventArchivePage({ t, setCurrentPage }) {
                             </td>
                           ));
                         } else if (Array.isArray(cat.levels) && cat.levels.length > 0) {
-                          return cat.levels.map((level, levelIdx) => [
-                            <td key={row.name + '-' + idx + '-' + cat.name + '-' + level + '-count-' + levelIdx} className={`p-2 ${catBg}`}>
-                              {row.chestDetails.filter(chest => chest.category === cat.name && chest.level === level).reduce((sum, chest) => sum + (chest.count || 0), 0)}
-                            </td>,
-                            <td key={row.name + '-' + idx + '-' + cat.name + '-' + level + '-points-' + levelIdx} className={`p-2 ${catBg}`}>
-                              {row.chestDetails.filter(chest => chest.category === cat.name && chest.level === level).reduce((sum, chest) => sum + (chest.points || 0), 0)}
-                            </td>
-                          ]).flat().concat([
-                            <td key={row.name + '-' + idx + '-' + cat.name + '-sum'} className={`p-2 font-semibold ${catBg}`}>
-                              {row.chestDetails.filter(chest => chest.category === cat.name).reduce((sum, chest) => sum + (chest.count || 0), 0)}
-                            </td>,
-                            <td key={row.name + '-' + idx + '-' + cat.name + '-sumPoints'} className={`p-2 font-semibold ${catBg}`}>
-                              {row.chestDetails.filter(chest => chest.category === cat.name).reduce((sum, chest) => sum + (chest.points || 0), 0)}
-                            </td>
-                          ]);
+                          // Bank Chests: tolerant nach Kategorie und Name/Level
+                          if (cat.name === "Bank Chests") {
+                            const nameMap = {
+                              Wooden: "Wooden Chest",
+                              Bronze: "Bronze Chest",
+                              Silver: "Silver Chest",
+                              Golden: "Golden Chest",
+                              Precious: "Precious Chest",
+                              Magic: "Magic Chest"
+                            };
+                            return cat.levels.map((level, levelIdx) => [
+                              <td key={row.name + '-' + idx + '-' + cat.name + '-' + level + '-count-' + levelIdx} className={`p-2 ${catBg}`}>
+                                {row.chestDetails.filter(chest => {
+                                  const expectedName = nameMap[level] || level + " Chest";
+                                  return (chest.category === "Bank Chests" && (chest.Name === expectedName || chest.name === expectedName || String(chest.level).toLowerCase() === String(level).toLowerCase()));
+                                }).reduce((sum, chest) => sum + (chest.count || 0), 0)}
+                              </td>,
+                              <td key={row.name + '-' + idx + '-' + cat.name + '-' + level + '-points-' + levelIdx} className={`p-2 ${catBg}`}>
+                                {row.chestDetails.filter(chest => {
+                                  const expectedName = nameMap[level] || level + " Chest";
+                                  return (chest.category === "Bank Chests" && (chest.Name === expectedName || chest.name === expectedName || String(chest.level).toLowerCase() === String(level).toLowerCase()));
+                                }).reduce((sum, chest) => sum + (chest.points || 0), 0)}
+                              </td>
+                            ]).flat().concat([
+                              <td key={row.name + '-' + idx + '-' + cat.name + '-sum'} className={`p-2 font-semibold ${catBg}`}>
+                                {row.chestDetails.filter(chest => chest.category === "Bank Chests").reduce((sum, chest) => sum + (chest.count || 0), 0)}
+                              </td>,
+                              <td key={row.name + '-' + idx + '-' + cat.name + '-sumPoints'} className={`p-2 font-semibold ${catBg}`}>
+                                {row.chestDetails.filter(chest => chest.category === "Bank Chests").reduce((sum, chest) => sum + (chest.points || 0), 0)}
+                              </td>
+                            ]);
+                          } else {
+                            // Levelspalten: tolerant nach Zahl/String
+                            return cat.levels.map((level, levelIdx) => [
+                              <td key={row.name + '-' + idx + '-' + cat.name + '-' + level + '-count-' + levelIdx} className={`p-2 ${catBg}`}>
+                                {row.chestDetails.filter(chest => {
+                                  // Level als Zahl oder String vergleichen
+                                  return (chest.category === cat.name && String(chest.level ?? chest.Level ?? "").toLowerCase() === String(level).toLowerCase());
+                                }).reduce((sum, chest) => sum + (chest.count || 0), 0)}
+                              </td>,
+                              <td key={row.name + '-' + idx + '-' + cat.name + '-' + level + '-points-' + levelIdx} className={`p-2 ${catBg}`}>
+                                {row.chestDetails.filter(chest => {
+                                  return (chest.category === cat.name && String(chest.level ?? chest.Level ?? "").toLowerCase() === String(level).toLowerCase());
+                                }).reduce((sum, chest) => sum + (chest.points || 0), 0)}
+                              </td>
+                            ]).flat().concat([
+                              <td key={row.name + '-' + idx + '-' + cat.name + '-sum'} className={`p-2 font-semibold ${catBg}`}>
+                                {row.chestDetails.filter(chest => chest.category === cat.name).reduce((sum, chest) => sum + (chest.count || 0), 0)}
+                              </td>,
+                              <td key={row.name + '-' + idx + '-' + cat.name + '-sumPoints'} className={`p-2 font-semibold ${catBg}`}>
+                                {row.chestDetails.filter(chest => chest.category === cat.name).reduce((sum, chest) => sum + (chest.points || 0), 0)}
+                              </td>
+                            ]);
+                          }
                         } else {
                           return (
                             <td key={row.name + '-' + idx + '-' + cat.name + '-single'} className={`p-2 ${catBg}`}>

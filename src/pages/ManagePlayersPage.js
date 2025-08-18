@@ -21,7 +21,22 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
   // Fallback für t, falls nicht übergeben
   const translations = {
     managePlayersTitle: 'Spieler verwalten',
-    // ...weitere Defaults nach Bedarf
+    searchPlaceholder: 'Spieler suchen...',
+    addPlayerTitle: 'Spieler hinzufügen',
+    nameLabel: 'Name',
+    aliasesLabel: 'Aliase',
+    rankLabel: 'Rang',
+    troopStrengthLabel: 'Truppenstärke',
+    addButton: 'Hinzufügen',
+    editButton: 'Bearbeiten',
+    deleteButton: 'Löschen',
+    saveButton: 'Speichern',
+    cancelButton: 'Abbrechen',
+    errorFillFields: 'Bitte alle Pflichtfelder ausfüllen (Name, Rang, Truppenstärke).',
+    errorAddPlayer: 'Fehler beim Anlegen des Spielers:',
+    confirmNameExists: 'Achtung: Ein Spieler mit diesem Namen oder Alias existiert bereits. Trotzdem anlegen?',
+    noPlayersFound: 'Keine Spieler gefunden.',
+    ...t
   };
   t = t || translations;
   const [players, setPlayers] = useState([]);
@@ -215,7 +230,7 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
   const handleAddPlayer = async () => {
     setAddError("");
     if (!form.name || !form.rank || !form.troopStrength) {
-      setAddError("Bitte alle Pflichtfelder ausfüllen (Name, Rang, Truppenstärke).");
+      setAddError(t.errorFillFields);
       return;
     }
 
@@ -226,7 +241,7 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
     const allAliases = players.flatMap(p => (p.aliases || []).map(a => a.toLowerCase()));
     const conflict = allNames.includes(lowerName) || allAliases.includes(lowerName) || newAliases.some(a => allNames.includes(a) || allAliases.includes(a));
     if (conflict) {
-      const proceed = window.confirm("Achtung: Ein Spieler mit diesem Namen oder Alias existiert bereits. Trotzdem anlegen?");
+      const proceed = window.confirm(t.confirmNameExists);
       if (!proceed) return;
     }
 
@@ -250,7 +265,7 @@ export default function ManagePlayersPage({ t, setCurrentPage }) {
         troopStrength: ""
       });
     } catch (err) {
-      setAddError("Fehler beim Anlegen des Spielers: " + (err.message || err.code || err.toString()));
+      setAddError(t.errorAddPlayer + ' ' + (err.message || err.code || err.toString()));
     }
   };
 

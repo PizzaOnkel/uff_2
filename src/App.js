@@ -146,6 +146,9 @@ class AppContent extends React.Component {
       case 'uffMusik':
         const UFF_Musik = require('./pages/UFF_Musik').default;
         return <UFF_Musik t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'musikShop':
+        const MusikShopPage = require('./pages/MusikShopPage').default;
+        return <MusikShopPage t={t} setCurrentPage={this.setCurrentPage} />;
       default:
         return <HomePage t={t} language={language} setLanguage={this.setLanguage} setCurrentPage={this.setCurrentPage} />;
     }

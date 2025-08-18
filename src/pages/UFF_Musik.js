@@ -198,6 +198,16 @@ export default function UFF_Musik({ t, setCurrentPage }) {
               </div>
             ))}
           </div>
+
+          {/* Button zum Shop */}
+          <div className="w-full flex justify-center mt-8">
+            <button
+              className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded shadow"
+              onClick={() => setCurrentPage && setCurrentPage("musikShop")}
+            >
+              zum Shop…
+            </button>
+          </div>
         </div>
       </div>
       <footer className="mt-auto text-gray-500 text-sm">{t?.copyright}</footer>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { translations } from '../translations/translations';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, getDocs, deleteDoc, doc, setDoc, addDoc } from 'firebase/firestore';
@@ -93,10 +94,10 @@ async function exportAggregatedDataToCSV(aggregatedData) {
   }
 }
 // Hilfsfunktion für Klartext-Zeitraum
-function formatPeriod(period) {
+function formatPeriod(period, lang) {
   if (period.start && period.end) {
-    const start = new Date(period.start).toLocaleDateString('de-DE');
-    const end = new Date(period.end).toLocaleDateString('de-DE');
+    const start = new Date(period.start).toLocaleDateString(lang === 'de' ? 'de-DE' : lang);
+    const end = new Date(period.end).toLocaleDateString(lang === 'de' ? 'de-DE' : lang);
     return `${start} – ${end}`;
   }
   return period.id;
@@ -147,13 +148,16 @@ const dialogBox = {
 // Perioden werden jetzt dynamisch aus Firestore geladen
 
 function AdminDashboard2({ setCurrentPage }) {
+  // Sprache aus localStorage oder Default holen
+  const lang = localStorage.getItem('lang') || 'de';
+  const t = translations[lang] || translations['de'];
   // Sortier-Optionen für Mappingvorschläge
   const [sortField, setSortField] = useState('category'); // 'category' oder 'chestName'
   const [sortOrder, setSortOrder] = useState('asc'); // 'asc' oder 'desc'
   // ...existing code...
   // Ergebnisse veröffentlichen
   const handlePublish = async () => {
-    setPublishStatus('läuft...');
+  setPublishStatus(t.statusRunning || 'läuft...');
     try {
       // Schreibe jede Gruppe als eigenes Dokument in publishedResults
       for (const group of aggregatedData) {
@@ -167,13 +171,13 @@ function AdminDashboard2({ setCurrentPage }) {
         console.log('[DEBUG] Schreibe publishedResults:', docRef.path, payload);
         await setDoc(docRef, payload);
       }
-      setPublishStatus('erledigt');
-      setToast('Ergebnisse veröffentlicht!');
+  setPublishStatus(t.statusDone || 'erledigt');
+  setToast(t.resultsPublished || 'Ergebnisse veröffentlicht!');
       setTimeout(() => setToast(''), 2000);
       console.log('[DEBUG] Ergebnisse erfolgreich veröffentlicht!');
     } catch (e) {
-      setPublishStatus('Fehler');
-      setToast('Fehler beim Veröffentlichen!');
+  setPublishStatus(t.statusError || 'Fehler');
+  setToast(t.errorPublishing || 'Fehler beim Veröffentlichen!');
       setTimeout(() => setToast(''), 3000);
       console.error('[DEBUG] Fehler beim Veröffentlichen:', e);
     }
@@ -185,24 +189,24 @@ function AdminDashboard2({ setCurrentPage }) {
   const [showExportSuccess, setShowExportSuccess] = useState(false);
   const handleExportCSV = async () => {
     console.log('[DEBUG] handleExportCSV gestartet');
-    setExportStatus('läuft...');
+  setExportStatus(t.statusRunning || 'läuft...');
     try {
       const result = await exportAggregatedDataToCSV(aggregatedData);
       console.log('[DEBUG] exportAggregatedDataToCSV Ergebnis:', result);
       if (result.ok) {
-        setExportStatus('erledigt');
-        setShowExportSuccess(true);
-        setToast('CSV erfolgreich exportiert!');
+  setExportStatus(t.statusDone || 'erledigt');
+  setShowExportSuccess(true);
+  setToast(t.csvExportSuccess || 'CSV erfolgreich exportiert!');
         setTimeout(() => setToast(''), 2000);
       } else {
-        setExportStatus('Fehler');
-        setToast('Fehler beim CSV-Export: ' + (result.error || 'Unbekannt'));
+  setExportStatus(t.statusError || 'Fehler');
+  setToast(t.errorCSVExport + ': ' + (result.error || t.unknownError || 'Unbekannt'));
         setTimeout(() => setToast(''), 3000);
         console.error('[DEBUG] Fehler beim CSV-Export:', result.error);
       }
     } catch (err) {
-      setExportStatus('Fehler');
-      setToast('Fehler beim CSV-Export: ' + (err.message || 'Unbekannt'));
+  setExportStatus(t.statusError || 'Fehler');
+  setToast(t.errorCSVExport + ': ' + (err.message || t.unknownError || 'Unbekannt'));
       setTimeout(() => setToast(''), 3000);
       console.error('[DEBUG] Unerwarteter Fehler im Export-Handler:', err);
     }
@@ -215,7 +219,7 @@ function AdminDashboard2({ setCurrentPage }) {
   // Neue Löschfunktion: komplette Session (uploadId) löschen oder Altbestände ohne uploadId
   const handleDeleteSession = async (uploadId) => {
     try {
-      setDeleteLoading(true);
+  setDeleteLoading(true);
       const batch = writeBatch(db);
       let q, snapshot;
       if (!uploadId || uploadId === 'ohneUploadId') {
@@ -253,12 +257,12 @@ function AdminDashboard2({ setCurrentPage }) {
         sessionMap[uploadId].count++;
       });
       setJsonFileEntries(Object.values(sessionMap));
-      setDeleteLoading(false);
-      setShowDeleteDialog(false);
-      setSelectedDeleteEntry(null);
+  setDeleteLoading(false);
+  setShowDeleteDialog(false);
+  setSelectedDeleteEntry(null);
     } catch (e) {
-      setDeleteLoading(false);
-      setDeleteError('Fehler beim Löschen der Session!');
+  setDeleteLoading(false);
+  setDeleteError(t.errorDeleteSession || 'Fehler beim Löschen der Session!');
     }
   };
 // (alte Löschfunktion entfernt, nur noch Session-Löschung aktiv)
@@ -610,7 +614,7 @@ useEffect(() => {
                   })
                   .map((period) => (
                     <option key={period.id} value={period.id} className="bg-gray-900 text-gray-100">
-                      {period.name ? `${period.name} (${formatPeriod(period)})` : formatPeriod(period)}
+                      {period.name ? `${period.name} (${formatPeriod(period, lang)})` : formatPeriod(period, lang)}
                     </option>
                   ))}
               </select>
@@ -619,7 +623,7 @@ useEffect(() => {
             <div className="mb-4">
               <label className="block mb-2">Event/Periode:</label>
               <div className="p-2 rounded bg-gray-900 text-gray-100 border border-gray-700">
-                {periods[0].name ? `${periods[0].name} (${formatPeriod(periods[0])})` : formatPeriod(periods[0])}
+                {periods[0].name ? `${periods[0].name} (${formatPeriod(periods[0], lang)})` : formatPeriod(periods[0], lang)}
               </div>
             </div>
           ) : (
