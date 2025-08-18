@@ -7,20 +7,23 @@ import React, { useRef } from "react";
 // Stripe initialisieren (Public Key aus Stripe Dashboard!)
 // const stripePromise = loadStripe("pk_test_1234567890"); // <-- DEIN PUBLIC KEY HIER
 
+// Basis-URL für GitHub Pages Deployment (mit abschließendem "/")
+const baseUrl = "/musik/";
+
 // Tracks mit Preisen und Dateipfaden (korrekte Zuordnung: Track 1 = Track_0.mp3 ... Track 18 = Track_17.mp3)
 const tracks = Array.from({ length: 18 }, (_, i) => ({
   id: i + 1,
   title: `Track ${i + 1}`,
-  previewUrl: `/musik/Track_${i}.mp3`,
+  previewUrl: `${baseUrl}Track_${i}.mp3`,
   price: "0,99 €",
-  downloadUrl: `/musik/Track_${i}.mp3`,
+  downloadUrl: `${baseUrl}Track_${i}.mp3`,
 })); // Sortiert von 1 bis 18
 
 const album = {
   title: "Complete Live Concert Album",
-  cover: "/musik/Image_2025-08-17.png",
+  cover: `${baseUrl}Image_2025-08-17.png`,
   price: "14,99 €",
-  downloadUrl: "/musik/Album_Complete.zip",
+  downloadUrl: `${baseUrl}Album_Complete.zip`,
   description: "Vollständiges LiveKonzert inklusive Bonustracks."
 };
 
