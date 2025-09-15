@@ -43,7 +43,8 @@ def build_react():
     if not is_node_server_running():
         tkinter.messagebox.showwarning("Achtung", "Starte zuerst den Node-Server (Backend), bevor du den Build ausführst!")
         return
-    subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && npm run build"', shell=True)
+    # Setze PUBLIC_URL für GitHub Pages Build
+    subprocess.Popen(f'start cmd /K "cd /d {UFF2_PATH} && set PUBLIC_URL=/uff_2 && npm run build"', shell=True)
 
 def git_commit_and_push():
     # Hinweis: Build sollte vorher ausgeführt werden
