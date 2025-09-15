@@ -79,8 +79,8 @@ function MusikShop_King_Chris_Page({ t, setCurrentPage }) {
                     />
                   </div>
                 ) : (
-                  <a href={album.downloadUrl} target="_blank" rel="noopener noreferrer" className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded mb-2 shadow-lg inline-block">
-                    Album Download
+                  <a href={album.downloadUrl} download className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded mb-2 shadow-lg inline-block">
+                    Album herunterladen
                   </a>
                 )}
               </div>
