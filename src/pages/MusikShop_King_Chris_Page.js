@@ -2,11 +2,12 @@ import React, { useRef, useState } from "react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 function MusikShop_King_Chris_Page({ t, setCurrentPage }) {
+  const base = process.env.PUBLIC_URL || "";
   const album = {
     title: "King Chris - Complete Live Concert Album",
-    cover: "/musik/King_Chris/King_Chris_Front_Cover.jpg",
+    cover: `${base}/musik/King_Chris/King_Chris_Front_Cover.jpg`,
     price: "17,99 €",
-    downloadUrl: "/musik/King_Chris/Album_Complete.zip",
+    downloadUrl: `${base}/musik/King_Chris/Album_Complete.zip`,
     description: "Vollständiges LiveKonzert inklusive Bonustracks."
   };
   const tracks = Array.from({ length: 19 }, (_, i) => {
@@ -14,9 +15,9 @@ function MusikShop_King_Chris_Page({ t, setCurrentPage }) {
     return {
       id: i + 1,
       title: `Track ${i + 1}`,
-      previewUrl: `/musik/King_Chris/Track_${num}.mp3`,
+      previewUrl: `${base}/musik/King_Chris/Track_${num}.mp3`,
       price: "0,99 €",
-      downloadUrl: `/musik/King_Chris/Track_${num}.mp3`,
+      downloadUrl: `${base}/musik/King_Chris/Track_${num}.mp3`,
     };
   });
 
