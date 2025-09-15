@@ -8,7 +8,7 @@ import React, { useRef } from "react";
 // const stripePromise = loadStripe("pk_test_1234567890"); // <-- DEIN PUBLIC KEY HIER
 
 // Absolute Basis-URL für GitHub Pages Deployment (angepasst auf dein Repo)
-const baseUrl = "./musik/"; // relative Pfadangabe, funktioniert lokal und online
+const baseUrl = "/musik/"; // absolute Pfadangabe für Online-Verfügbarkeit
 
 // Tracks mit Preisen und Dateipfaden (korrekte Zuordnung: Track 1 = Track_0.mp3 ... Track 18 = Track_17.mp3)
 const tracks = Array.from({ length: 18 }, (_, i) => ({
@@ -21,9 +21,9 @@ const tracks = Array.from({ length: 18 }, (_, i) => ({
 
 const album = {
   title: "Complete Live Concert Album",
-  cover: "./musik/Image_2025-08-17.png", // relative Pfadangabe
+  cover: "/musik/We_Stand_Together/Image_2025-08-17.png", // absolut für Online
   price: "14,99 €",
-  downloadUrl: "./musik/Album_Complete.zip", // relative Pfadangabe
+  downloadUrl: "/musik/We_Stand_Together/Album_Complete.zip", // absolut für Online
   description: "Vollständiges LiveKonzert inklusive Bonustracks."
 };
 
