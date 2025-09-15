@@ -2,20 +2,142 @@ import React, { useRef, useState } from "react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 function MusikShop_We_Stand_Together_Page({ t, setCurrentPage }) {
   // Daten für "We Stand Together"
+  const base = process.env.PUBLIC_URL || "";
   const album = {
     title: "We Stand Together - Complete Live Concert Album",
-  cover: "/musik/We_Stand_Together/Image_2025-08-17.png",
+    cover: `${base}/musik/We_Stand_Together/Image_2025-08-17.png`,
     price: "14,99 €",
-      downloadUrl: "/musik/Album_Complete.zip",
+    downloadUrl: `${base}/musik/Album_Complete.zip`,
     description: "Vollständiges LiveKonzert inklusive Bonustracks."
   };
-  const tracks = Array.from({ length: 18 }, (_, i) => ({
-    id: i + 1,
-    title: `Track ${i + 1}`,
-  previewUrl: `/musik/We_Stand_Together/Track_${i}.mp3`,
-    price: "0,99 €",
-  downloadUrl: `/musik/We_Stand_Together/Track_${i}.mp3`,
-  }));
+  const tracks = [
+    {
+      id: 1,
+      title: "Track 1",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_0.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_0.mp3`,
+    },
+    {
+      id: 2,
+      title: "Track 2",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_1.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_1.mp3`,
+    },
+    {
+      id: 3,
+      title: "Track 3",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_2.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_2.mp3`,
+    },
+    {
+      id: 4,
+      title: "Track 4",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_3.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_3.mp3`,
+    },
+    {
+      id: 5,
+      title: "Track 5",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_4.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_4.mp3`,
+    },
+    {
+      id: 6,
+      title: "Track 6",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_5.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_5.mp3`,
+    },
+    {
+      id: 7,
+      title: "Track 7",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_6.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_6.mp3`,
+    },
+    {
+      id: 8,
+      title: "Track 8",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_7.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_7.mp3`,
+    },
+    {
+      id: 9,
+      title: "Track 9",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_8.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_8.mp3`,
+    },
+    {
+      id: 10,
+      title: "Track 10",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_9.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_9.mp3`,
+    },
+    {
+      id: 11,
+      title: "Track 11",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_10.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_10.mp3`,
+    },
+    {
+      id: 12,
+      title: "Track 12",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_11.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_11.mp3`,
+    },
+    {
+      id: 13,
+      title: "Track 13",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_12.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_12.mp3`,
+    },
+    {
+      id: 14,
+      title: "Track 14",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_13.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_13.mp3`,
+    },
+    {
+      id: 15,
+      title: "Track 15",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_14.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_14.mp3`,
+    },
+    {
+      id: 16,
+      title: "Track 16",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_15.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_15.mp3`,
+    },
+    {
+      id: 17,
+      title: "Track 17",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_16.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_16.mp3`,
+    },
+    {
+      id: 18,
+      title: "Track 18",
+      previewUrl: `${base}/musik/We_Stand_Together/Track_17.mp3`,
+      price: "0,99 €",
+      downloadUrl: `${base}/musik/We_Stand_Together/Track_17.mp3`,
+    },
+  ];
 
   const audioRefs = useRef([]);
   const [albumPaid, setAlbumPaid] = useState(false);

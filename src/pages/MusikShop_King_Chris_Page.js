@@ -9,13 +9,16 @@ function MusikShop_King_Chris_Page({ t, setCurrentPage }) {
     downloadUrl: "/musik/King_Chris/Album_Complete.zip",
     description: "Vollständiges LiveKonzert inklusive Bonustracks."
   };
-  const tracks = Array.from({ length: 19 }, (_, i) => ({
-    id: i + 1,
-    title: `Track ${i + 1}`,
-    previewUrl: `/musik/King_Chris/Track_${i + 1}.mp3`,
-    price: "0,99 €",
-    downloadUrl: `/musik/King_Chris/Track_${i + 1}.mp3`,
-  }));
+  const tracks = Array.from({ length: 19 }, (_, i) => {
+    const num = String(i + 1).padStart(2, '0');
+    return {
+      id: i + 1,
+      title: `Track ${i + 1}`,
+      previewUrl: `/musik/King_Chris/Track_${num}.mp3`,
+      price: "0,99 €",
+      downloadUrl: `/musik/King_Chris/Track_${num}.mp3`,
+    };
+  });
 
   const audioRefs = useRef([]);
   const [albumPaid, setAlbumPaid] = useState(false);
