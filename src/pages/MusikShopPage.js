@@ -27,7 +27,7 @@ const album = {
   description: "Vollständiges LiveKonzert inklusive Bonustracks."
 };
 
-function MusikShopPage() {
+function MusikShopPage(props) {
   const audioRefs = useRef([]);
 
   const handlePreview = (idx) => {
@@ -47,70 +47,39 @@ function MusikShopPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white p-4 pb-32 relative">
-      {/* Statischer Zurück-Button */}
       <button onClick={() => window.history.back()} className="fixed top-1/2 right-4 transform -translate-y-1/2 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded shadow-lg">
         Zurück
       </button>
-
       <div className="w-full flex flex-col items-center">
-        <h1 className="text-4xl font-bold mb-6 text-center text-blue-400">Musik-Shop</h1>
-
-        <div className="mb-8 w-full max-w-2xl bg-gray-800 rounded p-4 flex flex-col items-center">
-          <p className="mb-4 text-lg text-blue-200 text-center">
-            Willkommen an alle Fans echter 80er Rockmusik!<br /><br />
-            Damit dieses Projekt erhalten werden kann, ist es notwendig, dass wir Einnahmen generieren.<br />
-            Da ich (PizzaOnkel) nicht viel von Spenden halte, bekommt jeder Spieler die Möglichkeit, KI-generierte Musik zu kaufen.<br />
-            Hier ein kurzer Überblick über meine Tracks und das Album. Das Probehören spielt zufällig ausgewählte Sequenzen der Tracks für 60 Sekunden ab.
-          </p>
-
-          <div className="flex items-center mb-6 w-full justify-center">
-            <div className="w-40 h-40 bg-gray-700 flex items-center justify-center mr-6 rounded shadow overflow-hidden">
-              <img src={album.cover} alt="Albumcover" className="w-full h-full object-cover" />
-            </div>
-            <div>
-              <p className="font-bold text-lg mb-1">{album.title}</p>
-              <p className="text-blue-300 mb-2">{album.description}</p>
-              <p className="text-blue-300 mb-2">Preis: {album.price}</p>
-              <a href={album.downloadUrl} target="_blank" rel="noopener noreferrer" className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded mb-2 shadow-lg inline-block">
-                Album kaufen / Download
-              </a>
-            </div>
+        <h1 className="text-4xl font-bold mb-6 text-center text-blue-400">Musik-Shop Übersicht</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-3xl mb-8">
+          {/* Platzhalter 1: We Stand Together */}
+          <div className="bg-gray-800 rounded p-6 flex flex-col items-center shadow-lg">
+            <img src="/musik/We_Stand_Together/Image_2025-08-17.png" alt="We Stand Together" className="w-32 h-32 object-cover mb-4 rounded" />
+            <h2 className="text-xl font-bold mb-2 text-blue-300">We Stand Together</h2>
+            <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded shadow" onClick={() => props.setCurrentPage && props.setCurrentPage("musikShopWeStandTogether")}>Zum Shop</button>
           </div>
-
-          <table className="w-full text-center mb-6 bg-gray-900 rounded shadow-lg border border-gray-700">
-            <thead>
-              <tr className="bg-gray-700">
-                <th className="p-2">#</th>
-                <th className="p-2">Titel</th>
-                <th className="p-2">Preis</th>
-                <th className="p-2">Probehören</th>
-                <th className="p-2">Download</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tracks.map((track, idx) => (
-                <tr key={track.id} className="hover:bg-gray-800">
-                  <td className="p-2 text-center">{track.id}</td>
-                  <td className="p-2">{track.title}</td>
-                  <td className="p-2 text-center">{track.price}</td>
-                  <td className="p-2 text-center">
-                    <button className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded shadow" onClick={() => handlePreview(idx)}>
-                      Probehören (60 Sekunden)
-                    </button>
-                    <audio ref={(el) => (audioRefs.current[idx] = el)} src={track.previewUrl} preload="none" />
-                  </td>
-                  <td className="p-2 text-center">
-                    <a href={track.downloadUrl} target="_blank" rel="noopener noreferrer" className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded shadow inline-block">
-                      Download
-                    </a>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {/* Platzhalter 2: PO Friends Goes Country */}
+          <div className="bg-gray-800 rounded p-6 flex flex-col items-center shadow-lg">
+            <img src="/musik/PO_Friends_Goes_Country/cover.png" alt="PO Friends Goes Country" className="w-32 h-32 object-cover mb-4 rounded" />
+            <h2 className="text-xl font-bold mb-2 text-blue-300">PO Friends Goes Country</h2>
+            <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded shadow" onClick={() => props.setCurrentPage && props.setCurrentPage("musikShopPOFriendsGoesCountry")}>Zum Shop</button>
+          </div>
+          {/* Platzhalter 3: Love Beyond The Silence */}
+          <div className="bg-gray-800 rounded p-6 flex flex-col items-center shadow-lg">
+            <img src="/musik/Love_Beyond_The_Silence/cover.png" alt="Love Beyond The Silence" className="w-32 h-32 object-cover mb-4 rounded" />
+            <h2 className="text-xl font-bold mb-2 text-blue-300">Love Beyond The Silence</h2>
+            <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded shadow" onClick={() => props.setCurrentPage && props.setCurrentPage("musikShopLoveBeyondTheSilence")}>Zum Shop</button>
+          </div>
+          {/* Platzhalter 4: King Chris */}
+          <div className="bg-gray-800 rounded p-6 flex flex-col items-center shadow-lg">
+          <img src="/musik/King_Chris/King_Chris_Front_Cover.jpg" alt="King Chris" className="w-32 h-32 object-cover mb-4 rounded" />
+            <h2 className="text-xl font-bold mb-2 text-blue-300">King Chris</h2>
+            <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded shadow" onClick={() => props.setCurrentPage && props.setCurrentPage("musikShopKingChris")}>Zum Shop</button>
+          </div>
         </div>
+        <footer className="mt-auto text-gray-500 text-sm">© PizzaOnkel Musik-Shop</footer>
       </div>
-      <footer className="mt-auto text-gray-500 text-sm">© PizzaOnkel Musik-Shop</footer>
     </div>
   );
 }

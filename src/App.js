@@ -149,6 +149,13 @@ class AppContent extends React.Component {
       case 'musikShop':
         const MusikShopPage = require('./pages/MusikShopPage').default;
         return <MusikShopPage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'musikShopKingChris':
+        const MusikShop_King_Chris_Page = require('./pages/MusikShop_King_Chris_Page').default;
+        return <MusikShop_King_Chris_Page t={t} setCurrentPage={this.setCurrentPage} />;
+        return <MusikShopPage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'musikShopWeStandTogether':
+        const MusikShop_We_Stand_Together_Page = require('./pages/MusikShop_We_Stand_Together_Page').default;
+        return <MusikShop_We_Stand_Together_Page t={t} setCurrentPage={this.setCurrentPage} />;
       default:
         return <HomePage t={t} language={language} setLanguage={this.setLanguage} setCurrentPage={this.setCurrentPage} />;
     }

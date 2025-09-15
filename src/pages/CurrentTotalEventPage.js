@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import StickyBackButton from "../components/StickyBackButton";
 import Papa from "papaparse";
@@ -206,7 +205,7 @@ const verticalHeaders = [
   });
   // Debug: Zeige finale Auswertung (Tabellenzeilen)
   console.log('[DEBUG][Tabellenzeilen]:', auswertung.map(row => row.name));
-  // ...entfernt, da oben bereits korrekt deklariert...
+  // ...existing code...
 
   // Summen für Gesamtergebnis berechnen
   let totalIst = auswertung.reduce((sum, row) => sum + row.ist, 0);
@@ -856,7 +855,7 @@ const verticalHeaders = [
                                               if (!window.__chestDebugged[chestKey]) {
                                                 window.__chestDebugged[chestKey] = true;
                                                 // eslint-disable-next-line no-console
-                                                console.warn('[DEBUG][Punkte-Mapping] Chest:',
+                                                console.warn('[DEBUG][Punkte-Mapping] Truhe:',
                                                   (chest.Name||"-") + " | " + (chest.category||"-") + " | " + (chest.Type||"-") + " | " + (chest.Source||"-") + " | " + (chest.level ?? chest.Level ?? "-")
                                                 );
                                                 // Detailliertes Level-Debug
@@ -927,7 +926,7 @@ const verticalHeaders = [
                                           return sum;
                                         }, 0)
                                 }
-                              </td>
+                              </td>,
                             ];
                           }).flat().concat([
                             <td
