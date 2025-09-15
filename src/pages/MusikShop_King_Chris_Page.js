@@ -17,7 +17,7 @@ function MusikShop_King_Chris_Page({ t, setCurrentPage }) {
       title: `Track ${i + 1}`,
       previewUrl: `${base}/musik/King_Chris/Track_${num}.mp3`,
       price: "0,99 €",
-      downloadUrl: `${base}/musik/King_Chris/Track_${num}.mp3`,
+  downloadUrl: `/download/King_Chris/Track_${num}.mp3`,
     };
   });
 
@@ -130,7 +130,7 @@ function MusikShop_King_Chris_Page({ t, setCurrentPage }) {
                           }}
                         />
                       ) : (
-                        <a href={track.downloadUrl} target="_blank" rel="noopener noreferrer" className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded shadow inline-block">
+                        <a href={track.downloadUrl} download className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded shadow inline-block">
                           Download
                         </a>
                       )}
