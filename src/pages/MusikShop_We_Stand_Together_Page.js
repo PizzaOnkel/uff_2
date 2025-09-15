@@ -158,7 +158,7 @@ function MusikShop_We_Stand_Together_Page({ t, setCurrentPage }) {
   };
 
   return (
-    <PayPalScriptProvider options={{ "client-id": "AacXr8FePzoU735adTnZEwWD_drzh36RCbdo02GFWHF5MQ2eyuwN_MoFZTHgZFXRWwdLS_ksrY5Cs9z7", currency: "EUR" }}>
+  <PayPalScriptProvider options={{ "client-id": "AeTClJ5IRKPfgCeucTp2ly3RzV27VO0OSEpukrJxP6YbqUBRQuzFljO7_IqgdM79BIHsBilOeOx3TE1P", currency: "EUR" }}>
       <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white p-4 pb-32 relative">
         <button
           onClick={() => setCurrentPage && setCurrentPage("musikShop")}
