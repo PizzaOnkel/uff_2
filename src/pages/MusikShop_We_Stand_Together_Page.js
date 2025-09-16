@@ -1,13 +1,29 @@
 import React, { useRef, useState } from "react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 function MusikShop_We_Stand_Together_Page({ t, setCurrentPage }) {
+  // Geräteerkennung
+  const isMobile = typeof window !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(window.navigator.userAgent);
+
+  // Alle Tracks nacheinander herunterladen
+  const handleDownloadAll = () => {
+    tracks.forEach((track, idx) => {
+      setTimeout(() => {
+        const link = document.createElement('a');
+        link.href = track.downloadUrl;
+        link.download = '';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }, idx * 500); // 0,5s Abstand pro Download
+    });
+  };
   // Daten für "We Stand Together"
   const base = process.env.PUBLIC_URL || "";
   const album = {
     title: "We Stand Together - Complete Live Concert Album",
     cover: `${base}/musik/We_Stand_Together/Image_2025-08-17.png`,
     price: "14,99 €",
-    downloadUrl: `${base}/musik/Album_Complete.zip`,
+  downloadUrl: `/download/We_Stand_Together/We_Stand_Together.zip`,
     description: "Vollständiges LiveKonzert inklusive Bonustracks."
   };
   const tracks = [
@@ -177,6 +193,9 @@ function MusikShop_We_Stand_Together_Page({ t, setCurrentPage }) {
                 <p className="font-bold text-lg mb-1">{album.title}</p>
                 <p className="text-blue-300 mb-2">{album.description}</p>
                 <p className="text-blue-300 mb-2">Preis: {album.price}</p>
+                <div className="bg-yellow-100 text-yellow-800 p-2 rounded mb-2 text-sm font-semibold">
+                  Hinweis: Das komplette Album als ZIP-Archiv herunterladen:
+                </div>
                 {!albumPaid ? (
                   <div className="mb-2">
                     <PayPalButtons
@@ -197,9 +216,23 @@ function MusikShop_We_Stand_Together_Page({ t, setCurrentPage }) {
                     />
                   </div>
                 ) : (
-                  <a href={album.downloadUrl} download className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded mb-2 shadow-lg inline-block">
-                    Album herunterladen
-                  </a>
+                  <>
+                    {isMobile ? (
+                      <div className="bg-red-100 text-red-700 p-3 rounded mb-2 text-sm">
+                        ZIP-Download ist auf vielen Handys nicht direkt nutzbar. Bitte einzelne Tracks herunterladen.
+                      </div>
+                    ) : (
+                      <button onClick={handleDownloadAll} className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mb-2 shadow-lg inline-block">
+                        Alle Tracks herunterladen
+                      </button>
+                    )}
+                    <div className="bg-yellow-100 text-yellow-800 p-2 rounded mb-2 text-sm font-semibold">
+                      Hinweis: Das komplette Album als ZIP-Archiv herunterladen:
+                    </div>
+                    <a href={album.downloadUrl} download className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded mb-2 shadow-lg inline-block">
+                      Album herunterladen
+                    </a>
+                  </>
                 )}
               </div>
             </div>

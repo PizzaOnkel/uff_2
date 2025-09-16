@@ -2,12 +2,28 @@ import React, { useRef, useState } from "react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 function MusikShop_King_Chris_Page({ t, setCurrentPage }) {
+  // Geräteerkennung
+  const isMobile = typeof window !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(window.navigator.userAgent);
+
+  // Alle Tracks nacheinander herunterladen
+  const handleDownloadAll = () => {
+    tracks.forEach((track, idx) => {
+      setTimeout(() => {
+        const link = document.createElement('a');
+        link.href = track.downloadUrl;
+        link.download = '';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }, idx * 500); // 0,5s Abstand pro Download
+    });
+  };
   const base = process.env.PUBLIC_URL || "";
   const album = {
     title: "King Chris - Complete Live Concert Album",
     cover: `${base}/musik/King_Chris/King_Chris_Front_Cover.jpg`,
     price: "17,99 €",
-    downloadUrl: `${base}/musik/King_Chris/Album_Complete.zip`,
+  downloadUrl: `/download/King_Chris/Album_Complete.zip`,
     description: "Vollständiges LiveKonzert inklusive Bonustracks."
   };
   const tracks = Array.from({ length: 19 }, (_, i) => {
@@ -79,9 +95,20 @@ function MusikShop_King_Chris_Page({ t, setCurrentPage }) {
                     />
                   </div>
                 ) : (
-                  <a href={album.downloadUrl} download className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded mb-2 shadow-lg inline-block">
-                    Album herunterladen
-                  </a>
+                  <>
+                    {isMobile ? (
+                      <div className="bg-red-100 text-red-700 p-3 rounded mb-2 text-sm">
+                        ZIP-Download ist auf vielen Handys nicht direkt nutzbar. Bitte einzelne Tracks herunterladen.
+                      </div>
+                    ) : (
+                      <button onClick={handleDownloadAll} className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mb-2 shadow-lg inline-block">
+                        Alle Tracks herunterladen
+                      </button>
+                    )}
+                    <a href={album.downloadUrl} download className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded mb-2 shadow-lg inline-block">
+                      Album herunterladen
+                    </a>
+                  </>
                 )}
               </div>
             </div>
