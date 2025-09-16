@@ -194,7 +194,7 @@ function MusikShop_We_Stand_Together_Page({ t, setCurrentPage }) {
                 <p className="text-blue-300 mb-2">{album.description}</p>
                 <p className="text-blue-300 mb-2">Preis: {album.price}</p>
                 <div className="bg-yellow-100 text-yellow-800 p-2 rounded mb-2 text-sm font-semibold">
-                  Hinweis: Das komplette Album als ZIP-Archiv herunterladen:
+                  Hinweis: Das komplette Album als ZIP-Archiv herunterladen. Handynutzer können nur einzelne Tracks herunterladen.
                 </div>
                 {!albumPaid ? (
                   <div className="mb-2">

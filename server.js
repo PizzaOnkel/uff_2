@@ -7,22 +7,29 @@ const cors = require('cors');
 
 
 const app = express();
+
 // Download-Route für Musikdateien mit Content-Disposition: attachment
 app.get('/download/:album/:file', (req, res) => {
   const album = req.params.album;
   const file = req.params.file;
   const filePath = path.join(__dirname, 'public', 'musik', album, file);
+  console.log('[DOWNLOAD-DEBUG] Anfrage:', req.originalUrl);
+  console.log('[DOWNLOAD-DEBUG] Pfad:', filePath);
   if (fs.existsSync(filePath)) {
+    console.log('[DOWNLOAD-DEBUG] Datei gefunden:', filePath);
     res.setHeader('Content-Disposition', `attachment; filename="${file}"`);
     res.setHeader('Content-Type', 'application/octet-stream');
-    res.sendFile(filePath);
+    res.sendFile(filePath, (err) => {
+      if (err) {
+        console.error('[DOWNLOAD-DEBUG] Fehler beim Senden:', err);
+        res.status(500).send('Fehler beim Download');
+      }
+    });
   } else {
+    console.error('[DOWNLOAD-DEBUG] Datei nicht gefunden:', filePath);
     res.status(404).send('Datei nicht gefunden');
   }
 });
-
-// Statische Auslieferung für ALLE Dateien im public-Ordner (z.B. info-audio.mp3)
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Statische Auslieferung für ALLE Dateien im public-Ordner (z.B. info-audio.mp3)
 app.use(express.static(path.join(__dirname, 'public')));
