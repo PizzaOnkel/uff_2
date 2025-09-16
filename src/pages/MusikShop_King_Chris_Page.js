@@ -23,7 +23,7 @@ function MusikShop_King_Chris_Page({ t, setCurrentPage }) {
     title: "King Chris - Complete Live Concert Album",
     cover: `${base}/musik/King_Chris/King_Chris_Front_Cover.jpg`,
     price: "17,99 €",
-  downloadUrl: `/download/King_Chris/Album_Complete.zip`,
+    downloadUrl: `${base}/musik/King_Chris/Album_Complete.zip`,
     description: "Vollständiges LiveKonzert inklusive Bonustracks."
   };
   const tracks = Array.from({ length: 19 }, (_, i) => {
