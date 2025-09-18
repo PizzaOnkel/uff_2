@@ -22,20 +22,31 @@ function MusikShop_King_Chris_Page({ t, setCurrentPage }) {
   const album = {
     title: "King Chris - Complete Live Concert Album",
     cover: `${base}/musik/King_Chris/King_Chris_Front_Cover.jpg`,
-    price: "17,99 €",
+  price: "19,99 €",
     downloadUrl: `${base}/musik/King_Chris/Album_Complete.zip`,
     description: "Vollständiges LiveKonzert inklusive Bonustracks."
   };
-  const tracks = Array.from({ length: 19 }, (_, i) => {
-    const num = String(i + 1).padStart(2, '0');
-    return {
-      id: i + 1,
-      title: `Track ${i + 1}`,
-      previewUrl: `${base}/musik/King_Chris/Track_${num}.mp3`,
-      price: "0,99 €",
-  downloadUrl: `/download/King_Chris/Track_${num}.mp3`,
-    };
-  });
+  const tracks = [
+    { id: 1, title: "Intro - Instrumental", previewUrl: `${base}/musik/King_Chris/Track_1.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_1.mp3` },
+    { id: 2, title: "Intro (Frontman's Opening)", previewUrl: `${base}/musik/King_Chris/Track_2.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_2.mp3` },
+    { id: 3, title: "The Outsider", previewUrl: `${base}/musik/King_Chris/Track_3.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_3.mp3` },
+    { id: 4, title: "Dreaming of Glory", previewUrl: `${base}/musik/King_Chris/Track_4.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_4.mp3` },
+    { id: 5, title: "First Steps", previewUrl: `${base}/musik/King_Chris/Track_5.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_5.mp3` },
+    { id: 6, title: "Fallings & Rising", previewUrl: `${base}/musik/King_Chris/Track_6.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_6.mp3` },
+    { id: 7, title: "Fight for Respect", previewUrl: `${base}/musik/King_Chris/Track_7.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_7.mp3` },
+    { id: 8, title: "Rising Star", previewUrl: `${base}/musik/King_Chris/Track_8.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_8.mp3` },
+    { id: 9, title: "The Call", previewUrl: `${base}/musik/King_Chris/Track_9.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_9.mp3` },
+    { id: 10, title: "30 Days", previewUrl: `${base}/musik/King_Chris/Track_10.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_10.mp3` },
+    { id: 11, title: "The Eve", previewUrl: `${base}/musik/King_Chris/Track_11.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_11.mp3` },
+    { id: 12, title: "Enter the Ring", previewUrl: `${base}/musik/King_Chris/Track_12.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_12.mp3` },
+    { id: 13, title: "Rise of the Champion", previewUrl: `${base}/musik/King_Chris/Track_13.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_13.mp3` },
+    { id: 14, title: "Champion’s Glory", previewUrl: `${base}/musik/King_Chris/Track_14.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_14.mp3` },
+    { id: 15, title: "The Final Bow", previewUrl: `${base}/musik/King_Chris/Track_15.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_15.mp3` },
+    { id: 16, title: "One More Time - Concert - Outro", previewUrl: `${base}/musik/King_Chris/Track_16.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_16.mp3` },
+    { id: 17, title: "Instumental", previewUrl: `${base}/musik/King_Chris/Track_17.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_17.mp3` },
+    { id: 18, title: "King Chris (BonusTrack)", previewUrl: `${base}/musik/King_Chris/Track_18.mp3`, price: "1,49 €", downloadUrl: `${base}/musik/King_Chris/Track_18.mp3` },
+  ];
+  // ...existing code...
 
   const audioRefs = useRef([]);
   const [albumPaid, setAlbumPaid] = useState(false);
@@ -82,7 +93,7 @@ function MusikShop_King_Chris_Page({ t, setCurrentPage }) {
                       createOrder={(data, actions) => {
                         return actions.order.create({
                           purchase_units: [{
-                            amount: { value: "17.99" },
+                            amount: { value: "19.99" },
                             description: album.title
                           }]
                         });
@@ -141,7 +152,7 @@ function MusikShop_King_Chris_Page({ t, setCurrentPage }) {
                           createOrder={(data, actions) => {
                             return actions.order.create({
                               purchase_units: [{
-                                amount: { value: "0.99" },
+                                amount: { value: "1.49" },
                                 description: track.title
                               }]
                             });

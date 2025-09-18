@@ -22,135 +22,135 @@ function MusikShop_We_Stand_Together_Page({ t, setCurrentPage }) {
   const album = {
     title: "We Stand Together - Complete Live Concert Album",
     cover: `${base}/musik/We_Stand_Together/Image_2025-08-17.png`,
-    price: "14,99 €",
+  price: "19,99 €",
     downloadUrl: `${base}/musik/We_Stand_Together/We_Stand_Together.zip`,
     description: "Vollständiges LiveKonzert inklusive Bonustracks."
   };
   const tracks = [
     {
       id: 1,
-      title: "Track 1",
+      title: "Intro - Friday Nights in June",
       previewUrl: `${base}/musik/We_Stand_Together/Track_0.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_0.mp3`,
     },
     {
       id: 2,
-      title: "Track 2",
+      title: "Back in Those Days",
       previewUrl: `${base}/musik/We_Stand_Together/Track_1.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_1.mp3`,
     },
     {
       id: 3,
-      title: "Track 3",
+      title: "The Letter",
       previewUrl: `${base}/musik/We_Stand_Together/Track_2.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_2.mp3`,
     },
     {
       id: 4,
-      title: "Track 4",
+      title: "Boot Camp Nights",
       previewUrl: `${base}/musik/We_Stand_Together/Track_3.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_3.mp3`,
     },
     {
       id: 5,
-      title: "Track 5",
+      title: "Across the Sea",
       previewUrl: `${base}/musik/We_Stand_Together/Track_4.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_4.mp3`,
     },
     {
       id: 6,
-      title: "Track 6",
+      title: "Letters from the Frontline",
       previewUrl: `${base}/musik/We_Stand_Together/Track_5.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_5.mp3`,
     },
     {
       id: 7,
-      title: "Track 7",
+      title: "Brothers in Arms",
       previewUrl: `${base}/musik/We_Stand_Together/Track_6.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_6.mp3`,
     },
     {
       id: 8,
-      title: "Track 8",
+      title: "Letters Keep Me Alive",
       previewUrl: `${base}/musik/We_Stand_Together/Track_7.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_7.mp3`,
     },
     {
       id: 9,
-      title: "Track 9",
+      title: "The Longest Day",
       previewUrl: `${base}/musik/We_Stand_Together/Track_8.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_8.mp3`,
     },
     {
       id: 10,
-      title: "Track 10",
+      title: "The Fallen",
       previewUrl: `${base}/musik/We_Stand_Together/Track_9.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_9.mp3`,
     },
     {
       id: 11,
-      title: "Track 11",
+      title: "Hope on the Horizon",
       previewUrl: `${base}/musik/We_Stand_Together/Track_10.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_10.mp3`,
     },
     {
       id: 12,
-      title: "Track 12",
+      title: "Until You Came Home",
       previewUrl: `${base}/musik/We_Stand_Together/Track_11.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_11.mp3`,
     },
     {
       id: 13,
-      title: "Track 13",
+      title: "We Stand Together",
       previewUrl: `${base}/musik/We_Stand_Together/Track_12.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_12.mp3`,
     },
     {
       id: 14,
-      title: "Track 14",
+      title: "End Of The Story - Instrumental (Bonus)",
       previewUrl: `${base}/musik/We_Stand_Together/Track_13.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_13.mp3`,
     },
     {
       id: 15,
-      title: "Track 15",
+      title: "Letter on the Table (Bonus)",
       previewUrl: `${base}/musik/We_Stand_Together/Track_14.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_14.mp3`,
     },
     {
       id: 16,
-      title: "Track 16",
+      title: "Before the March (Bonus)",
       previewUrl: `${base}/musik/We_Stand_Together/Track_15.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_15.mp3`,
     },
     {
       id: 17,
-      title: "Track 17",
+      title: "Under foreign skies (Bonus)",
       previewUrl: `${base}/musik/We_Stand_Together/Track_16.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_16.mp3`,
     },
     {
       id: 18,
-      title: "Track 18",
+      title: "March of the Heart (Bonus)",
       previewUrl: `${base}/musik/We_Stand_Together/Track_17.mp3`,
-      price: "0,99 €",
+        price: "1,49 €",
       downloadUrl: `${base}/musik/We_Stand_Together/Track_17.mp3`,
     },
   ];
@@ -196,27 +196,8 @@ function MusikShop_We_Stand_Together_Page({ t, setCurrentPage }) {
                 <div className="bg-yellow-100 text-yellow-800 p-2 rounded mb-2 text-sm font-semibold">
                   Hinweis: Das komplette Album als ZIP-Archiv herunterladen. Handynutzer können nur einzelne Tracks herunterladen.
                 </div>
-                {!albumPaid ? (
-                  <div className="mb-2">
-                    <PayPalButtons
-                      style={{ layout: "vertical" }}
-                      createOrder={(data, actions) => {
-                        return actions.order.create({
-                          purchase_units: [{
-                            amount: { value: "14.99" },
-                            description: album.title
-                          }]
-                        });
-                      }}
-                      onApprove={(data, actions) => {
-                        return actions.order.capture().then(() => {
-                          setAlbumPaid(true);
-                        });
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <>
+                {/* ...existing code... */}
+                <>
                     {isMobile ? (
                       <div className="bg-red-100 text-red-700 p-3 rounded mb-2 text-sm">
                         ZIP-Download ist auf vielen Handys nicht direkt nutzbar. Bitte einzelne Tracks herunterladen.
@@ -233,8 +214,7 @@ function MusikShop_We_Stand_Together_Page({ t, setCurrentPage }) {
                       Album herunterladen
                     </a>
                   </>
-                )}
-              </div>
+                </div>
             </div>
             <div className="mb-4 flex justify-center">
               <a href="/musik/We_Stand_Together/Album_Info.pdf" target="_blank" rel="noopener noreferrer"
@@ -271,7 +251,7 @@ function MusikShop_We_Stand_Together_Page({ t, setCurrentPage }) {
                           createOrder={(data, actions) => {
                             return actions.order.create({
                               purchase_units: [{
-                                amount: { value: "0.99" },
+                                amount: { value: "1.49" },
                                 description: track.title
                               }]
                             });

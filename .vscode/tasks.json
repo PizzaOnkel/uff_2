@@ -7,6 +7,24 @@
 			"command": "xcopy /E /Y \"public\\musik\" \"build\\musik\"",
 			"args": [],
 			"group": "build"
+		},
+		{
+			"label": "Kopiere PO Friends Country Cover ins Build",
+			"type": "shell",
+			"command": "copy public\\musik\\PO_Friends_Goes_Country\\cover.png build\\musik\\PO_Friends_Goes_Country\\cover.png",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Kopiere Front_Cover.png als cover.png ins public",
+			"type": "shell",
+			"command": "copy public\\musik\\PO_Friends_Goes_Country\\Front_Cover.png public\\musik\\PO_Friends_Goes_Country\\cover.png",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
 		}
 	]
 }

@@ -152,7 +152,12 @@ class AppContent extends React.Component {
       case 'musikShopKingChris':
         const MusikShop_King_Chris_Page = require('./pages/MusikShop_King_Chris_Page').default;
         return <MusikShop_King_Chris_Page t={t} setCurrentPage={this.setCurrentPage} />;
-        return <MusikShopPage t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'musikShopPOFriendsGoesCountry':
+        const MusikShop_PO_Friends_Goes_Country_Page = require('./pages/MusikShop_PO_Friends_Goes_Country_Page').default;
+        return <MusikShop_PO_Friends_Goes_Country_Page t={t} setCurrentPage={this.setCurrentPage} />;
+      case 'musikShopLoveBeyondTheSilence':
+        const MusikShop_Love_Beyond_The_Silence_Page = require('./pages/MusikShop_Love_Beyond_The_Silence_Page').default;
+        return <MusikShop_Love_Beyond_The_Silence_Page t={t} setCurrentPage={this.setCurrentPage} />;
       case 'musikShopWeStandTogether':
         const MusikShop_We_Stand_Together_Page = require('./pages/MusikShop_We_Stand_Together_Page').default;
         return <MusikShop_We_Stand_Together_Page t={t} setCurrentPage={this.setCurrentPage} />;
