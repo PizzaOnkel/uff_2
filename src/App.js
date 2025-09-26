@@ -37,14 +37,27 @@ import HallOfChampionsPage from './pages/HallOfChampionsPage';
 class AppContent extends React.Component {
   constructor(props) {
     super(props);
+    
+    // URL-Parameter auslesen für Direktlinks
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageParam = urlParams.get('page');
+    const hashParam = window.location.hash.replace('#', '');
+    const initialPage = pageParam || hashParam || 'home';
+    
     this.state = {
-      currentPage: 'home',
+      currentPage: initialPage,
       language: 'de',
     };
   }
 
   setCurrentPage = (page) => {
     this.setState({ currentPage: page });
+    // URL aktualisieren für Direktlinks
+    if (page !== 'home') {
+      window.history.pushState({}, '', `?page=${page}`);
+    } else {
+      window.history.pushState({}, '', window.location.pathname);
+    }
   };
 
   setLanguage = (lang) => {

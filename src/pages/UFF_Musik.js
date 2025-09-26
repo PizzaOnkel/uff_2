@@ -202,10 +202,10 @@ export default function UFF_Musik({ t, setCurrentPage }) {
           {/* Button zum Shop */}
           <div className="w-full flex justify-center mt-8">
             <button
-              className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded shadow"
+              className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 px-12 rounded-lg shadow-lg text-xl transform transition-all hover:scale-105"
               onClick={() => setCurrentPage && setCurrentPage("musikShop")}
             >
-              zum Shop…
+              🎵 weitere Musik-Projekte
             </button>
           </div>
         </div>
