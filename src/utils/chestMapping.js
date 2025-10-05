@@ -1,6 +1,56 @@
 // Gemeinsame Mapping-Logik für Truhen-Kategorien und Level
 // Aus CurrentTotalEventPage.js extrahiert
 
+// Hilfsfunktion: Bestimme den Level-Bereich für Runic/Vault Chests
+function getLevelRange(level, category) {
+  const numLevel = Number(level);
+  if (isNaN(numLevel)) return null;
+  
+  if (category === "Runic Chests") {
+    if (numLevel >= 20 && numLevel <= 24) return "20-24";
+    if (numLevel >= 25 && numLevel <= 29) return "25-29";
+    if (numLevel >= 30 && numLevel <= 34) return "30-34";
+    if (numLevel >= 35 && numLevel <= 39) return "35-39";
+    if (numLevel >= 40 && numLevel <= 44) return "40-44";
+    if (numLevel >= 45) return "45";
+  }
+  
+  if (category === "Vault of the Ancients") {
+    if (numLevel >= 10 && numLevel <= 14) return "10-14";
+    if (numLevel >= 15 && numLevel <= 19) return "15-19";
+    if (numLevel >= 20 && numLevel <= 24) return "20-24";
+    if (numLevel >= 25 && numLevel <= 29) return "25-29";
+    if (numLevel >= 30 && numLevel <= 34) return "30-34";
+    if (numLevel >= 35 && numLevel <= 39) return "35-39";
+    if (numLevel >= 40 && numLevel <= 44) return "40-44";
+  }
+  
+  return null;
+}
+
+// Hilfsfunktion: Prüfe ob ein Level in einen Bereich fällt
+function levelMatchesRange(chestLevel, rangeString) {
+  const numLevel = Number(chestLevel);
+  if (isNaN(numLevel)) return false;
+  
+  if (!rangeString || typeof rangeString !== "string") return false;
+  
+  // Einzelner Wert (z.B. "45")
+  if (!rangeString.includes("-")) {
+    return numLevel >= Number(rangeString);
+  }
+  
+  // Bereich (z.B. "20-24")
+  const parts = rangeString.split("-");
+  if (parts.length !== 2) return false;
+  
+  const start = Number(parts[0]);
+  const end = Number(parts[1]);
+  if (isNaN(start) || isNaN(end)) return false;
+  
+  return numLevel >= start && numLevel <= end;
+}
+
 export function mapChestToCategoryAndLevel(chest, chestMappings = []) {
   let points = 0;
   if (chestMappings.length > 0) {
@@ -36,33 +86,52 @@ export function mapChestToCategoryAndLevel(chest, chestMappings = []) {
       if (typeA && typeA === typeB) score++;
       // Source: toleranter Vergleich
       if (sourceA && sourceA === sourceB) score++;
-      // Level: toleranter Vergleich (Zahl oder String, auch Teilstring)
-      if (
-        (levelA && levelB && (levelA === levelB || levelA.includes(levelB) || levelB.includes(levelA))) ||
-        (!isNaN(numA) && !isNaN(numB) && numA === numB)
-      ) score++;
+      // Level: erweiterte Bereichs-Unterstützung für Runic/Vault
+      let levelMatch = false;
+      if (levelA && levelB) {
+        // Standard-String-Vergleich
+        if (levelA === levelB || levelA.includes(levelB) || levelB.includes(levelA)) {
+          levelMatch = true;
+        }
+        // Numerischer Vergleich
+        else if (!isNaN(numA) && !isNaN(numB) && numA === numB) {
+          levelMatch = true;
+        }
+        // Bereichs-Matching für Runic/Vault
+        else if ((categoryA === 'runic chests' || categoryA === 'vault of the ancients') && levelA.includes('-')) {
+          levelMatch = levelMatchesRange(chest.level ?? chest.Level, levelA);
+        }
+        else if ((categoryB === 'runic chests' || categoryB === 'vault of the ancients') && levelB.includes('-')) {
+          levelMatch = levelMatchesRange(m.levelStart || m.level || m.Level || m.levelEnd, levelB);
+        }
+      }
+      if (levelMatch) score++;
       // Tolerantes Matching: Nur Felder vergleichen, die auf beiden Seiten gesetzt sind
       let matches = true;
       if (nameA && nameB && nameA !== nameB && !nameB.includes(nameA) && !nameA.includes(nameB)) matches = false;
       if (categoryA && categoryB && !(categoryA === categoryB || citadelMatch)) matches = false;
       if (typeA && typeB && typeA !== typeB) matches = false;
       if (sourceA && sourceB && sourceA !== sourceB) matches = false;
-      if (
-        levelA && levelB &&
-        !(levelA === levelB || levelA.includes(levelB) || levelB.includes(levelA) || (!isNaN(numA) && !isNaN(numB) && numA === numB))
-      ) matches = false;
+      // Erweiterte Level-Matching-Validierung
+      if (levelA && levelB && !levelMatch) {
+        // Fallback: Standard-Vergleiche
+        if (!(levelA === levelB || levelA.includes(levelB) || levelB.includes(levelA) || (!isNaN(numA) && !isNaN(numB) && numA === numB))) {
+          matches = false;
+        }
+      }
       // Debug-Log für jede Mapping-Prüfung
       if (categoryA === 'citadel' || categoryB === 'citadel' || nameA.includes('citadel') || nameB.includes('citadel')) {
-        console.log('[DEBUG][MappingCheck] Chest:', chest, 'Mapping:', m, {
-          idx,
-          nameA, nameB,
-          categoryA, categoryB,
-          typeA, typeB,
-          sourceA, sourceB,
-          levelA, levelB,
-          numA, numB,
-          matches, score
-        });
+        // Debug auskommentiert für Performance
+        // console.log('[DEBUG][MappingCheck] Chest:', chest, 'Mapping:', m, {
+        //   idx,
+        //   nameA, nameB,
+        //   categoryA, categoryB,
+        //   typeA, typeB,
+        //   sourceA, sourceB,
+        //   levelA, levelB,
+        //   numA, numB,
+        //   matches, score
+        // });
       }
       if (matches && score > bestScore) {
         bestScore = score;
@@ -127,12 +196,18 @@ export function mapChestToCategoryAndLevel(chest, chestMappings = []) {
   }
   else if ((chest.Name||"").toLowerCase().includes("runic") || (chest.Type||"").toLowerCase().includes("runic") || (chest.Source||"").toLowerCase().includes("runic")) {
     category = "Runic Chests";
+    // Automatische Level-Bereichs-Bestimmung für Runic Chests
+    const levelRange = getLevelRange(chest.level ?? chest.Level, "Runic Chests");
+    if (levelRange) level = levelRange;
   }
   else if ((chest.Name||"").toLowerCase().includes("heroic") || (chest.Type||"").toLowerCase().includes("heroic") || (chest.Source||"").toLowerCase().includes("heroic")) {
     category = "Heroic Chests";
   }
   else if ((chest.Name||"").toLowerCase().includes("vault") || (chest.Type||"").toLowerCase().includes("vault") || (chest.Source||"").toLowerCase().includes("vault")) {
     category = "Vault of the Ancients";
+    // Automatische Level-Bereichs-Bestimmung für Vault Chests
+    const levelRange = getLevelRange(chest.level ?? chest.Level, "Vault of the Ancients");
+    if (levelRange) level = levelRange;
   }
   else if ((chest.Name||"").toLowerCase().includes("quick march") || (chest.Type||"").toLowerCase().includes("quick march") || (chest.Source||"").toLowerCase().includes("quick march")) {
     category = "Quick March Chest";

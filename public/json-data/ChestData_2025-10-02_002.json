@@ -1,0 +1,3322 @@
+{
+  "2025-10-04": [
+    {
+      "Clanmate": "Manhor",
+      "chests": [
+        {
+          "Name": "Bronze Chest",
+          "Type": "Level 0 Bank",
+          "Source": "Level 0 Bank",
+          "Level": 0
+        },
+        {
+          "Name": "Bronze Chest",
+          "Type": "Level 0 Bank",
+          "Source": "Level 0 Bank",
+          "Level": 0
+        },
+        {
+          "Name": "Bronze Chest",
+          "Type": "Level 0 Bank",
+          "Source": "Level 0 Bank",
+          "Level": 0
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "SBzBy II",
+      "chests": [
+        {
+          "Name": "Silver Chest",
+          "Type": "Level 0 Bank",
+          "Source": "Level 0 Bank",
+          "Level": 0
+        },
+        {
+          "Name": "Silver Chest",
+          "Type": "Level 0 Bank",
+          "Source": "Level 0 Bank",
+          "Level": 0
+        },
+        {
+          "Name": "Silver Chest",
+          "Type": "Level 0 Bank",
+          "Source": "Level 0 Bank",
+          "Level": 0
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 30 Citadel",
+          "Source": "Level 30 Citadel",
+          "Level": 30
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Sapphire Chest",
+          "Type": "Level 30 Vault of the Ancients",
+          "Source": "Level 30 Vault of the Ancients",
+          "Level": 30
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "Miss Marple",
+      "chests": [
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Kobani",
+      "chests": [
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "YurasiK",
+      "chests": [
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 15 Citadel",
+          "Source": "Level 15 Citadel",
+          "Level": 15
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 15 Citadel",
+          "Source": "Level 15 Citadel",
+          "Level": 15
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 15 Citadel",
+          "Source": "Level 15 Citadel",
+          "Level": 15
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 15 Citadel",
+          "Source": "Level 15 Citadel",
+          "Level": 15
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Elgi",
+      "chests": [
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Red Saber",
+      "chests": [
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Fendis",
+      "chests": [
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Fray",
+      "chests": [
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 10 rare Crypt",
+          "Source": "Level 10 rare Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 10 Citadel",
+          "Source": "Level 10 Citadel",
+          "Level": 10
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 15 rare Crypt",
+          "Source": "Level 15 rare Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 10 Citadel",
+          "Source": "Level 10 Citadel",
+          "Level": 10
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 15 rare Crypt",
+          "Source": "Level 15 rare Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 15 rare Crypt",
+          "Source": "Level 15 rare Crypt",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "Taugal",
+      "chests": [
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        }
+      ]
+    },
+    {
+      "Clanmate": "Finda",
+      "chests": [
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Ancient Bastion Chest",
+          "Type": "Level 25 epic Crypt",
+          "Source": "Level 25 epic Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Ancient Bastion Chest",
+          "Type": "Level 25 epic Crypt",
+          "Source": "Level 25 epic Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 30 Citadel",
+          "Source": "Level 30 Citadel",
+          "Level": 30
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 30 Citadel",
+          "Source": "Level 30 Citadel",
+          "Level": 30
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 30 Citadel",
+          "Source": "Level 30 Citadel",
+          "Level": 30
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 30 Citadel",
+          "Source": "Level 30 Citadel",
+          "Level": 30
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 30 Citadel",
+          "Source": "Level 30 Citadel",
+          "Level": 30
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 30 Citadel",
+          "Source": "Level 30 Citadel",
+          "Level": 30
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 30 Citadel",
+          "Source": "Level 30 Citadel",
+          "Level": 30
+        }
+      ]
+    },
+    {
+      "Clanmate": "Aargauer Monster",
+      "chests": [
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Daijind",
+      "chests": [
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Ancient Warrior's Chest",
+          "Type": "Level 15 epic Crypt",
+          "Source": "Level 15 epic Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Ancient Warrior's Chest",
+          "Type": "Level 15 epic Crypt",
+          "Source": "Level 15 epic Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "maese",
+      "chests": [
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "Linfir 2",
+      "chests": [
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "Edgar Wallace",
+      "chests": [
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Common Chest of Wealth",
+          "Type": "Level 0 Clan wealth",
+          "Source": "Level 0 Clan wealth",
+          "Level": 0
+        },
+        {
+          "Name": "Uncommon Chest of Wealth",
+          "Type": "Level 0 Clan wealth",
+          "Source": "Level 0 Clan wealth",
+          "Level": 0
+        },
+        {
+          "Name": "Rare Chest of Wealth",
+          "Type": "Level 0 Clan wealth",
+          "Source": "Level 0 Clan wealth",
+          "Level": 0
+        },
+        {
+          "Name": "Epic Chest of Wealth",
+          "Type": "Level 0 Clan wealth",
+          "Source": "Level 0 Clan wealth",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Sapphire Chest",
+          "Type": "Level 30 Vault of the Ancients",
+          "Source": "Level 30 Vault of the Ancients",
+          "Level": 30
+        }
+      ]
+    },
+    {
+      "Clanmate": "Ya kut",
+      "chests": [
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Turtle Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Moginn",
+      "chests": [
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Harpy Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Gladiator's Chest",
+          "Type": "Level 0 Arena",
+          "Source": "Level 0 Arena",
+          "Level": 0
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Harpy Chest",
+          "Type": "Level 15 epic Crypt",
+          "Source": "Level 15 epic Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Kelerosir",
+      "chests": [
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "CordantriuS",
+      "chests": [
+        {
+          "Name": "Arcane Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Sapphire Chest",
+          "Type": "Level 35 Vault of the Ancients",
+          "Source": "Level 35 Vault of the Ancients",
+          "Level": 35
+        }
+      ]
+    },
+    {
+      "Clanmate": "Saberflame",
+      "chests": [
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Vakums",
+      "chests": [
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Scorpion Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Trillium Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 15 rare Crypt",
+          "Source": "Level 15 rare Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Sapphire Chest",
+          "Type": "Level 25 Vault of the Ancients",
+          "Source": "Level 25 Vault of the Ancients",
+          "Level": 25
+        },
+        {
+          "Name": "Sapphire Chest",
+          "Type": "Level 25 Vault of the Ancients",
+          "Source": "Level 25 Vault of the Ancients",
+          "Level": 25
+        },
+        {
+          "Name": "Sapphire Chest",
+          "Type": "Level 30 Vault of the Ancients",
+          "Source": "Level 30 Vault of the Ancients",
+          "Level": 30
+        }
+      ]
+    },
+    {
+      "Clanmate": "Gocha",
+      "chests": [
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Black Saber",
+      "chests": [
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Rifur",
+      "chests": [
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 15 rare Crypt",
+          "Source": "Level 15 rare Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 25 rare Crypt",
+          "Source": "Level 25 rare Crypt",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "WildMG",
+      "chests": [
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "KlaxxoN",
+      "chests": [
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Eragon",
+      "chests": [
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Union Chest",
+          "Type": "Level 0 Union of Triumph personal reward",
+          "Source": "Level 0 Union of Triumph personal reward",
+          "Level": 0
+        },
+        {
+          "Name": "Union Chest",
+          "Type": "Level 0 Union of Triumph personal reward",
+          "Source": "Level 0 Union of Triumph personal reward",
+          "Level": 0
+        },
+        {
+          "Name": "Union Chest",
+          "Type": "Level 0 Union of Triumph personal reward",
+          "Source": "Level 0 Union of Triumph personal reward",
+          "Level": 0
+        },
+        {
+          "Name": "Union Chest",
+          "Type": "Level 0 Union of Triumph personal reward",
+          "Source": "Level 0 Union of Triumph personal reward",
+          "Level": 0
+        },
+        {
+          "Name": "Union Chest",
+          "Type": "Level 0 Union of Triumph personal reward",
+          "Source": "Level 0 Union of Triumph personal reward",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Mardicas",
+      "chests": [
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Serdriel",
+      "chests": [
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Upasara Wulung",
+      "chests": [
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Tormenta solar",
+      "chests": [
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Ancient Bastion Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 25 rare Crypt",
+          "Source": "Level 25 rare Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 25 rare Crypt",
+          "Source": "Level 25 rare Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Rover",
+      "chests": [
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "White Wood Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Germano1",
+      "chests": [
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Gladiator's Chest",
+          "Type": "Level 0 Arena",
+          "Source": "Level 0 Arena",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Mikoikt",
+      "chests": [
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Silverfray",
+      "chests": [
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "Kantrius",
+      "chests": [
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Sapphire Chest",
+          "Type": "Level 25 Vault of the Ancients",
+          "Source": "Level 25 Vault of the Ancients",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "Lanmoin der 3te",
+      "chests": [
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "Lanmoin der Kleine",
+      "chests": [
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Tehn",
+      "chests": [
+        {
+          "Name": "Gladiator's Chest",
+          "Type": "Level 0 Arena",
+          "Source": "Level 0 Arena",
+          "Level": 0
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "Angelina",
+      "chests": [
+        {
+          "Name": "Sapphire Chest",
+          "Type": "Level 20 Vault of the Ancients",
+          "Source": "Level 20 Vault of the Ancients",
+          "Level": 20
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Sapphire Chest",
+          "Type": "Level 20 Vault of the Ancients",
+          "Source": "Level 20 Vault of the Ancients",
+          "Level": 20
+        },
+        {
+          "Name": "Gladiator's Chest",
+          "Type": "Level 0 Arena",
+          "Source": "Level 0 Arena",
+          "Level": 0
+        },
+        {
+          "Name": "Common Chest of Wealth",
+          "Type": "Level 0 Clan wealth",
+          "Source": "Level 0 Clan wealth",
+          "Level": 0
+        },
+        {
+          "Name": "Uncommon Chest of Wealth",
+          "Type": "Level 0 Clan wealth",
+          "Source": "Level 0 Clan wealth",
+          "Level": 0
+        },
+        {
+          "Name": "Rare Chest of Wealth",
+          "Type": "Level 0 Clan wealth",
+          "Source": "Level 0 Clan wealth",
+          "Level": 0
+        },
+        {
+          "Name": "Epic Chest of Wealth",
+          "Type": "Level 0 Clan wealth",
+          "Source": "Level 0 Clan wealth",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Adoragas",
+      "chests": [
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "Jannoz",
+      "chests": [
+        {
+          "Name": "Minotaur Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Sapphire Chest",
+          "Type": "Level 20 Vault of the Ancients",
+          "Source": "Level 20 Vault of the Ancients",
+          "Level": 20
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Chest of the Cursed",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Titansteel Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Sapphire Chest",
+          "Type": "Level 25 Vault of the Ancients",
+          "Source": "Level 25 Vault of the Ancients",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "Finginad",
+      "chests": [
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Cobalt Chest",
+          "Type": "Level 15 epic Crypt",
+          "Source": "Level 15 epic Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 15 Citadel",
+          "Source": "Level 15 Citadel",
+          "Level": 15
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 15 Citadel",
+          "Source": "Level 15 Citadel",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "Rainblade",
+      "chests": [
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        },
+        {
+          "Name": "Braided Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        },
+        {
+          "Name": "Cobalt Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 15 rare Crypt",
+          "Source": "Level 15 rare Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 10 Citadel",
+          "Source": "Level 10 Citadel",
+          "Level": 10
+        }
+      ]
+    },
+    {
+      "Clanmate": "Elsa",
+      "chests": [
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "rami",
+      "chests": [
+        {
+          "Name": "Gladiator's Chest",
+          "Type": "Level 0 Arena",
+          "Source": "Level 0 Arena",
+          "Level": 0
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Priest's Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Titansteel Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 15 rare Crypt",
+          "Source": "Level 15 rare Crypt",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "Dr Mabuse",
+      "chests": [
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Frostterror",
+      "chests": [
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Omen Chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Friedoline",
+      "chests": [
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "Barsian",
+      "chests": [
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "Huzar",
+      "chests": [
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Linvenix",
+      "chests": [
+        {
+          "Name": "Union Chest",
+          "Type": "Level 0 Union of Triumph personal reward",
+          "Source": "Level 0 Union of Triumph personal reward",
+          "Level": 0
+        },
+        {
+          "Name": "Union Chest",
+          "Type": "Level 0 Union of Triumph personal reward",
+          "Source": "Level 0 Union of Triumph personal reward",
+          "Level": 0
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "Hulsa",
+      "chests": [
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Forondod",
+      "chests": [
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Dark Omens chest",
+          "Type": "Level 0 Dark Omens event",
+          "Source": "Level 0 Dark Omens event",
+          "Level": 0
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "Zuzilkree",
+      "chests": [
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 25 rare Crypt",
+          "Source": "Level 25 rare Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 5 Common Crypt",
+          "Source": "Level 5 Common Crypt",
+          "Level": 5
+        }
+      ]
+    },
+    {
+      "Clanmate": "Alfred Hitchcock",
+      "chests": [
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "Lindis",
+      "chests": [
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "roger",
+      "chests": [
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Miss Pelace",
+      "chests": [
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        }
+      ]
+    }
+  ]
+}

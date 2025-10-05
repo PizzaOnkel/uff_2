@@ -1,0 +1,3496 @@
+{
+  "2025-09-23": [
+    {
+      "Clanmate": "Manhor",
+      "chests": [
+        {
+          "Name": "Golden Chest",
+          "Type": "Level 0 Bank",
+          "Source": "Level 0 Bank",
+          "Level": 0
+        },
+        {
+          "Name": "Golden Chest",
+          "Type": "Level 0 Bank",
+          "Source": "Level 0 Bank",
+          "Level": 0
+        },
+        {
+          "Name": "Golden Chest",
+          "Type": "Level 0 Bank",
+          "Source": "Level 0 Bank",
+          "Level": 0
+        },
+        {
+          "Name": "Magic Chest",
+          "Type": "Level 0 Bank",
+          "Source": "Level 0 Bank",
+          "Level": 0
+        },
+        {
+          "Name": "Magic Chest",
+          "Type": "Level 0 Bank",
+          "Source": "Level 0 Bank",
+          "Level": 0
+        },
+        {
+          "Name": "Magic Chest",
+          "Type": "Level 0 Bank",
+          "Source": "Level 0 Bank",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Trillium Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "White Wood Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Ancient Warrior's Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Scarab Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Harpy Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Turtle Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Harpy Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Ancient Warrior's Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Chest of the Cursed",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Ancient Warrior's Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Ancient Warrior's Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Chest of the Cursed",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Ancient Warrior's Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Cobalt Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Scorpion Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Harpy Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Abandoned Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Trillium Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Ancient Bastion Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Priest's Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cobalt Chest",
+          "Type": "Level 35 epic Crypt",
+          "Source": "Level 35 epic Crypt",
+          "Level": 35
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cobalt Chest",
+          "Type": "Level 35 epic Crypt",
+          "Source": "Level 35 epic Crypt",
+          "Level": 35
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "Hulsa",
+      "chests": [
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Romazan",
+      "chests": [
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 25 Citadel",
+          "Source": "Level 25 Citadel",
+          "Level": 25
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 25 rare Crypt",
+          "Source": "Level 25 rare Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 25 Citadel",
+          "Source": "Level 25 Citadel",
+          "Level": 25
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 25 Citadel",
+          "Source": "Level 25 Citadel",
+          "Level": 25
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 25 Citadel",
+          "Source": "Level 25 Citadel",
+          "Level": 25
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 25 Citadel",
+          "Source": "Level 25 Citadel",
+          "Level": 25
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 25 Citadel",
+          "Source": "Level 25 Citadel",
+          "Level": 25
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 25 Citadel",
+          "Source": "Level 25 Citadel",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 25 Citadel",
+          "Source": "Level 25 Citadel",
+          "Level": 25
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Scarab Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 25 Citadel",
+          "Source": "Level 25 Citadel",
+          "Level": 25
+        },
+        {
+          "Name": "Ancient Bastion Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 25 Citadel",
+          "Source": "Level 25 Citadel",
+          "Level": 25
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 25 Citadel",
+          "Source": "Level 25 Citadel",
+          "Level": 25
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 25 Citadel",
+          "Source": "Level 25 Citadel",
+          "Level": 25
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 25 Citadel",
+          "Source": "Level 25 Citadel",
+          "Level": 25
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Linven",
+      "chests": [
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "Silver Saber",
+      "chests": [
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Zuzilkree",
+      "chests": [
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 15 Citadel",
+          "Source": "Level 15 Citadel",
+          "Level": 15
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 15 Citadel",
+          "Source": "Level 15 Citadel",
+          "Level": 15
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 15 rare Crypt",
+          "Source": "Level 15 rare Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Elgi",
+      "chests": [
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "DerKleine73",
+      "chests": [
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Cobalt Chest",
+          "Type": "Level 15 epic Crypt",
+          "Source": "Level 15 epic Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "maese",
+      "chests": [
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 15 Citadel",
+          "Source": "Level 15 Citadel",
+          "Level": 15
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 10 Citadel",
+          "Source": "Level 10 Citadel",
+          "Level": 10
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 15 Citadel",
+          "Source": "Level 15 Citadel",
+          "Level": 15
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 10 Citadel",
+          "Source": "Level 10 Citadel",
+          "Level": 10
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 15 Citadel",
+          "Source": "Level 15 Citadel",
+          "Level": 15
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 15 Citadel",
+          "Source": "Level 15 Citadel",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "Vakums",
+      "chests": [
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cobalt Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Priest's Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "Serdriilas",
+      "chests": [
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Red Saber",
+      "chests": [
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 15 Citadel",
+          "Source": "Level 15 Citadel",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "Rainblade",
+      "chests": [
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Frayy",
+      "chests": [
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 15 Citadel",
+          "Source": "Level 15 Citadel",
+          "Level": 15
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 15 Citadel",
+          "Source": "Level 15 Citadel",
+          "Level": 15
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 15 rare Crypt",
+          "Source": "Level 15 rare Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Alexkidbro",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Ancient Warrior's Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Turtle Chest",
+          "Type": "Level 25 epic Crypt",
+          "Source": "Level 25 epic Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Scorpion Chest",
+          "Type": "Level 25 epic Crypt",
+          "Source": "Level 25 epic Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 25 rare Crypt",
+          "Source": "Level 25 rare Crypt",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "Mikoikt",
+      "chests": [
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Edgar Wallace",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Chest of the Cursed",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Ancient Warrior's Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Ancient Warrior's Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Ancient Warrior's Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Chest of the Cursed",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Chest of the Cursed",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Chest of the Cursed",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Ancient Warrior's Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Ancient Warrior's Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Chest of the Cursed",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Chest of the Cursed",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Ancient Warrior's Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Ancient Warrior's Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Chest of the Cursed",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Chest of the Cursed",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Ancient Warrior's Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Ancient Warrior's Chest",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Chest of the Cursed",
+          "Type": "Level 30 epic Crypt",
+          "Source": "Level 30 epic Crypt",
+          "Level": 30
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 30 rare Crypt",
+          "Source": "Level 30 rare Crypt",
+          "Level": 30
+        }
+      ]
+    },
+    {
+      "Clanmate": "Nightfang",
+      "chests": [
+        {
+          "Name": "Union Chest",
+          "Type": "Level 0 Union of Triumph personal reward",
+          "Source": "Level 0 Union of Triumph personal reward",
+          "Level": 0
+        },
+        {
+          "Name": "Union Chest",
+          "Type": "Level 0 Union of Triumph personal reward",
+          "Source": "Level 0 Union of Triumph personal reward",
+          "Level": 0
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "Nightfan",
+      "chests": [
+        {
+          "Name": "Union Chest",
+          "Type": "Level 0 Union of Triumph personal reward",
+          "Source": "Level 0 Union of Triumph personal reward",
+          "Level": 0
+        },
+        {
+          "Name": "White Wood Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Petrov val",
+      "chests": [
+        {
+          "Name": "Gladiator's Chest",
+          "Type": "Level 0 Arena",
+          "Source": "Level 0 Arena",
+          "Level": 0
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Titansteel Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Mary Pili",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Minotaur Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Fendis",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Barsian",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "rami",
+      "chests": [
+        {
+          "Name": "Abandoned Chest",
+          "Type": "Level 15 epic Crypt",
+          "Source": "Level 15 epic Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Rover",
+      "chests": [
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cursed Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 20 Citadel",
+          "Source": "Level 20 Citadel",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "WildMG",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "El Mosca",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "Angelina",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Common Chest of Wealth",
+          "Type": "Level 0 Clan wealth",
+          "Source": "Level 0 Clan wealth",
+          "Level": 0
+        },
+        {
+          "Name": "Uncommon Chest of Wealth",
+          "Type": "Level 0 Clan wealth",
+          "Source": "Level 0 Clan wealth",
+          "Level": 0
+        },
+        {
+          "Name": "Rare Chest of Wealth",
+          "Type": "Level 0 Clan wealth",
+          "Source": "Level 0 Clan wealth",
+          "Level": 0
+        },
+        {
+          "Name": "Epic Chest of Wealth",
+          "Type": "Level 0 Clan wealth",
+          "Source": "Level 0 Clan wealth",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Germano1",
+      "chests": [
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "Kelerosir",
+      "chests": [
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "Adoran",
+      "chests": [
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "Silverfray",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Silverfrayy",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Tehn",
+      "chests": [
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Scarab Chest",
+          "Type": "Level 15 epic Crypt",
+          "Source": "Level 15 epic Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        }
+      ]
+    },
+    {
+      "Clanmate": "YurasiK",
+      "chests": [
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Gladiator's Chest",
+          "Type": "Level 0 Arena",
+          "Source": "Level 0 Arena",
+          "Level": 0
+        },
+        {
+          "Name": "Gnome Workshop Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        }
+      ]
+    },
+    {
+      "Clanmate": "White Los",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "LosBoLos",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 25 Common Crypt",
+          "Source": "Level 25 Common Crypt",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "Upasara Wulung",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 10 Citadel",
+          "Source": "Level 10 Citadel",
+          "Level": 10
+        }
+      ]
+    },
+    {
+      "Clanmate": "Elsa",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Momath",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Kobani",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Lindis",
+      "chests": [
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 15 rare Crypt",
+          "Source": "Level 15 rare Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Priest's Chest",
+          "Type": "Level 15 epic Crypt",
+          "Source": "Level 15 epic Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Chest of the Cursed",
+          "Type": "Level 15 epic Crypt",
+          "Source": "Level 15 epic Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Mayan Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 15 rare Crypt",
+          "Source": "Level 15 rare Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 15 rare Crypt",
+          "Source": "Level 15 rare Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 15 rare Crypt",
+          "Source": "Level 15 rare Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        }
+      ]
+    },
+    {
+      "Clanmate": "Finginad",
+      "chests": [
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        }
+      ]
+    },
+    {
+      "Clanmate": "Daijind",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "KlaxxoN",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Akinobar",
+      "chests": [
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 25 rare Crypt",
+          "Source": "Level 25 rare Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 25 rare Crypt",
+          "Source": "Level 25 rare Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 25 rare Crypt",
+          "Source": "Level 25 rare Crypt",
+          "Level": 25
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 20 rare Crypt",
+          "Source": "Level 20 rare Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Taugal",
+      "chests": [
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Stone Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Gladiator's Chest",
+          "Type": "Level 0 Arena",
+          "Source": "Level 0 Arena",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Frostterror",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Sand Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Forgotten Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Priest's Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "House of Horrors Chest",
+          "Type": "Level 25 epic Crypt",
+          "Source": "Level 25 epic Crypt",
+          "Level": 25
+        }
+      ]
+    },
+    {
+      "Clanmate": "Adoragas",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        },
+        {
+          "Name": "Barbarian Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 15 Citadel",
+          "Source": "Level 15 Citadel",
+          "Level": 15
+        },
+        {
+          "Name": "Elven Citadel Chest",
+          "Type": "Level 10 Citadel",
+          "Source": "Level 10 Citadel",
+          "Level": 10
+        },
+        {
+          "Name": "Elegant Chest",
+          "Type": "Level 10 Common Crypt",
+          "Source": "Level 10 Common Crypt",
+          "Level": 10
+        }
+      ]
+    },
+    {
+      "Clanmate": "Rifur",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Orc Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Cobalt Chest",
+          "Type": "Level 15 epic Crypt",
+          "Source": "Level 15 epic Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Cobra Chest",
+          "Type": "Level 15 Common Crypt",
+          "Source": "Level 15 Common Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Fire Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 15 rare Crypt",
+          "Source": "Level 15 rare Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "Rare Dragon Chest",
+          "Type": "Level 15 rare Crypt",
+          "Source": "Level 15 rare Crypt",
+          "Level": 15
+        },
+        {
+          "Name": "White Wood Chest",
+          "Type": "Level 20 epic Crypt",
+          "Source": "Level 20 epic Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Eragon",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "PizzaOnkel",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    },
+    {
+      "Clanmate": "Cerberus",
+      "chests": [
+        {
+          "Name": "Infernal Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        },
+        {
+          "Name": "Bone Chest",
+          "Type": "Level 20 Common Crypt",
+          "Source": "Level 20 Common Crypt",
+          "Level": 20
+        }
+      ]
+    },
+    {
+      "Clanmate": "Miss Pelace",
+      "chests": [
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        },
+        {
+          "Name": "Jörmungandr's Chest",
+          "Type": "Level 0 Jörmungandr Shop",
+          "Source": "Level 0 Jörmungandr Shop",
+          "Level": 0
+        }
+      ]
+    }
+  ]
+}

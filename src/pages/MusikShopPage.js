@@ -48,7 +48,7 @@ function MusikShopPage(props) {
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white p-4 pb-32 relative">
-      <button onClick={() => window.history.back()} className="fixed top-1/2 right-4 transform -translate-y-1/2 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded shadow-lg">
+      <button onClick={() => props.setCurrentPage && props.setCurrentPage("navigation")} className="fixed top-1/2 right-4 transform -translate-y-1/2 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded shadow-lg">
         Zurück
       </button>
       <div className="w-full flex flex-col items-center">

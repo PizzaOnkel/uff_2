@@ -1,50 +1,4 @@
 import { mapToMainName } from "../utils/aliasMapping";
-
-// **INTELLIGENTE SONDERZEICHEN-NORMALISIERUNG**
-// Behandelt Apostrophe, Umlaute und andere Sonderzeichen für besseres String-Matching
-export function normalizeChestName(name) {
-  if (!name || typeof name !== 'string') return '';
-  
-  return name
-    .trim()
-    .toLowerCase()
-    // Apostrophe normalisieren (verschiedene Unicode-Varianten)
-    .replace(/[''`´]/g, "'")
-    // Umlaute normalisieren
-    .replace(/ä/g, 'ae')
-    .replace(/ö/g, 'oe') 
-    .replace(/ü/g, 'ue')
-    .replace(/ß/g, 'ss')
-    // Akzente normalisieren
-    .replace(/[éèê]/g, 'e')
-    .replace(/[áàâ]/g, 'a')
-    .replace(/[íìî]/g, 'i')
-    .replace(/[óòô]/g, 'o')
-    .replace(/[úùû]/g, 'u')
-    // Weitere Sonderzeichen
-    .replace(/[ñ]/g, 'n')
-    .replace(/[ç]/g, 'c')
-    // Mehrfache Leerzeichen normalisieren
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-// Toleranter String-Vergleich mit Sonderzeichen-Normalisierung
-export function stringsMatchTolerant(str1, str2) {
-  if (!str1 || !str2) return false;
-  
-  const norm1 = normalizeChestName(str1);
-  const norm2 = normalizeChestName(str2);
-  
-  // Exakte Übereinstimmung nach Normalisierung
-  if (norm1 === norm2) return true;
-  
-  // Teilstring-Matching
-  if (norm1.includes(norm2) || norm2.includes(norm1)) return true;
-  
-  return false;
-}
-
 // 1:1-Übernahme der Normberechnung aus CurrentTotalEventPage.js
 export function calculatePlayerNorms({ playersArr, resultsArr, chestMappings, normsArr, ignoreChests, periodsArr, currentPeriodId }) {
   function getNormPoints(troopStrengthName) {
@@ -92,19 +46,6 @@ export function calculatePlayerNorms({ playersArr, resultsArr, chestMappings, no
   const filteredResults = currentPeriodId
     ? resultsArr.filter(r => r.periodId === currentPeriodId)
     : resultsArr;
-    
-  // PERFORMANCE-OPTIMIERUNG: Erstelle Mapping-Index für schnellere Suche
-  const mappingCache = new Map();
-  if (chestMappings.length > 0) {
-    chestMappings.forEach(m => {
-      const key = `${(m.type || m.Type || "").trim().toLowerCase()}_${(m.chestName || m.Name || "").trim().toLowerCase()}_${(m.category || "").trim().toLowerCase()}_${String(m.levelStart || m.level || m.Level || m.levelEnd || "").trim().toLowerCase()}`;
-      if (!mappingCache.has(key)) {
-        mappingCache.set(key, []);
-      }
-      mappingCache.get(key).push(m);
-    });
-  }
-  
   const playerMap = new Map();
   filteredResults.forEach(result => {
     const mainName = mapToMainName(playersArr, result.Clanmate);
@@ -137,47 +78,19 @@ export function calculatePlayerNorms({ playersArr, resultsArr, chestMappings, no
           let points = 0;
           let bestMapping = null;
           let bestScore = -1;
-          
-          // PERFORMANCE-OPTIMIERUNG: Verwende optimierte Mapping-Suche statt doppelter Schleife
           if (chestMappings.length > 0) {
-            // Schnelle Suche: Erstelle Suchkriterien
-            const typeB = (chest.Type || "").trim().toLowerCase();
-            const nameB = (chest.Name || "").trim().toLowerCase();
-            const categoryB = (chest.category || "").trim().toLowerCase();
-            const sourceB = (chest.Source || chest.source || "").trim().toLowerCase();
-            const levelB = String(levelStr).toLowerCase();
-            
-            // Kandidaten-Mappings sammeln (max 10-20 statt alle durchgehen)
-            const candidateMappings = [];
-            
-            // Direkte Suche nach passenden Mappings
-            for (const m of chestMappings) {
+            chestMappings.forEach(m => {
               const typeA = (m.type || m.Type || "").trim().toLowerCase();
+              const typeB = (chest.Type || "").trim().toLowerCase();
               const nameA = (m.chestName || m.Name || "").trim().toLowerCase();
+              const nameB = (chest.Name || "").trim().toLowerCase();
               const categoryA = (m.category || "").trim().toLowerCase();
-              
-              // Früher Ausschluss unpassender Mappings
-              let couldMatch = false;
-              if (typeA && typeB && typeA.includes(typeB.substring(0, 8))) couldMatch = true;
-              if (nameA && nameB && nameA.includes(nameB.substring(0, 8))) couldMatch = true;
-              if (categoryA && categoryB && categoryA.includes(categoryB.substring(0, 8))) couldMatch = true;
-              if (!typeA && !nameA && !categoryA) couldMatch = true; // Generische Mappings
-              
-              if (couldMatch) {
-                candidateMappings.push(m);
-              }
-              
-              // Limitiere Kandidaten für Performance
-              if (candidateMappings.length > 20) break;
-            }
-            
-            // Nur die relevanten Kandidaten bewerten
-            candidateMappings.forEach(m => {
-              const typeA = (m.type || m.Type || "").trim().toLowerCase();
-              const nameA = (m.chestName || m.Name || "").trim().toLowerCase();
-              const categoryA = (m.category || "").trim().toLowerCase();
+              const categoryB = (chest.category || "").trim().toLowerCase();
               const sourceA = (m.source || m.Source || "").trim().toLowerCase();
+              const sourceB = (chest.Source || chest.source || "").trim().toLowerCase();
               const levelA = String(m.levelStart || m.level || m.Level || m.levelEnd || "").trim().toLowerCase();
+              // Patch: levelB jetzt aus levelStr
+              const levelB = String(levelStr).toLowerCase();
               let score = 0;
               const isBankChest = (chest.category === "Bank Chests" || typeB === "bank" || sourceB === "bank");
               // --- Tartaros Spezial-Matching ---
@@ -232,12 +145,20 @@ export function calculatePlayerNorms({ playersArr, resultsArr, chestMappings, no
             });
             if (bestMapping && bestMapping.points !== undefined) {
               points = Number(bestMapping.points);
+              // Debug-Ausgabe für Tartaros Chests
+              if ((chest.category && chest.category.toLowerCase().includes('tartaros')) || (chest.Name && chest.Name.toLowerCase().includes('tartaros'))) {
+                console.log('[TARTAROS-MAPPING]', {
+                  chest,
+                  bestMapping,
+                  points
+                });
+              }
             }
           }
-          // --- Common Chests Mapping zentralisiert mit Sonderzeichen-Normalisierung ---
-          let nameLower = normalizeChestName(chest.Name || "");
-          let typeLower = normalizeChestName(chest.Type || "");
-          let sourceLower = normalizeChestName(chest.Source || "");
+          // --- Common Chests Mapping zentralisiert ---
+          let nameLower = (chest.Name || "").toLowerCase();
+          let typeLower = (chest.Type || "").toLowerCase();
+          let sourceLower = (chest.Source || "").toLowerCase();
           let category = "Unbekannt";
           let level = chest.level ?? chest.Level ?? 0;
           if (
@@ -456,8 +377,8 @@ export function calculatePlayerNorms({ playersArr, resultsArr, chestMappings, no
           return {
             ...chest,
             category,
-            // Nutze level (lokale Variable) für die Rückgabe, falls levelStr leer ist
-            level: level,
+            // Nutze das extrahierte Level für die Rückgabe (wichtig für Filter und Anzeige)
+            level: levelStr !== undefined && levelStr !== null && levelStr !== "" ? levelStr : (level ?? 0),
             count: chest.count || 1,
             points
           };
@@ -544,12 +465,11 @@ export function getEpicChestPoints(chest, chestMappings) {
 // Zentrale Utility für Chest-Mapping, Filter und Punkteberechnung
 // Hier werden alle Kernfunktionen gekapselt, die in mehreren Seiten benötigt werden
 
-// Hilfsfunktion: Fallback-Mapping für category/level mit Sonderzeichen-Support
+// Hilfsfunktion: Fallback-Mapping für category/level
 export function fallbackCategory(chest) {
-  const name = normalizeChestName(chest.Name || '');
-  const type = normalizeChestName(chest.Type || '');
-  const source = normalizeChestName(chest.Source || '');
-  
+  const name = (chest.Name || '').toLowerCase();
+  const type = (chest.Type || '').toLowerCase();
+  const source = (chest.Source || '').toLowerCase();
   if (name.includes('arena') || type.includes('arena') || source.includes('arena')) return 'Arena Total';
   // Tolerant: auch "common chest" (Singular/Plural) in Name oder Typ akzeptieren
   if (type.includes('common crypt') || name.includes('common chest') || type.includes('common chest')) return 'Common Total';
@@ -597,85 +517,6 @@ export function fallbackLevel(chest) {
   return chest.level ?? chest.Level ?? 0;
 }
 
-// **ERWEITERTE BEREICHS-LEVEL-FUNKTIONEN**
-// Unterstützt sowohl normale Level als auch Bereiche (z.B. "1-5", "10-15")
-export function chestMatchesLevel(chest, targetLevel, category) {
-  // Kompatibilität: Behandle sowohl chest-Objekt als auch chestName-String
-  const chestName = typeof chest === 'string' ? chest : (chest?.Name || chest?.name || '');
-  
-  if (targetLevel === undefined) return false;
-  
-  // WICHTIG: Verwende chest.level falls verfügbar (von calculatePlayerNorms gesetzt)
-  let chestLevel = null;
-  if (typeof chest === 'object' && chest !== null) {
-    chestLevel = chest.level;
-  }
-  
-  // Fallback: Level aus Namen extrahieren falls chest.level nicht verfügbar
-  if (chestLevel === null || chestLevel === undefined) {
-    if (!chestName) return false;
-    const normalizedName = normalizeChestName(chestName);
-    
-    // Für Bank Chests
-    if (category === "Bank Chests") {
-      const bankLevels = ["wooden", "bronze", "silver", "golden", "precious", "magic"];
-      const foundLevel = bankLevels.find(level => normalizedName.includes(level));
-      chestLevel = foundLevel ? foundLevel.charAt(0).toUpperCase() + foundLevel.slice(1) : null;
-    } else {
-      // Numerische Level extrahieren
-      const levelMatch = normalizedName.match(/(\d+)/);
-      chestLevel = levelMatch ? parseInt(levelMatch[1]) : null;
-    }
-  }
-  
-  if (chestLevel === null || chestLevel === undefined) return false;
-  
-  // Vergleiche chestLevel mit targetLevel
-  // Für String-Level (Bank Chests)
-  if (typeof targetLevel === 'string' && typeof chestLevel === 'string') {
-    const normalizedTarget = normalizeChestName(targetLevel);
-    const normalizedChest = normalizeChestName(chestLevel);
-    return normalizedChest === normalizedTarget;
-  }
-  
-  // Für numerische Level - exakter Match
-  if (typeof targetLevel === 'number' && typeof chestLevel === 'number') {
-    return chestLevel === targetLevel;
-  }
-  
-  // Für Bereichs-Level (z.B. "20-24")
-  if (typeof targetLevel === 'string' && targetLevel.includes('-') && typeof chestLevel === 'number') {
-    const [start, end] = targetLevel.split('-').map(x => parseInt(x.trim()));
-    if (!isNaN(start) && !isNaN(end)) {
-      return chestLevel >= start && chestLevel <= end;
-    }
-  }
-  
-  return false;
-}
-
-// Intelligente Level-Extraktion mit Bereichs-Support
-export function extractChestLevel(chestName, category) {
-  if (!chestName) return null;
-  
-  const normalizedName = normalizeChestName(chestName);
-  
-  // Bank Chests haben String-Level
-  if (category === "Bank Chests") {
-    const bankLevels = ["wooden", "bronze", "silver", "golden", "precious", "magic"];
-    const foundLevel = bankLevels.find(level => normalizedName.includes(level));
-    return foundLevel ? foundLevel.charAt(0).toUpperCase() + foundLevel.slice(1) : null;
-  }
-  
-  // Numerische Level extrahieren
-  const levelMatch = normalizedName.match(/(\d+)/);
-  if (levelMatch) {
-    return parseInt(levelMatch[1]);
-  }
-  
-  return null;
-}
-
 // Arena-Truhen nie ignorieren (global)
 export function isArenaChest(chest) {
   return (
@@ -715,13 +556,11 @@ export function isIgnoredChest(chest, ignoreChests) {
 }
 
 // Mapping-Logik: Weist einer Chest das passende Mapping zu und gibt die Punkte zurück
-// Hilfsfunktion für toleranten Kategorie-Vergleich (z.B. Tartaros) mit Sonderzeichen-Support
+// Hilfsfunktion für toleranten Kategorie-Vergleich (z.B. Tartaros)
 function categoriesMatchTolerant(catA, catB) {
   if (!catA || !catB) return false;
-  
-  const a = normalizeChestName(catA);
-  const b = normalizeChestName(catB);
-  
+  const a = catA.toLowerCase();
+  const b = catB.toLowerCase();
   // Tolerant für Tartaros
   if ((a.includes('tartaros') && b.includes('tartaros'))) return true;
   // Tolerant für Elven/Cursed/Citadel

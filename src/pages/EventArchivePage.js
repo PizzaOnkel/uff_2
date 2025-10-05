@@ -8,6 +8,7 @@ import { ROUTES } from "../routes";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { mapToMainName } from "../utils/aliasMapping";
+import { getChestPoints, chestMatchesLevel } from "../utils/logicZentrale";
 import { fallbackCategory, fallbackLevel, calculatePlayerNorms, isIgnoredChest } from "../utils/logicZentrale";
 
 // Kategorien wie im Original, inkl. Tartaros
@@ -167,12 +168,14 @@ export default function EventArchivePage({ t, setCurrentPage }) {
   });
   // Debug: Zeige gefilterte Ergebnisse und gemappte Truhen im Browser
   if (window && window.console) {
-    console.log('DEBUG: selectedPeriodId', selectedPeriodId);
-    console.log('DEBUG: results (gefiltert)', results);
-    console.log('DEBUG: auswertung', auswertung);
+    // Debug auskommentiert für Performance
+    // console.log('DEBUG: selectedPeriodId', selectedPeriodId);
+    // console.log('DEBUG: results (gefiltert)', results);
+    // console.log('DEBUG: auswertung', auswertung);
     if (auswertung && auswertung.length > 0) {
       auswertung.forEach((row, idx) => {
-        console.log(`DEBUG: Spieler ${row.name} - chestDetails`, row.chestDetails);
+        // Debug auskommentiert für Performance
+        // console.log(`DEBUG: Spieler ${row.name} - chestDetails`, row.chestDetails);
       });
     }
   }
@@ -208,7 +211,7 @@ export default function EventArchivePage({ t, setCurrentPage }) {
 
   function renderPlayerModal(playerRow) {
     const visibleChests = playerRow.chestDetails.filter(chest => {
-      return !isIgnoredChest(chest);
+      return !isIgnoredChest(chest, ignoreChests);
     });
     const grouped = {};
     visibleChests.forEach(chest => {
@@ -223,7 +226,7 @@ export default function EventArchivePage({ t, setCurrentPage }) {
         };
       }
       grouped[key].count += chest.count || 1;
-      grouped[key].points += (chest.points || 0) * (chest.count || 1);
+      grouped[key].points += getChestPoints(chest, chestMappings) * (chest.count || 1);
     });
     const groupedList = Object.values(grouped);
     return (
@@ -526,14 +529,14 @@ export default function EventArchivePage({ t, setCurrentPage }) {
                                 {row.chestDetails.filter(chest => {
                                   const expectedName = nameMap[level] || level + " Chest";
                                   return (chest.category === "Bank Chests" && (chest.Name === expectedName || chest.name === expectedName || String(chest.level).toLowerCase() === String(level).toLowerCase()));
-                                }).reduce((sum, chest) => sum + (chest.points || 0), 0)}
+                                }).reduce((sum, chest) => sum + getChestPoints(chest, chestMappings), 0)}
                               </td>
                             ]).flat().concat([
                               <td key={row.name + '-' + idx + '-' + cat.name + '-sum'} className={`p-2 font-semibold ${catBg}`}>
                                 {row.chestDetails.filter(chest => chest.category === "Bank Chests").reduce((sum, chest) => sum + (chest.count || 0), 0)}
                               </td>,
                               <td key={row.name + '-' + idx + '-' + cat.name + '-sumPoints'} className={`p-2 font-semibold ${catBg}`}>
-                                {row.chestDetails.filter(chest => chest.category === "Bank Chests").reduce((sum, chest) => sum + (chest.points || 0), 0)}
+                                {row.chestDetails.filter(chest => chest.category === "Bank Chests").reduce((sum, chest) => sum + getChestPoints(chest, chestMappings), 0)}
                               </td>
                             ]);
                           } else {
@@ -541,21 +544,20 @@ export default function EventArchivePage({ t, setCurrentPage }) {
                             return cat.levels.map((level, levelIdx) => [
                               <td key={row.name + '-' + idx + '-' + cat.name + '-' + level + '-count-' + levelIdx} className={`p-2 ${catBg}`}>
                                 {row.chestDetails.filter(chest => {
-                                  // Level als Zahl oder String vergleichen
-                                  return (chest.category === cat.name && String(chest.level ?? chest.Level ?? "").toLowerCase() === String(level).toLowerCase());
+                                  return (chest.category === cat.name && chestMatchesLevel(chest, level, cat.name));
                                 }).reduce((sum, chest) => sum + (chest.count || 0), 0)}
                               </td>,
                               <td key={row.name + '-' + idx + '-' + cat.name + '-' + level + '-points-' + levelIdx} className={`p-2 ${catBg}`}>
                                 {row.chestDetails.filter(chest => {
-                                  return (chest.category === cat.name && String(chest.level ?? chest.Level ?? "").toLowerCase() === String(level).toLowerCase());
-                                }).reduce((sum, chest) => sum + (chest.points || 0), 0)}
+                                  return (chest.category === cat.name && chestMatchesLevel(chest, level, cat.name));
+                                }).reduce((sum, chest) => sum + getChestPoints(chest, chestMappings), 0)}
                               </td>
                             ]).flat().concat([
                               <td key={row.name + '-' + idx + '-' + cat.name + '-sum'} className={`p-2 font-semibold ${catBg}`}>
                                 {row.chestDetails.filter(chest => chest.category === cat.name).reduce((sum, chest) => sum + (chest.count || 0), 0)}
                               </td>,
                               <td key={row.name + '-' + idx + '-' + cat.name + '-sumPoints'} className={`p-2 font-semibold ${catBg}`}>
-                                {row.chestDetails.filter(chest => chest.category === cat.name).reduce((sum, chest) => sum + (chest.points || 0), 0)}
+                                {row.chestDetails.filter(chest => chest.category === cat.name).reduce((sum, chest) => sum + getChestPoints(chest, chestMappings), 0)}
                               </td>
                             ]);
                           }

@@ -7,6 +7,59 @@ import { db } from "../firebase";
 import { collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDocs, query } from "firebase/firestore";
 import StickyBackButton from "../components/StickyBackButton";
 
+// Hilfsfunktion: Auto-Export der Chest-Mappings als JSON-Datei
+function exportChestMappingsToJSON(mappings) {
+  try {
+    // Strukturierte Daten für die Referenz-Datei aufbereiten
+    const exportData = {
+      exportInfo: {
+        timestamp: new Date().toISOString(),
+        totalMappings: mappings.length,
+        version: "1.0",
+        description: "Chest Mapping Referenz-Datei für korrekte Kategorisierung und Punkteverteilung"
+      },
+      mappings: mappings.map(mapping => ({
+        chestName: mapping.chestName || "",
+        category: mapping.category || "",
+        type: mapping.type || "",
+        source: mapping.source || "",
+        levelStart: mapping.levelStart || "",
+        levelEnd: mapping.levelEnd || "",
+        points: mapping.points || 0,
+        timestamp: mapping.timestamp || "",
+        id: mapping.id || ""
+      }))
+    };
+
+    // JSON als Blob erstellen
+    const jsonString = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    
+    // Download-Link erstellen und automatisch auslösen
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `chest_mappings_${new Date().toISOString().split('T')[0]}.json`;
+    
+    // Auto-Download nur, wenn sich die Daten geändert haben
+    // Verhindert ständige Downloads bei jedem Seitenaufruf
+    const currentDataHash = btoa(jsonString).slice(0, 20);
+    const lastHash = localStorage.getItem('chestMappingHash');
+    
+    if (currentDataHash !== lastHash && mappings.length > 0) {
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      localStorage.setItem('chestMappingHash', currentDataHash);
+      console.log('✅ Chest Mappings automatisch als JSON exportiert:', link.download);
+    }
+    
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('❌ Fehler beim JSON-Export:', error);
+  }
+}
+
 // Hilfsfunktion: Vorschlagsliste aus allen Ergebnissen neu generieren
 async function refreshUsedChestMappings(db) {
   // Alle existierenden Mappings und Vorschläge laden
@@ -232,6 +285,9 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
       const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
         .sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
       setChestMappings(list);
+      
+      // Auto-Export: JSON-Datei erstellen
+      exportChestMappingsToJSON(list);
     });
     // usedChestMappings abonnieren (Vorschläge immer aktuell!)
     const unsub2 = onSnapshot(collection(db, "usedChestMappings"), snapshot => {
@@ -281,12 +337,15 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
   async function importUsedMapping(mapping) {
     setImporting(true);
     try {
+      // Alle Felder 1:1 übernehmen
       await addDoc(collection(db, "chestMappings"), {
-        chestName: mapping.chestName,
-        category: mapping.category,
-        levelStart: mapping.level,
-        levelEnd: mapping.level,
-        points: 0,
+        chestName: mapping.chestName || "",
+        category: mapping.category || "",
+        type: mapping.type || "",
+        source: mapping.source || "",
+        levelStart: mapping.level || "",
+        levelEnd: mapping.level || "",
+        points: 0, // Punkte müssen manuell gesetzt werden
         timestamp: new Date().toISOString()
       });
       // Optional: Nach dem Import aus der Vorschlagsliste entfernen
@@ -339,7 +398,7 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
 
   function getChestNamesForCategory(category) {
     const bankNames = ["Wooden Chest", "Bronze Chest", "Silver Chest", "Golden Chest", "Precious Chest", "Magic Chest"];
-    if (category === "Bank") {
+    if (category === "Bank" || category === "Bank Chests") {
       return [...bankNames];
     }
     return chestNames[category + " Chests"] || chestNames[category] || ["default"];
@@ -350,7 +409,8 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
     if (!newMapping.category || !newMapping.points) return;
     let levelStart = newMapping.levelStart;
     let levelEnd = newMapping.levelEnd;
-    if (newMapping.category !== "Bank") {
+    // Für Bank Chests: Level als Name (String) übernehmen, nicht parsen
+    if (newMapping.category !== "Bank" && newMapping.category !== "Bank Chests") {
       levelStart = levelStart !== "" ? parseInt(levelStart, 10) : "";
       levelEnd = levelEnd !== "" ? parseInt(levelEnd, 10) : "";
     }
@@ -399,7 +459,7 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
     let levelStart = editingMapping.levelStart;
     let levelEnd = editingMapping.levelEnd;
     // Level als Zahl speichern, außer bei Bank
-    if (editingMapping.category !== "Bank") {
+    if (editingMapping.category !== "Bank" && editingMapping.category !== "Bank Chests") {
       levelStart = levelStart !== "" && levelStart !== null ? Number(levelStart) : "";
       levelEnd = levelEnd !== "" && levelEnd !== null ? Number(levelEnd) : "";
     }
@@ -436,6 +496,7 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
       <div className="w-full max-w-4xl flex flex-row gap-4 mb-4">
         <button onClick={() => setShowSuggestions(v => !v)} className="px-4 py-2 bg-yellow-700 rounded text-white font-semibold hover:bg-yellow-800 transition">{showSuggestions ? 'Vorschlagsliste ausblenden' : 'Vorschlagsliste anzeigen'}</button>
         <button onClick={() => setShowIgnoreList(v => !v)} className="px-4 py-2 bg-red-700 rounded text-white font-semibold hover:bg-red-800 transition">{showIgnoreList ? 'Ignorierliste ausblenden' : 'Ignorierliste anzeigen'}</button>
+        <button onClick={() => exportChestMappingsToJSON(chestMappings)} className="px-4 py-2 bg-green-700 rounded text-white font-semibold hover:bg-green-800 transition">📁 JSON Export</button>
       </div>
       {/* Ausgelagerte Komponenten */}
       {showSuggestions && (
@@ -577,7 +638,7 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
           </div>
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-300">Level Start</label>
-            {newMapping.category === "Bank" ? (
+            {(newMapping.category === "Bank" || newMapping.category === "Bank Chests") ? (
               <select
                 value={newMapping.levelStart}
                 onChange={e => setNewMapping({ ...newMapping, levelStart: e.target.value })}
@@ -600,7 +661,7 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
           </div>
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-300">Level Ende</label>
-            {newMapping.category === "Bank" ? (
+            {(newMapping.category === "Bank" || newMapping.category === "Bank Chests") ? (
               <select
                 value={newMapping.levelEnd}
                 onChange={e => setNewMapping({ ...newMapping, levelEnd: e.target.value })}
@@ -818,7 +879,7 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
                       </td>
                       <td className="px-4 py-2">
                         {editingId === mapping.id ? (
-                          editingMapping.category === "Bank" ? (
+                          (editingMapping.category === "Bank" || editingMapping.category === "Bank Chests") ? (
                             <div className="flex gap-2">
                               <select
                                 value={editingMapping.levelStart}
@@ -832,7 +893,6 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
                                 <option value="Golden">Golden</option>
                                 <option value="Precious">Precious</option>
                                 <option value="Magic">Magic</option>
-                                <option value="Level 30 Citadel">Level 30 Citadel</option>
                               </select>
                               <span className="text-gray-400">-</span>
                               <select
@@ -847,7 +907,6 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
                                 <option value="Golden">Golden</option>
                                 <option value="Precious">Precious</option>
                                 <option value="Magic">Magic</option>
-                                <option value="Level 30 Citadel">Level 30 Citadel</option>
                               </select>
                             </div>
                           ) : (
@@ -870,9 +929,13 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
                             </div>
                           )
                         ) : (
-                          mapping.levelStart === mapping.levelEnd ?
-                            mapping.levelStart :
-                            `${mapping.levelStart} - ${mapping.levelEnd}`
+                          (mapping.category === "Bank" || mapping.category === "Bank Chests") ?
+                            (mapping.levelStart === mapping.levelEnd ? mapping.levelStart : `${mapping.levelStart} - ${mapping.levelEnd}`)
+                          : (
+                            mapping.levelStart === mapping.levelEnd ?
+                              mapping.levelStart :
+                              `${mapping.levelStart} - ${mapping.levelEnd}`
+                          )
                         )}
                       </td>
                       <td className="px-4 py-2">
