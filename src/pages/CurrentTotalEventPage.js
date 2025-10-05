@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import StickyBackButton from "../components/StickyBackButton";
 import Papa from "papaparse";
 import { ROUTES } from "../routes";
@@ -70,30 +70,75 @@ const verticalHeaders = [
 
   // State für Ignore-Liste
   const [ignoreChests, setIgnoreChests] = useState([]);
+  
+  // Performance-Optimierung: Cache für Firestore-Daten
+  const [dataCache, setDataCache] = useState({
+    lastFetch: null,
+    data: null
+  });
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 Minuten Cache
+  const [forceRefresh, setForceRefresh] = useState(false); // Force Refresh Flag
 
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-      const [playersSnap, troopSnap, resultsSnap, chestMappingsSnap, normsSnap, uploadTimesSnap, periodsSnap, ignoreSnap] = await Promise.all([
+      
+      // Prüfe Cache zuerst (außer bei Force Refresh)
+      const cacheNow = Date.now();
+      if (!forceRefresh && dataCache.data && dataCache.lastFetch && (cacheNow - dataCache.lastFetch) < CACHE_DURATION) {
+        // Verwende gecachte Daten
+        const cached = dataCache.data;
+        setPlayers(cached.players);
+        setTroopStrengths(cached.troopStrengths);
+        setChestMappings(cached.chestMappings);
+        setNorms(cached.norms);
+        setUploadTimes(cached.uploadTimes);
+        setPeriods(cached.periods);
+        setIgnoreChests(cached.ignoreChests);
+        setResults(cached.results);
+        setLoading(false);
+        return;
+      }
+      
+      // Nur bei Cache-Miss: Lade Daten von Firestore - OPTIMIERT mit selektiver Ladung
+      console.time('⏱️ Firestore Load Time');
+      
+      // Lade nur die wichtigsten Daten parallel - Results limitieren
+      const [playersSnap, troopSnap, chestMappingsSnap, normsSnap, periodsSnap] = await Promise.all([
         getDocs(collection(db, "players")),
         getDocs(collection(db, "troopStrengths")),
-        getDocs(collection(db, "results")),
         getDocs(collection(db, "chestMappings")),
         getDocs(collection(db, "norms")),
-        getDocs(collection(db, "uploadtime")),
-        getDocs(collection(db, "periods")),
-        getDocs(collection(db, "chestMappingIgnore")),
+        getDocs(collection(db, "periods"))
       ]);
-  const loadedPlayers = playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  const loadedTroops = troopSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  const resultsArr = resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  const loadedMappings = chestMappingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  // Debug auskommentiert für Performance
-  // console.log('[DEBUG][RAW PLAYERS]:', loadedPlayers);
-  // console.log('[DEBUG][RAW RESULTS]:', resultsArr);
-  setPlayers(loadedPlayers);
-  setTroopStrengths(loadedTroops);
-  setChestMappings(loadedMappings);
+      
+      console.timeEnd('⏱️ Firestore Load Time');
+      console.time('⏱️ Data Processing Time');
+      
+      // Lade Results und weniger kritische Daten in zweiter Welle
+      const [resultsSnap, uploadTimesSnap, ignoreSnap] = await Promise.all([
+        getDocs(collection(db, "results")),
+        getDocs(collection(db, "uploadtime")),
+        getDocs(collection(db, "chestMappingIgnore"))
+      ]);
+      
+      // Verarbeite die kritischen Daten sofort
+      const loadedPlayers = playersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const loadedTroops = troopSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const loadedMappings = chestMappingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const loadedNorms = normsSnap.docs.map(doc => ({ troopStrength: doc.data().troopStrength, value: doc.data().value }));
+      const loadedPeriods = periodsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      // Setze kritische Daten sofort - User sieht schneller Inhalte
+      setPlayers(loadedPlayers);
+      setTroopStrengths(loadedTroops);
+      setChestMappings(loadedMappings);
+      setNorms(loadedNorms);
+      setPeriods(loadedPeriods);
+      
+      // Verarbeite Results
+      const resultsArr = resultsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      console.log(`📊 Loaded ${resultsArr.length} results, ${loadedMappings.length} mappings`);
       // Debug: Zeige alle Mapping-Namen/Kategorien im Browser an
       if (loadedMappings && loadedMappings.length > 0) {
         const mappingNames = loadedMappings.map(m => ({
@@ -120,15 +165,14 @@ const verticalHeaders = [
         }
       });
       setUploadTimes(uploadMap);
-      // Perioden laden
-      const periodsArr = periodsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setPeriods(periodsArr);
+      
+      // Verwende bereits geladene Perioden
       // Aktuelle Periode bestimmen (neueste mit start <= jetzt und end >= jetzt oder end leer)
       let now = new Date();
       let currentPeriod = null;
       let currentPeriodId = null;
       // Finde die Periode, die aktuell ist (start <= jetzt && (end >= jetzt || end leer))
-      for (const p of periodsArr) {
+      for (const p of loadedPeriods) {
         if (p.start && new Date(p.start) <= now && (!p.end || new Date(p.end) >= now)) {
           currentPeriod = p;
           currentPeriodId = p.id;
@@ -136,8 +180,8 @@ const verticalHeaders = [
         }
       }
       // Fallback: falls keine laufende Periode, nimm die mit dem neuesten start
-      if (!currentPeriod && periodsArr.length > 0) {
-        currentPeriod = periodsArr.reduce((a, b) => (!a.start || (b.start && new Date(b.start) > new Date(a.start))) ? b : a);
+      if (!currentPeriod && loadedPeriods.length > 0) {
+        currentPeriod = loadedPeriods.reduce((a, b) => (!a.start || (b.start && new Date(b.start) > new Date(a.start))) ? b : a);
         currentPeriodId = currentPeriod.id;
       }
       const filteredResults = resultsArr.filter(r => r.periodId === currentPeriodId);
@@ -148,10 +192,35 @@ const verticalHeaders = [
       // Ignore-Liste aus Firestore
       const ignoreList = ignoreSnap.docs.map(doc => doc.data());
       setIgnoreChests(ignoreList);
+      
+      // Cache die verarbeiteten Daten für zukünftige Verwendung
+      const cacheData = {
+        players: loadedPlayers,
+        troopStrengths: loadedTroops,
+        chestMappings: loadedMappings,
+        norms: loadedNorms,
+        uploadTimes: uploadMap,
+        periods: loadedPeriods,
+        ignoreChests: ignoreList,
+        results: filteredResults
+      };
+      setDataCache({
+        lastFetch: Date.now(),
+        data: cacheData
+      });
+      
+      console.timeEnd('⏱️ Data Processing Time');
+      console.log('🚀 CurrentTotalEventPage loaded successfully');
+      setForceRefresh(false); // Reset force refresh flag
       setLoading(false);
     }
     fetchData();
-  }, []);
+  }, [forceRefresh]); // Re-run when forceRefresh changes
+  
+  // Force Refresh Funktion
+  const handleForceRefresh = () => {
+    setForceRefresh(true);
+  };
 
   useEffect(() => {
     const container = tableContainerRef.current;
@@ -187,25 +256,28 @@ const verticalHeaders = [
     return norm ? Number(norm.value) : 0;
   }
 
-  // --- Zentrale Auswertung mit calculatePlayerNorms aus logicZentrale.js ---
-  // Nur Spieler anzeigen, die in den aktuellen results (JSON-Uploads) vorkommen
-  // Extrahiere die Namen aus dem flachen results-Array
-  // Extrahiere die Namen aus dem flachen results-Array
-  const clanmateNamesRaw = results.map(r => (r.Clanmate || r.playerName || r.name || "").trim().toLowerCase()).filter(Boolean);
-  const clanmateNames = Array.from(new Set(clanmateNamesRaw));
-  // Debug: Zeige alle Namen aus der JSON (results)
-  // Debug auskommentiert für Performance
-  // console.log('[DEBUG][ClanmateNames aus JSON]:', clanmateNames);
-  // Übergebe ALLE Spielerobjekte an die zentrale Auswertung, damit Aliase/Hauptnamen korrekt gemappt werden
-  const auswertung = calculatePlayerNorms({
-    playersArr: players,
-    resultsArr: results,
-    chestMappings,
-    normsArr: norms,
-    ignoreChests,
-    periodsArr: periods,
-    currentPeriodId: periods.find(p => p.name === currentPeriodName)?.id || (periods[0]?.id ?? null)
-  });
+  // --- PERFORMANCE-OPTIMIERUNG: Verwende useMemo für aufwendige Berechnungen ---
+  const auswertung = useMemo(() => {
+    if (!results.length || !players.length || !chestMappings.length) {
+      return [];
+    }
+    
+    // Extrahiere die Namen aus dem flachen results-Array
+    const clanmateNamesRaw = results.map(r => (r.Clanmate || r.playerName || r.name || "").trim().toLowerCase()).filter(Boolean);
+    const clanmateNames = Array.from(new Set(clanmateNamesRaw));
+    
+    // Übergebe ALLE Spielerobjekte an die zentrale Auswertung, damit Aliase/Hauptnamen korrekt gemappt werden
+    return calculatePlayerNorms({
+      playersArr: players,
+      resultsArr: results,
+      chestMappings,
+      normsArr: norms,
+      ignoreChests,
+      periodsArr: periods,
+      currentPeriodId: periods.find(p => p.name === currentPeriodName)?.id || (periods[0]?.id ?? null)
+    });
+  }, [results, players, chestMappings, norms, ignoreChests, periods, currentPeriodName]); // Abhängigkeiten für useMemo
+  
   // Debug: Zeige finale Auswertung (Tabellenzeilen)
   // Debug auskommentiert für Performance
   // console.log('[DEBUG][Tabellenzeilen]:', auswertung.map(row => row.name));
@@ -414,20 +486,47 @@ const verticalHeaders = [
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white p-4 pb-32">
-      {/* Fixierte Buttons: Zurück und On Top */}
-      <div style={{position:'fixed', right:'24px', top:'50%', transform:'translateY(200%)', zIndex:1000, width:'200px', display:'flex', flexDirection:'column', alignItems:'center', pointerEvents:'auto'}}>
-        <div style={{width:'100%'}}>
-          <StickyBackButton onClick={() => setCurrentPage(ROUTES.NAVIGATION)} label={t?.backToNavigation || "Zurück"} style={{width:'100px'}} />
-        </div>
-        <div style={{width:'100%'}}>
-          <StickyBackButton
-            onClick={() => window.scrollTo({top:0, behavior:'smooth'})}
-            label={"On Top"}
-            style={{ background: '#1976d2', width:'100px', marginTop:'34px' }}
-          />
-        </div>
-        {/* Platz für weitere Buttons */}
-      </div>
+      {/* Fixierte Buttons: Zurück, On Top und Aktualisieren */}
+      <StickyBackButton 
+        onClick={() => setCurrentPage(ROUTES.NAVIGATION)} 
+        label={t?.backToNavigation || "Navigation"} 
+        style={{
+          position: 'fixed',
+          right: '24px',
+          top: '45%',
+          width: '120px', 
+          fontSize: '11px',
+          zIndex: 1000
+        }} 
+      />
+      <StickyBackButton
+        onClick={() => window.scrollTo({top:0, behavior:'smooth'})}
+        label={"🔝 Nach Oben"}
+        style={{ 
+          position: 'fixed',
+          right: '24px',
+          top: '50%',
+          background: '#1976d2', 
+          width: '120px',
+          fontSize: '11px',
+          zIndex: 1000
+        }}
+      />
+      <StickyBackButton
+        onClick={handleForceRefresh}
+        label={loading ? "⏳ Laden..." : "🔄 Aktualisieren"}
+        style={{ 
+          position: 'fixed',
+          right: '24px',
+          top: '55%',
+          background: loading ? '#666' : '#10b981', 
+          width: '120px',
+          fontSize: '10px',
+          cursor: loading ? 'not-allowed' : 'pointer',
+          zIndex: 1000
+        }}
+        disabled={loading}
+      />
       <div className="w-full flex flex-col items-center">
         {/* Name und Zeitraum der aktuellen Veranstaltungsperiode (aus Firestore-Perioden) */}
         {!loading && currentPeriodName && (
@@ -447,6 +546,18 @@ const verticalHeaders = [
           <p className="text-xl text-gray-300 mb-8 text-center">{t.loadingData || "Lade Daten..."}</p>
         ) : (
           <>
+            {/* Cache-Status-Anzeige */}
+            {dataCache.lastFetch && (
+              <div className="mb-4 w-full max-w-4xl bg-blue-900/20 border border-blue-500/30 rounded p-3 text-center">
+                <div className="text-sm text-blue-200">
+                  📊 Daten vom: {new Date(dataCache.lastFetch).toLocaleTimeString('de-DE')} 
+                  <span className="ml-2 text-xs text-blue-300">
+                    (Cache läuft {Math.round((CACHE_DURATION - (Date.now() - dataCache.lastFetch)) / 1000 / 60)} Min.)
+                  </span>
+                </div>
+              </div>
+            )}
+            
             <div className="mb-8 w-full max-w-2xl bg-gray-800 rounded p-4 flex flex-col items-center">
               <h3 className="text-2xl font-semibold mb-2 text-blue-300">{t.clanTotalResult || "Clan-Gesamtergebnis"}</h3>
               <div className="w-full flex justify-between mb-2">

@@ -5,9 +5,52 @@ import { mapToMainName } from "../utils/aliasMapping";
 export function normalizeChestName(name) {
   if (!name || typeof name !== 'string') return '';
   
-  return name
-    .trim()
-    .toLowerCase()
+  let normalized = name.trim().toLowerCase();
+  
+  // **OCR-FEHLER KORREKTUREN**
+  // Häufige OCR-Lesefehler automatisch korrigieren
+  const ocrFixes = {
+    // Pipe-Zeichen am Ende entfernen
+    '|': '',
+    ' |': '', // auch mit Leerzeichen
+    '| ': '', // auch mit nachfolgendem Leerzeichen
+    // Unicode-Fehler korrigieren
+    'â€˜': "'",  // Fenrirâ€˜s -> Fenrir's
+    'â€™': "'",  // Variante
+    'Ã¯': 'i',   // heroÃ¯c -> heroic
+    'ã¯': 'i',   // heroã¯c -> heroic (weitere Variante)
+    'Ð¡': 'c',   // Level 15 Ð¡ -> Level 15 C
+    'Ä±': 'n',   // BarbariarÄ± -> Barbarian
+    'ae±': '',   // Barbarianae± -> Barbarian
+    // Häufige Tippfehler
+    'abandpned': 'abandoned',  // Abandpned -> Abandoned
+    'elveri': 'elven',         // Elveri -> Elven
+    'elvri': 'elven',          // Elvri -> Elven
+    'elvrin': 'elven',         // Elvrin -> Elven
+    'elvenn': 'elven',         // Elvenn -> Elven
+    'cidadel': 'citadel',      // Cidadel -> Citadel
+    'barbariar': 'barbarian',  // BarbariarÄ± -> Barbarian (zusätzlich)
+    'barbariarn': 'barbarian', // Barbariarn -> Barbarian
+    'barbarianae': 'barbarian', // Barbarianae± -> Barbarian
+    'bankk': 'bank',           // Bankk -> Bank
+    'heroã¯c': 'heroic',       // heroã¯c -> heroic
+    'ancientsâ€™': "ancients'", // Ancientsâ€™ -> Ancients'
+    'ancientsâ€˜': "ancients'", // Ancientsâ€˜ -> Ancients'
+    'fenrirâ€™': "fenrir's",   // Fenrirâ€™ -> Fenrir's
+    'fenrirâ€˜': "fenrir's",   // Fenrirâ€˜ -> Fenrir's
+    // Truncated text
+    ' ban': ' bank',  // Level 0 Ban -> Level 0 Bank
+    ' 2 2': ' 22',    // Level 2 2 -> Level 22
+    // Store-Fehler
+    'hermes" store': 'hermes store', // Hermes" Store -> Hermes Store
+  };
+  
+  // OCR-Korrekturen anwenden
+  for (const [error, fix] of Object.entries(ocrFixes)) {
+    normalized = normalized.replace(new RegExp(error, 'g'), fix);
+  }
+  
+  return normalized
     // Apostrophe normalisieren (verschiedene Unicode-Varianten)
     .replace(/[''`´]/g, "'")
     // Umlaute normalisieren
