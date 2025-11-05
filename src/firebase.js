@@ -18,8 +18,7 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 
 // Emulator-Verbindung nur lokal aktivieren
-// Emulator-Verbindung deaktiviert: Immer Cloud-Datenbank verwenden
-// if (window.location.hostname === "localhost") {
-//   connectFirestoreEmulator(db, "localhost", 8080);
-//   connectAuthEmulator(auth, "http://localhost:8000");
-// }
+if (window.location.hostname === "localhost") {
+  connectFirestoreEmulator(db, "localhost", 8080);
+  connectAuthEmulator(auth, "http://localhost:8000");
+}

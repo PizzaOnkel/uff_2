@@ -8,7 +8,7 @@ import { ROUTES } from "../routes";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { mapToMainName } from "../utils/aliasMapping";
-import { getChestPoints, chestMatchesLevel } from "../utils/logicZentrale";
+import { getChestPoints, chestMatchesLevel, chestCategoryMatches } from "../utils/logicZentrale";
 import { fallbackCategory, fallbackLevel, calculatePlayerNorms, isIgnoredChest } from "../utils/logicZentrale";
 
 // Kategorien wie im Original, inkl. Tartaros
@@ -168,14 +168,10 @@ export default function EventArchivePage({ t, setCurrentPage }) {
   });
   // Debug: Zeige gefilterte Ergebnisse und gemappte Truhen im Browser
   if (window && window.console) {
-    // Debug auskommentiert für Performance
-    // console.log('DEBUG: selectedPeriodId', selectedPeriodId);
-    // console.log('DEBUG: results (gefiltert)', results);
-    // console.log('DEBUG: auswertung', auswertung);
+  // ...existing code...
     if (auswertung && auswertung.length > 0) {
       auswertung.forEach((row, idx) => {
-        // Debug auskommentiert für Performance
-        // console.log(`DEBUG: Spieler ${row.name} - chestDetails`, row.chestDetails);
+  // ...existing code...
       });
     }
   }
@@ -211,7 +207,7 @@ export default function EventArchivePage({ t, setCurrentPage }) {
 
   function renderPlayerModal(playerRow) {
     const visibleChests = playerRow.chestDetails.filter(chest => {
-      return !isIgnoredChest(chest, ignoreChests);
+      return !isIgnoredChest(chest);
     });
     const grouped = {};
     visibleChests.forEach(chest => {
@@ -500,9 +496,9 @@ export default function EventArchivePage({ t, setCurrentPage }) {
                           return cat.subChests.map((sub, subIdx) => (
                             <td key={row.name + '-' + idx + '-' + cat.name + '-' + sub.name + '-' + subIdx} className={`p-2 ${catBg}`}>
                               {row.chestDetails.filter(chest => {
-                                if (sub.name === "Quick March Chest") return chest.category === "Quick March Chest";
-                                if (sub.name === "Ancients Chest") return chest.category === "Ancients Chest";
-                                if (sub.name === "ROTA Total") return chest.category === "Quick March Chest" || chest.category === "Ancients Chest";
+                                if (sub.name === "Quick March Chest") return chestCategoryMatches(chest, "Quick March Chest");
+                                if (sub.name === "Ancients Chest") return chestCategoryMatches(chest, "Ancients Chest");
+                                if (sub.name === "ROTA Total") return chestCategoryMatches(chest, "Quick March Chest") || chestCategoryMatches(chest, "Ancients Chest");
                                 return false;
                               }).reduce((sum, chest) => sum + (chest.count || 0), 0)}
                             </td>

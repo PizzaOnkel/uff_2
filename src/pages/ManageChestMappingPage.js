@@ -575,31 +575,6 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
-            {/* Hilfe-Box für Bereichs-Kategorien */}
-            {(newMapping.category === "Runic Chests" || newMapping.category === "Vault of the Ancients") && (
-              <div className="mt-2 p-3 bg-blue-900/30 border border-blue-500/30 rounded-lg">
-                <div className="flex items-center gap-2 text-blue-300 text-sm font-medium mb-2">
-                  💡 Bereichs-Level Unterstützung
-                </div>
-                <div className="text-xs text-blue-200">
-                  <strong>{newMapping.category}</strong> verwendet Bereichs-Level:
-                  <ul className="mt-1 ml-4 list-disc space-y-1">
-                    {newMapping.category === "Runic Chests" && (
-                      <>
-                        <li>20-24, 25-29, 30-34, 35-39, 40-44, 45+</li>
-                        <li>Wähle einen Bereich aus der Dropdown-Liste</li>
-                      </>
-                    )}
-                    {newMapping.category === "Vault of the Ancients" && (
-                      <>
-                        <li>10-14, 15-19, 20-24, 25-29, 30-34, 35-39, 40-44</li>
-                        <li>Automatische Start/Ende-Zuordnung</li>
-                      </>
-                    )}
-                  </ul>
-                </div>
-              </div>
-            )}
           </div>
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-300">Type</label>
@@ -674,47 +649,6 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
                   <option key={lvl} value={lvl}>{lvl}</option>
                 ))}
               </select>
-            ) : (newMapping.category === "Runic Chests" || newMapping.category === "Vault of the Ancients") ? (
-              <div className="space-y-2">
-                <select
-                  value={`${newMapping.levelStart}-${newMapping.levelEnd}`}
-                  onChange={e => {
-                    const [start, end] = e.target.value.split('-');
-                    setNewMapping({ 
-                      ...newMapping, 
-                      levelStart: start || '', 
-                      levelEnd: end || '' 
-                    });
-                  }}
-                  className="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-purple-500 focus:outline-none"
-                >
-                  <option value="">Bereich wählen...</option>
-                  {newMapping.category === "Runic Chests" && [
-                    { label: "20-24", value: "20-24" },
-                    { label: "25-29", value: "25-29" },
-                    { label: "30-34", value: "30-34" },
-                    { label: "35-39", value: "35-39" },
-                    { label: "40-44", value: "40-44" },
-                    { label: "45+", value: "45-50" }
-                  ].map(range => (
-                    <option key={range.value} value={range.value}>{range.label}</option>
-                  ))}
-                  {newMapping.category === "Vault of the Ancients" && [
-                    { label: "10-14", value: "10-14" },
-                    { label: "15-19", value: "15-19" },
-                    { label: "20-24", value: "20-24" },
-                    { label: "25-29", value: "25-29" },
-                    { label: "30-34", value: "30-34" },
-                    { label: "35-39", value: "35-39" },
-                    { label: "40-44", value: "40-44" }
-                  ].map(range => (
-                    <option key={range.value} value={range.value}>{range.label}</option>
-                  ))}
-                </select>
-                <div className="text-xs text-gray-400">
-                  📍 Bereiche für {newMapping.category} - Start: {newMapping.levelStart}, Ende: {newMapping.levelEnd}
-                </div>
-              </div>
             ) : (
               <input
                 type="number"
@@ -738,13 +672,6 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
                   <option key={lvl} value={lvl}>{lvl}</option>
                 ))}
               </select>
-            ) : (newMapping.category === "Runic Chests" || newMapping.category === "Vault of the Ancients") ? (
-              <div className="px-3 py-2 rounded bg-gray-600 text-gray-300 border border-gray-600">
-                <span className="text-sm">🔒 Automatisch gesetzt durch Bereichs-Auswahl</span>
-                <div className="text-xs text-gray-400 mt-1">
-                  Aktuelles Ende: {newMapping.levelEnd || 'Nicht gesetzt'}
-                </div>
-              </div>
             ) : (
               <input
                 type="number"
@@ -982,36 +909,6 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
                                 <option value="Magic">Magic</option>
                               </select>
                             </div>
-                          ) : (editingMapping.category === "Runic Chests" || editingMapping.category === "Vault of the Ancients") ? (
-                            <div className="flex flex-col gap-1">
-                              <select
-                                value={`${editingMapping.levelStart}-${editingMapping.levelEnd}`}
-                                onChange={e => {
-                                  const [start, end] = e.target.value.split('-');
-                                  setEditingMapping({ 
-                                    ...editingMapping, 
-                                    levelStart: start || '', 
-                                    levelEnd: end || '' 
-                                  });
-                                }}
-                                className="w-24 px-2 py-1 rounded bg-gray-700 text-white border border-gray-600 text-xs"
-                              >
-                                <option value="">Bereich...</option>
-                                {editingMapping.category === "Runic Chests" && [
-                                  "20-24", "25-29", "30-34", "35-39", "40-44", "45-50"
-                                ].map(range => (
-                                  <option key={range} value={range}>{range}</option>
-                                ))}
-                                {editingMapping.category === "Vault of the Ancients" && [
-                                  "10-14", "15-19", "20-24", "25-29", "30-34", "35-39", "40-44"
-                                ].map(range => (
-                                  <option key={range} value={range}>{range}</option>
-                                ))}
-                              </select>
-                              <div className="text-xs text-gray-400">
-                                {editingMapping.levelStart}-{editingMapping.levelEnd}
-                              </div>
-                            </div>
                           ) : (
                             <div className="flex gap-2">
                               <input
@@ -1032,29 +929,13 @@ function ManageChestMappingPage({ t, setCurrentPage }) {
                             </div>
                           )
                         ) : (
-                          (() => {
-                            const start = mapping.levelStart;
-                            const end = mapping.levelEnd;
-                            
-                            // Bank Chests - spezielle Formatierung
-                            if (mapping.category === "Bank" || mapping.category === "Bank Chests") {
-                              return start === end ? start : `${start} - ${end}`;
-                            }
-                            
-                            // Runic Chests und Vault - Bereichs-Hervorhebung
-                            if (mapping.category === "Runic Chests" || mapping.category === "Vault of the Ancients") {
-                              if (start && end && start !== end) {
-                                return (
-                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                                    📊 {start}-{end}
-                                  </span>
-                                );
-                              }
-                            }
-                            
-                            // Standard-Anzeige
-                            return start === end ? start : `${start} - ${end}`;
-                          })()
+                          (mapping.category === "Bank" || mapping.category === "Bank Chests") ?
+                            (mapping.levelStart === mapping.levelEnd ? mapping.levelStart : `${mapping.levelStart} - ${mapping.levelEnd}`)
+                          : (
+                            mapping.levelStart === mapping.levelEnd ?
+                              mapping.levelStart :
+                              `${mapping.levelStart} - ${mapping.levelEnd}`
+                          )
                         )}
                       </td>
                       <td className="px-4 py-2">

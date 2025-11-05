@@ -80,7 +80,7 @@ const TopTen = ({ t, setCurrentPage }) => {
         const filteredResults = currentPeriod ? resultsArr.filter(r => r.periodId === currentPeriod.id) : [];
         setData(filteredResults);
       } catch (error) {
-        console.error('[TopTen] Fehler beim Laden der Firestore-Daten:', error);
+  // Fehler beim Laden der Firestore-Daten
         setData([]);
       }
       setLoading(false);
