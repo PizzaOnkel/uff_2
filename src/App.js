@@ -105,8 +105,7 @@ class AppContent extends React.Component {
       case 'emailTest':
         return <EmailTestPage t={t} setCurrentPage={this.setCurrentPage} />;
       case 'adminLogin':
-        if (!t) throw new Error('t (Translations) ist nicht gesetzt!');
-        return <AdminLoginPage t={t} setCurrentPage={this.setCurrentPage} />;
+        return <AdminLoginPage setCurrentPage={this.setCurrentPage} />;
       case 'adminDebug':
         return <AdminDebugPage t={t} setCurrentPage={this.setCurrentPage} />;
       case 'currentTotalEvent':

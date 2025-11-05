@@ -42,7 +42,7 @@ function categoriesMatchTolerant(a, b) {
   const A = normalizeChestName(a);
   const B = normalizeChestName(b);
   if (A === B) return true;
-    const keywords = ["common crypt", "common chests", "common", "tartaros", "elven", "cursed", "citadel", "epic", "rare", "bank", "runic", "heroic", "jormungandr", "union", "rota", "vault"];
+  const keywords = ["tartaros", "elven", "cursed", "citadel", "epic", "rare", "bank", "runic", "heroic", "jormungandr", "union", "rota", "vault"];
   for (const k of keywords) if (A.includes(k) && B.includes(k)) return true;
   return false;
 }
@@ -53,36 +53,15 @@ export function chestCategoryMatches(chest, catName) {
   return stringsMatchTolerant(c, catName);
 }
 
-export function mapCategoryToPageName(cat, chest) {
+function mapCategoryToPageName(cat) {
   const c = safeToString(cat).toLowerCase();
-  // Strenge und exklusive Ausnahme-Regel für Citadel-Chests: Name, Type/Source und Level prüfen
-  if (chest) {
-    const name = (chest.Name || chest.name || '').toLowerCase();
-    const type = (chest.Type || chest.type || '').toLowerCase();
-    const source = (chest.Source || chest.source || '').toLowerCase();
-    const lvl = String(chest.level ?? chest.Level ?? '').trim();
-    // Exklusive Regel: Cursed Citadel Chest mit Level 20/25 und Type/Source Citadel wird NUR als Cursed Chests gezählt
-    if (
-      name.includes('cursed') && (type.includes('citadel') || source.includes('citadel')) && (lvl === '20' || lvl === '25')
-    ) {
-      return 'Cursed Chests';
-    }
-    // Exklusive Regel: Elven Citadel Chest mit Level 20/25 und Type/Source Citadel wird NUR als Elven Chests gezählt
-    if (
-      name.includes('elven') && (type.includes('citadel') || source.includes('citadel')) && (lvl === '20' || lvl === '25')
-    ) {
-      return 'Elven Chests';
-    }
-  }
   if (c.includes("arena")) return "Arena Chests";
-  if (c.includes("common crypt") || c.includes("common chests") || c.includes("common")) return "Common Chests";
-  if (c.includes("rare crypt") || c.includes("rare chests") || c.includes("rare")) return "Rare Chests";
+  if (c.includes("common")) return "Common Chests";
+  if (c.includes("rare")) return "Rare Chests";
   if (c.includes("epic") && c.includes("ancient")) return "Epic Ancient squad";
-  if (c.includes("epic crypt") || c.includes("epic chests") || c.includes("epic")) return "Epic Chests";
+  if (c.includes("epic")) return "Epic Chests";
   if (c.includes("tartaros")) return "Chests of Tartaros";
-  if (c.includes("elven") && !c.includes("cursed")) return "Elven Chests";
-  if (c.includes("citadel") && !c.includes("cursed") && !c.includes("elven")) return "Elven Chests";
-  if (c.includes("cursed")) return "Cursed Chests";
+  if (c.includes("elven") || c.includes("citadel")) return "Elven Chests";
   if (c.includes("cursed")) return "Cursed Chests";
   if (c.includes("bank")) return "Bank Chests";
   if (c.includes("runic")) return "Runic Chests";
@@ -204,48 +183,54 @@ export function getChestPoints(chest, chestMappings) {
   if (mappings.length === 0) return 0;
   const typeB = safeToString(chest.Type || chest.type || '');
   const nameB = safeToString(chest.Name || chest.name || '');
-  const categoryB = safeToString(chest.category || chest.Category || chest.Type || chest.Source || '');
-  const extractedLevel = extractChestLevel(chest, categoryB);
-  const levelB = extractedLevel !== null && extractedLevel !== undefined ? String(extractedLevel) : safeToString(chest.level ?? chest.Level ?? '');
-  const sourceB = safeToString(chest.Source || chest.source || '');
+  const categoryB = safeToString(chest.category || chest.Category || chest.Type || '');
+  // Normalize levelB by attempting to extract numeric/textual level from chest fields
+  const extractedLevel = extractChestLevel(chest, chest.category || chest.Category || chest.Type || chest.Source || '');
+  const levelB = extractedLevel !== null && extractedLevel !== undefined ? extractedLevel : safeToString(chest.level ?? chest.Level ?? '');
 
-  // Toleranter Vergleich: Kategorie und Level, Level-Ranges, Source/Type optional, Name nur wenn explizit im Mapping
-  const mapping = mappings.find(m => {
-    const categoryA = safeToString(m.category || m.Category || '');
-    const levelA = String(m.level || m.Level || m.levelStart || '').trim();
-    const levelEndA = String(m.levelEnd || '').trim();
-    const sourceA = safeToString(m.source || m.Source || '');
+  let best = null;
+  let bestScore = -1;
+
+  for (const m of mappings) {
     const typeA = safeToString(m.type || m.Type || '');
     const nameA = safeToString(m.chestName || m.Name || '');
+    const categoryA = safeToString(m.category || m.Category || '');
+    const levelA = safeToString(m.level || m.Level || '');
+    let score = 0;
 
-    // Kategorie tolerant vergleichen
-    if (!stringsMatchTolerant(categoryA, categoryB)) return false;
+    // strong exact name match
+    if (nameA && nameA.toLowerCase() === nameB.toLowerCase()) score += 100;
+    // substring matches (tolerant for OCR differences)
+    else if (nameA && nameB && nameA.toLowerCase().includes(nameB.toLowerCase())) score += 40;
+    else if (nameA && nameB && nameB.toLowerCase().includes(nameA.toLowerCase())) score += 30;
 
-    // Level: direkt oder im Bereich
-    if (levelA && levelEndA) {
-      // Range
-      const lvlNum = Number(levelB);
-      const lvlStart = Number(levelA);
-      const lvlEnd = Number(levelEndA);
-      if (isNaN(lvlNum) || isNaN(lvlStart) || isNaN(lvlEnd)) return false;
-      if (lvlNum < lvlStart || lvlNum > lvlEnd) return false;
-    } else if (levelA) {
-      // Einzelwert
-      if (!stringsMatchTolerant(levelA, levelB)) return false;
+    // category similarity
+    if (categoryA && categoriesMatchTolerant(categoryA, categoryB)) score += 20;
+
+    // type match
+    if (typeA && typeA.toLowerCase() === typeB.toLowerCase()) score += 5;
+
+    // level match (numeric or textual)
+    if (levelA && (levelB !== undefined && levelB !== null && levelB !== '')) {
+      const nA = Number(levelA);
+      const nB = Number(levelB);
+      if (!isNaN(nA) && !isNaN(nB) && nA === nB) score += 30;
+      else if (String(levelA).toLowerCase() === String(levelB).toLowerCase()) score += 10;
+      else {
+        // try extracting numeric from levelA textual forms like 'Level 25'
+        const mA = normalizeChestName(levelA).match(/(\d{1,3})/);
+        const mB = typeof levelB === 'string' ? normalizeChestName(levelB).match(/(\d{1,3})/) : null;
+        const vA = mA ? Number(mA[1]) : (isNaN(Number(levelA)) ? NaN : Number(levelA));
+        const vB = mB ? Number(mB[1]) : (isNaN(Number(levelB)) ? NaN : Number(levelB));
+        if (!isNaN(vA) && !isNaN(vB) && vA === vB) score += 25;
+      }
     }
 
-    // Source/Type optional vergleichen, falls im Mapping gesetzt
-    if (sourceA && sourceB && !stringsMatchTolerant(sourceA, sourceB)) return false;
-    if (typeA && typeB && !stringsMatchTolerant(typeA, typeB)) return false;
-
-    // Name nur vergleichen, wenn im Mapping gesetzt
-    if (nameA && !stringsMatchTolerant(nameA, nameB)) return false;
-
-    return true;
-  });
-  if (mapping && mapping.points !== undefined && mapping.points !== '') {
-    return Number(mapping.points) || 0;
+    // prefer higher score even when not all fields match
+    if (score > bestScore) { bestScore = score; best = m; }
   }
+
+  if (best && best.points !== undefined && best.points !== '') return Number(best.points) || 0;
   return 0;
 }
 
@@ -310,27 +295,11 @@ export function calculatePlayerNorms({ playersArr = [], resultsArr = [], chestMa
         try {
           if (!rc) continue;
           if (isIgnoredChest(rc, ignoreChests)) continue;
-          // Kategorie immer über zentrale Mapping-Funktion bestimmen (inkl. exklusive Citadel-Regel)
-          const mappedCategory = mapCategoryToPageName(rc.category || rc.Type || rc.Source || rc.Category || '', rc);
-          let level = extractChestLevel(rc.Name || rc.name || '', mappedCategory) ?? (rc.level ?? rc.Level ?? '');
-          if (level !== null && level !== undefined) level = String(level);
+          const category = rc.category || rc.Type || rc.Source || rc.Category || '';
+          const level = extractChestLevel(rc.Name || rc.name || '', category) ?? (rc.level ?? rc.Level ?? '');
           const count = Number(rc.count ?? rc.Count ?? 1) || 1;
-          const pointsPer = getChestPoints({ ...rc, category: mappedCategory, level }, chestMappings) || 0;
+          const pointsPer = getChestPoints({ ...rc, category, level }, chestMappings) || 0;
           const points = Number(pointsPer) * count;
-          // Debug-Ausgabe: Mapping-Entscheidung und Punkte
-          if (typeof window !== 'undefined') {
-            window._chestDebug = window._chestDebug || [];
-            window._chestDebug.push({
-              player: mainName,
-              category: mappedCategory,
-              level,
-              name: rc.Name || rc.name || '',
-              count,
-              pointsPer,
-              points,
-              mappingFound: pointsPer > 0
-            });
-          }
           entry.ist = (entry.ist || 0) + points;
           entry.chests = (entry.chests || 0) + count;
           if (res.timestamp || res.uploadTime) {
@@ -338,7 +307,7 @@ export function calculatePlayerNorms({ playersArr = [], resultsArr = [], chestMa
             if (!entry.timestamp) entry.timestamp = ts;
             else { const prev = new Date(entry.timestamp).getTime ? new Date(entry.timestamp).getTime() : 0; const cur = new Date(ts).getTime ? new Date(ts).getTime() : 0; if (!isNaN(cur) && cur > prev) entry.timestamp = ts; }
           }
-          entry.chestDetails.push({ Name: rc.Name || rc.name || '', Type: rc.Type || rc.type || '', Source: rc.Source || rc.source || '', category: mappedCategory, level: level ?? '', count, points: Number(points) || 0 });
+          entry.chestDetails.push({ Name: rc.Name || rc.name || '', Type: rc.Type || rc.type || '', Source: rc.Source || rc.source || '', category: mapCategoryToPageName(category || rc.category || rc.Type || rc.Source || ''), level: level ?? '', count, points: Number(points) || 0 });
         } catch (e) {
           // swallow
         }

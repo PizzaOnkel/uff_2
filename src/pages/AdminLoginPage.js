@@ -46,11 +46,11 @@ export default function AdminLoginPage({ t, setCurrentPage, setIsAdmin }) {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-4">
       <div className="bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md">
         <h2 className="text-3xl font-bold mb-6 text-center text-blue-400">
-          {t.adminLoginTitle}
+          {t.adminLoginTitle || 'Administrator-Login'}
         </h2>
         
         <p className="text-gray-300 mb-6 text-center text-sm">
-          {t.adminLoginSubtitle}
+          {t.adminLoginSubtitle || 'Melde dich mit deinen Administrator-Zugangsdaten an.'}
         </p>
 
         {error && (
@@ -62,7 +62,7 @@ export default function AdminLoginPage({ t, setCurrentPage, setIsAdmin }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              {t.emailLabel}
+              {t.emailLabel || 'E-Mail-Adresse *'}
             </label>
             <input
               type="email"
@@ -70,14 +70,14 @@ export default function AdminLoginPage({ t, setCurrentPage, setIsAdmin }) {
               value={formData.email}
               onChange={handleInputChange}
               className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white focus:border-blue-500 focus:outline-none"
-              placeholder={t.emailPlaceholder}
+              placeholder={t.emailPlaceholder || 'admin@example.com'}
               disabled={loading}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              {t.passwordLabel}
+              {t.passwordLabel || 'Passwort *'}
             </label>
             <input
               type="password"
@@ -85,7 +85,7 @@ export default function AdminLoginPage({ t, setCurrentPage, setIsAdmin }) {
               value={formData.password}
               onChange={handleInputChange}
               className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white focus:border-blue-500 focus:outline-none"
-              placeholder={t.passwordPlaceholder}
+              placeholder={t.passwordPlaceholder || '••••••••'}
               disabled={loading}
             />
           </div>
@@ -99,18 +99,18 @@ export default function AdminLoginPage({ t, setCurrentPage, setIsAdmin }) {
                 : 'bg-blue-600 hover:bg-blue-700 focus:bg-blue-700'
             } text-white`}
           >
-            {loading ? t.loginLoading : t.loginButton}
+            {loading ? (t.loginLoading || 'Anmelden...') : (t.loginButton || 'Anmelden')}
           </button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-gray-400 text-sm">
-            {t.notAdminYet}{' '}
+            {t.notAdminYet || 'Noch kein Admin?'}{' '}
             <button
               onClick={() => setCurrentPage(ROUTES.ADMIN_REGISTRATION)}
               className="text-blue-400 hover:text-blue-300 underline"
             >
-              {t.becomeAdmin}
+              {t.becomeAdmin || 'Administrator werden'}
             </button>
           </p>
         </div>
@@ -124,7 +124,7 @@ export default function AdminLoginPage({ t, setCurrentPage, setIsAdmin }) {
           <line x1="19" y1="12" x2="5" y2="12" />
           <polyline points="12 19 5 12 12 5" />
         </svg>
-  {t.backToNavigation}
+  {t.backToNavigation || 'Zurück zur Navigation'}
       </button>
     </div>
   );

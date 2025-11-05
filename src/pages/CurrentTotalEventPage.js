@@ -5,7 +5,7 @@ import { ROUTES } from "../routes";
 import { db } from "../firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { mapToMainName } from "../utils/aliasMapping";
-import { fallbackCategory, fallbackLevel, calculatePlayerNorms, isIgnoredChest, getChestPoints, chestMatchesLevel, stringsMatchTolerant, mapCategoryToPageName } from "../utils/logicZentrale";
+import { fallbackCategory, fallbackLevel, calculatePlayerNorms, isIgnoredChest, getChestPoints, chestMatchesLevel, stringsMatchTolerant } from "../utils/logicZentrale";
 
 export default function CurrentTotalEventPage({ t, setCurrentPage }) {
   // Helper für Namens-Mapping (Bank Chests)
@@ -331,7 +331,7 @@ const verticalHeaders = [
     const grouped = {};
     visibleChests.forEach(chest => {
       // Korrigierte Zuordnung für Citadel Chests
-      let mappedCategory = mapCategoryToPageName(chest.category, chest);
+  let mappedCategory = chest.category;
       const name = (chest.Name || chest.name || '').toLowerCase();
       const type = (chest.Type || chest.type || '').toLowerCase();
       const source = (chest.Source || chest.source || '').toLowerCase();
@@ -567,31 +567,31 @@ const verticalHeaders = [
                 <thead>
                   <tr className="bg-gray-700">
                     <th rowSpan="3" className="p-2">
-                      <VerticalHeader>{t.name}</VerticalHeader>
+                      <VerticalHeader>Name</VerticalHeader>
                     </th>
                     <th rowSpan="3" className="p-2">
-                      <VerticalHeader>{t.rank}</VerticalHeader>
+                      <VerticalHeader>Rang</VerticalHeader>
                     </th>
                     <th rowSpan="3" className="p-2">
-                      <VerticalHeader>{t.troopStrength}</VerticalHeader>
+                      <VerticalHeader>Truppenstärke</VerticalHeader>
                     </th>
                     <th rowSpan="3" className="p-2">
-                      <VerticalHeader>{t.clanChests}</VerticalHeader>
+                      <VerticalHeader>Clantruhen</VerticalHeader>
                     </th>
                     <th rowSpan="3" className="p-2">
-                      <VerticalHeader>{t.pointsTotalIst}</VerticalHeader>
+                      <VerticalHeader>Punkte Total (Ist)</VerticalHeader>
                     </th>
                     <th rowSpan="3" className="p-2">
-                      <VerticalHeader>{t.normSoll}</VerticalHeader>
+                      <VerticalHeader>Norm (Soll)</VerticalHeader>
                     </th>
                     <th rowSpan="3" className="p-2">
-                      <VerticalHeader>{t.difference}</VerticalHeader>
+                      <VerticalHeader>Differenz</VerticalHeader>
                     </th>
                     <th rowSpan="3" className="p-2 norm-column" style={{ width: "120px", minWidth: "120px" }}>
-                      <VerticalHeader>{t.normFulfillment}</VerticalHeader>
+                      <VerticalHeader>Normerfüllung</VerticalHeader>
                     </th>
                     <th rowSpan="3" className="p-2">
-                      <VerticalHeader>{t.timestamp}</VerticalHeader>
+                      <VerticalHeader>Timestamp</VerticalHeader>
                     </th>
                     {chestCategories.map((cat, catIdx) => {
                       // Eindeutige dunkle Pastellfarben für jede Kategorie

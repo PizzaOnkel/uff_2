@@ -295,9 +295,9 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
           periodId: selectedPeriod,
           uploadtime
         });
-  // ...existing code...
+        console.log('[DEBUG] uploadtime-Dokument erfolgreich geschrieben:', uploadtimeDocRef.id);
       } catch (err) {
-  // ...existing code...
+        console.error('[ERROR] Fehler beim Schreiben in die Collection uploadtime:', err);
         setError('Fehler beim Schreiben in die Collection uploadtime: ' + err.message);
         setIsUploading(false);
         return;
@@ -416,7 +416,7 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
           totalEventDays: playerData.eventDates.length, // Anzahl der aktiven Tage
           uploadtime
         };
-  // ...existing code...
+        console.log("[DEBUG] Firestore-Dokument für Spieler-Upload:", JSON.stringify(firestoreData, null, 2));
         await addDoc(collection(db, "results"), firestoreData);
       }
       // SPEICHERE ALLE VERWENDETEN MAPPINGS IN FIRESTORE
@@ -430,7 +430,7 @@ export default function UploadResultsPage({ t, setCurrentPage }) {
             timestamp: new Date().toISOString(),
             periodId: selectedPeriod
           };
-          // ...existing code...
+          console.log("[DEBUG] Schreibe usedChestMapping in Firestore:", docData);
           await addDoc(collection(db, "usedChestMappings"), docData);
         }
       }

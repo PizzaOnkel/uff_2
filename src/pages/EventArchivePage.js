@@ -168,10 +168,12 @@ export default function EventArchivePage({ t, setCurrentPage }) {
   });
   // Debug: Zeige gefilterte Ergebnisse und gemappte Truhen im Browser
   if (window && window.console) {
-  // ...existing code...
+    console.log('DEBUG: selectedPeriodId', selectedPeriodId);
+    console.log('DEBUG: results (gefiltert)', results);
+    console.log('DEBUG: auswertung', auswertung);
     if (auswertung && auswertung.length > 0) {
       auswertung.forEach((row, idx) => {
-  // ...existing code...
+        console.log(`DEBUG: Spieler ${row.name} - chestDetails`, row.chestDetails);
       });
     }
   }
