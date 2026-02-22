@@ -1,3 +1,5 @@
+// Expliziter benannter Export am Ende der Datei
+// ...entfernt, da unten als Funktion exportiert
 import { mapToMainName } from "../utils/aliasMapping.js";
 
 // Small safe helpers
@@ -49,19 +51,48 @@ function categoriesMatchTolerant(a, b) {
 
 // Exported helper for pages: tolerant category check between a chest object and a category name
 export function chestCategoryMatches(chest, catName) {
+  // Exklusive und tolerante Zuordnung für Citadel Chests
+  const name = (safeToString(chest?.Name || chest?.name || '') + '').toLowerCase();
+  const type = (safeToString(chest?.Type || chest?.type || '') + '').toLowerCase();
+  const source = (safeToString(chest?.Source || chest?.source || '') + '').toLowerCase();
+  const lvl = String(chest?.level ?? chest?.Level ?? '').trim().toLowerCase();
+  // Tolerante Zuordnung: Cursed Citadel Chest mit Level 20/25 und Type/Source Citadel wird als Cursed Chests gezählt
+  if (
+    name.includes('cursed') && name.includes('citadel') && (type.includes('citadel') || source.includes('citadel')) && (lvl === '20' || lvl === '25')
+  ) {
+    return catName === 'Cursed Chests';
+  }
+  // Tolerante Zuordnung: Elven Citadel Chest mit Level 20/25 und Type/Source Citadel wird als Elven Chests gezählt
+  if (
+    name.includes('elven') && name.includes('citadel') && (type.includes('citadel') || source.includes('citadel')) && (lvl === '20' || lvl === '25')
+  ) {
+    return catName === 'Elven Chests';
+  }
+  // Sonstige Zuordnung wie gehabt, aber Citadel Chests mit Level 20/25 werden NICHT anderen Kategorien zugeordnet
+  if ((type.includes('citadel') || source.includes('citadel')) && (lvl === '20' || lvl === '25')) {
+    // Nur die oben genannten Regeln greifen, alle anderen Kategorien werden ausgeschlossen
+    return false;
+  }
   const c = (chest && (chest.category || chest.Category || '')) || '';
   return stringsMatchTolerant(c, catName);
 }
 
-function mapCategoryToPageName(cat) {
+export function mapCategoryToPageName(cat) {
   const c = safeToString(cat).toLowerCase();
+  // Sonderregel: Bank Chests
+  if (c.includes("wooden chest") || c.includes("bronze chest") || c.includes("silver chest") || c.includes("golden chest") || c.includes("precious chest") || c.includes("magic chest")) {
+    return "Bank Chests";
+  }
   if (c.includes("arena")) return "Arena Chests";
   if (c.includes("common")) return "Common Chests";
   if (c.includes("rare")) return "Rare Chests";
   if (c.includes("epic") && c.includes("ancient")) return "Epic Ancient squad";
   if (c.includes("epic")) return "Epic Chests";
   if (c.includes("tartaros")) return "Chests of Tartaros";
-  if (c.includes("elven") || c.includes("citadel")) return "Elven Chests";
+  // Strenge Zuordnung für Citadel Chests
+  if (c.includes("cursed") && c.includes("citadel")) return "Cursed Chests";
+  if (c.includes("elven") && c.includes("citadel")) return "Elven Chests";
+  if (c.includes("elven")) return "Elven Chests";
   if (c.includes("cursed")) return "Cursed Chests";
   if (c.includes("bank")) return "Bank Chests";
   if (c.includes("runic")) return "Runic Chests";
@@ -127,9 +158,18 @@ export function extractChestLevel(chestOrName, category) {
   // Build a combined normalized string from name/type/source to find numeric level anywhere
   const combined = normalizeChestName([chestName, type, source].filter(Boolean).join(' '));
 
-  // Bank chest textual levels
-  if (categoriesMatchTolerant(category || '', 'Bank Chests') || catLower.includes('bank')) {
-    const found = bankLevels.find(l => combined.includes(l));
+  // Bank chest textual levels und Sonderregel für Bank Chests
+  if (
+    categoriesMatchTolerant(category || '', 'Bank Chests') ||
+    catLower.includes('bank') ||
+    normalizeChestName(chestName).includes('wooden chest') ||
+    normalizeChestName(chestName).includes('bronze chest') ||
+    normalizeChestName(chestName).includes('silver chest') ||
+    normalizeChestName(chestName).includes('golden chest') ||
+    normalizeChestName(chestName).includes('precious chest') ||
+    normalizeChestName(chestName).includes('magic chest')
+  ) {
+    const found = bankLevels.find(l => combined.includes(l) || normalizeChestName(chestName).includes(l + ' chest'));
     if (found) return found.charAt(0).toUpperCase() + found.slice(1);
   }
 
@@ -210,20 +250,17 @@ export function getChestPoints(chest, chestMappings) {
     // type match
     if (typeA && typeA.toLowerCase() === typeB.toLowerCase()) score += 5;
 
-    // level match (numeric or textual)
+    // level match (numeric or textual, tolerant)
     if (levelA && (levelB !== undefined && levelB !== null && levelB !== '')) {
-      const nA = Number(levelA);
-      const nB = Number(levelB);
-      if (!isNaN(nA) && !isNaN(nB) && nA === nB) score += 30;
-      else if (String(levelA).toLowerCase() === String(levelB).toLowerCase()) score += 10;
-      else {
-        // try extracting numeric from levelA textual forms like 'Level 25'
-        const mA = normalizeChestName(levelA).match(/(\d{1,3})/);
-        const mB = typeof levelB === 'string' ? normalizeChestName(levelB).match(/(\d{1,3})/) : null;
-        const vA = mA ? Number(mA[1]) : (isNaN(Number(levelA)) ? NaN : Number(levelA));
-        const vB = mB ? Number(mB[1]) : (isNaN(Number(levelB)) ? NaN : Number(levelB));
-        if (!isNaN(vA) && !isNaN(vB) && vA === vB) score += 25;
-      }
+      // Toleranter Vergleich: '20', 'Level 20', 'Level 20 Citadel', 20
+      const normA = normalizeChestName(levelA);
+      const normB = normalizeChestName(String(levelB));
+      // numerisch extrahieren
+      const numA = normA.match(/(\d{1,3})/);
+      const numB = normB.match(/(\d{1,3})/);
+      if (numA && numB && numA[1] === numB[1]) score += 30;
+      else if (normA === normB) score += 15;
+      else if (normA.includes(normB) || normB.includes(normA)) score += 10;
     }
 
     // prefer higher score even when not all fields match
@@ -288,7 +325,15 @@ export function calculatePlayerNorms({ playersArr = [], resultsArr = [], chestMa
       else if (rawChests && typeof rawChests === 'object') {
         for (const [cat, val] of Object.entries(rawChests)) {
           if (Array.isArray(val)) val.forEach(item => normalized.push({ ...(item || {}), category: cat }));
-          else if (val && typeof val === 'object') for (const [lvl, cnt] of Object.entries(val)) { const count = Number(cnt) || 0; if (count > 0) normalized.push({ Name: '', Type: '', Source: '', category: cat, level: lvl, count }); }
+          else if (val && typeof val === 'object') {
+            for (const [lvl, cnt] of Object.entries(val)) {
+              const count = Number(cnt) || 0;
+              if (count > 0) {
+                // Name aus dem Key übernehmen, falls vorhanden
+                normalized.push({ Name: cat, Type: '', Source: '', category: cat, level: lvl, count });
+              }
+            }
+          }
         }
       }
       for (const rc of normalized) {

@@ -94,20 +94,7 @@ app.post('/uff_2/api/export-csv', express.json(), (req, res) => {
 
 // Datei-Upload (JSON)
 const uploadDir = path.join(__dirname, 'public', 'json-data');
-
-// Helper: Liefere den neuesten ChestData_*.json Dateinamen im uploadDir oder null
-function getLatestChestDataFilename() {
-  try {
-    const files = fs.readdirSync(uploadDir);
-    const chestFiles = files.filter(f => f.startsWith('ChestData_') && f.endsWith('.json'));
-    if (chestFiles.length === 0) return null;
-    // Sortiere nach Name (Timestamp enthalten) absteigend
-    chestFiles.sort().reverse();
-    return chestFiles[0];
-  } catch (err) {
-    return null;
-  }
-}
+const uploadFilePath = path.join(uploadDir, 'aktuelle_Punkte-Tabelle.json');
 
 app.post('/upload-json', (req, res) => {
   let rawData = '';
@@ -115,36 +102,16 @@ app.post('/upload-json', (req, res) => {
   req.on('end', () => {
     try {
       // Extrahiere Datei aus multipart/form-data
-      const contentType = req.headers['content-type'] || '';
-      const boundaryMatch = contentType.match(/boundary=(.*)$/);
-      if (!boundaryMatch) throw new Error('Ungültiger Content-Type (kein boundary)');
-      const boundary = boundaryMatch[1];
+      const boundary = req.headers['content-type'].split('boundary=')[1];
       const parts = rawData.split(boundary);
       const filePart = parts.find(p => p.includes('application/json'));
       if (!filePart) throw new Error('Keine JSON-Datei gefunden!');
       const jsonStart = filePart.indexOf('{');
       const jsonEnd = filePart.lastIndexOf('}') + 1;
       const jsonString = filePart.substring(jsonStart, jsonEnd);
-
-      // Wenn client ?compat=true sendet, speichern wir weiterhin unter aktuelle_Punkte-Tabelle.json
-      const url = req.url || '';
-      const compat = url.includes('compat=true') || req.headers['x-compat-mode'] === '1';
-
-      fs.mkdirSync(uploadDir, { recursive: true });
-      if (compat) {
-        const compatPath = path.join(uploadDir, 'aktuelle_Punkte-Tabelle.json');
-        fs.writeFileSync(compatPath, jsonString);
-        return res.send('JSON-Datei erfolgreich hochgeladen (compat mode)!');
-      }
-
-      // Default: speichere als ChestData_<timestamp>.json
-      const ts = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `ChestData_${ts}.json`;
-      const targetPath = path.join(uploadDir, filename);
-      fs.writeFileSync(targetPath, jsonString);
-      res.send(`JSON-Datei erfolgreich hochgeladen als ${filename}`);
+      fs.writeFileSync(uploadFilePath, jsonString);
+      res.send('JSON-Datei erfolgreich hochgeladen!');
     } catch (err) {
-      console.error('[UPLOAD-ERROR]', err && err.stack ? err.stack : err);
       res.status(500).send('Fehler beim Hochladen der JSON-Datei!');
     }
   });

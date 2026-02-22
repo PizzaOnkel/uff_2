@@ -82,27 +82,29 @@ function MusikShop_PO_Friends_Goes_Country_Page({ t, setCurrentPage }) {
                 <p className="font-bold text-lg mb-1">{album.title}</p>
                 <p className="text-blue-300 mb-2">{album.description}</p>
                 <p className="text-blue-300 mb-2">Preis: {album.price}</p>
-                <div className="bg-yellow-100 text-yellow-800 p-2 rounded mb-2 text-sm font-semibold">
+                <div style={{ maxWidth: "160px", margin: "0 auto" }} className="bg-yellow-100 text-yellow-800 p-2 rounded mb-2 text-sm font-semibold">
                   Hinweis: Das komplette Album als ZIP-Archiv herunterladen. Handynutzer können nur einzelne Tracks herunterladen.
                 </div>
                 {!albumPaid ? (
                   <div className="mb-2">
-                    <PayPalButtons
-                      style={{ layout: "vertical" }}
-                      createOrder={(data, actions) => {
-                        return actions.order.create({
-                          purchase_units: [{
-                            amount: { value: "19.99" },
-                            description: album.title
-                          }]
-                        });
-                      }}
-                      onApprove={(data, actions) => {
-                        return actions.order.capture().then(() => {
-                          setAlbumPaid(true);
-                        });
-                      }}
-                    />
+                    <div style={{ maxWidth: "160px", margin: "0 auto" }}>
+                      <PayPalButtons
+                        style={{ layout: "vertical", height: 25, shape: "pill", color: "silver" }}
+                        createOrder={(data, actions) => {
+                          return actions.order.create({
+                            purchase_units: [{
+                              amount: { value: "19.99" },
+                              description: album.title
+                            }]
+                          });
+                        }}
+                        onApprove={(data, actions) => {
+                          return actions.order.capture().then(() => {
+                            setAlbumPaid(true);
+                          });
+                        }}
+                      />
+                    </div>
                   </div>
                 ) : (
                   <>

@@ -193,28 +193,34 @@ function MusikShop_We_Stand_Together_Page({ t, setCurrentPage }) {
                 <p className="font-bold text-lg mb-1">{album.title}</p>
                 <p className="text-blue-300 mb-2">{album.description}</p>
                 <p className="text-blue-300 mb-2">Preis: {album.price}</p>
-                <div className="bg-yellow-100 text-yellow-800 p-2 rounded mb-2 text-sm font-semibold">
-                  Hinweis: Das komplette Album als ZIP-Archiv herunterladen. Handynutzer können nur einzelne Tracks herunterladen.
-                </div>
-                {/* ...existing code... */}
-                <>
-                    {isMobile ? (
-                      <div className="bg-red-100 text-red-700 p-3 rounded mb-2 text-sm">
-                        ZIP-Download ist auf vielen Handys nicht direkt nutzbar. Bitte einzelne Tracks herunterladen.
-                      </div>
-                    ) : (
-                      <button onClick={handleDownloadAll} className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mb-2 shadow-lg inline-block">
-                        Alle Tracks herunterladen
-                      </button>
-                    )}
-                    <div className="bg-yellow-100 text-yellow-800 p-2 rounded mb-2 text-sm font-semibold">
-                      Hinweis: Das komplette Album als ZIP-Archiv herunterladen:
-                    </div>
-                    <a href={album.downloadUrl} download className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded mb-2 shadow-lg inline-block">
+                <div style={{ maxWidth: "160px", margin: "0 auto" }}>
+                  {!albumPaid ? (
+                    <PayPalButtons
+                      style={{ layout: "vertical", height: 25, shape: "pill", color: "silver" }}
+                      createOrder={(data, actions) => {
+                        return actions.order.create({
+                          purchase_units: [{
+                            amount: { value: "19.99" },
+                            description: album.title
+                          }]
+                        });
+                      }}
+                      onApprove={(data, actions) => {
+                        return actions.order.capture().then(() => {
+                          setAlbumPaid(true);
+                        });
+                      }}
+                    />
+                  ) : (
+                    <a href={album.downloadUrl} download className="bg-green-500 hover:bg-green-600 text-white py-2 px-6 text-base rounded shadow inline-block">
                       Album herunterladen
                     </a>
-                  </>
+                  )}
                 </div>
+                <div style={{ maxWidth: "160px", margin: "0 auto" }} className="text-xs text-gray-600 mt-2">
+                  ZIP-Download ist auf vielen Handys nicht direkt nutzbar. Bitte einzelne Tracks herunterladen.
+                </div>
+              </div>
             </div>
             <div className="mb-4 flex justify-center">
               <a href="/musik/We_Stand_Together/Album_Info.pdf" target="_blank" rel="noopener noreferrer"

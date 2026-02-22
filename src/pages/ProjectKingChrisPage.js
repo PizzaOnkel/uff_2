@@ -105,14 +105,14 @@ export default function ProjectKingChrisPage({ t, setCurrentPage }) {
           <div className="border-t border-b border-gray-700 py-2 md:py-3 flex flex-col items-center gap-2 md:gap-3">
             <button
               onClick={() => setCurrentPage('artistProfile')}
-              className="px-2 py-1.5 rounded-lg bg-gray-700/30 hover:bg-gray-600/40 border border-gray-600 transition-all duration-200 text-gray-300 hover:text-gray-200 text-xs"
+              className="px-3 py-1.5 rounded-lg bg-gray-700/30 hover:bg-gray-600/40 border border-gray-600 transition-all duration-200 text-gray-300 hover:text-gray-200 text-xs"
             >
               👤 Künstler
             </button>
             
             <button
               onClick={() => setCurrentPage('home')}
-              className="px-2 py-1.5 rounded-lg bg-gray-700/30 hover:bg-gray-600/40 border border-gray-600 transition-all duration-200 text-gray-300 hover:text-gray-200 text-xs"
+              className="px-3 py-1.5 rounded-lg bg-gray-700/30 hover:bg-gray-600/40 border border-gray-600 transition-all duration-200 text-gray-300 hover:text-gray-200 text-xs"
             >
               🏠 Startseite
             </button>
@@ -169,10 +169,10 @@ export default function ProjectKingChrisPage({ t, setCurrentPage }) {
             {albumInfo.title}
           </h1>
           <p className="text-lg md:text-xl text-purple-300 mb-2">{albumInfo.subtitle}</p>
-          <p className="text-sm text-gray-400 mb-6">📅 {albumInfo.releaseYear}</p>
+          <p className="text-gray-400 mb-8">📅 {albumInfo.releaseYear}</p>
 
           {/* Story Teaser */}
-          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 md:p-6 mb-6">
+          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-2 md:p-4 mb-6">
             <h2 className="text-lg md:text-xl font-bold mb-3 text-purple-300">📖 {t.storyTitle || "Die Story"}</h2>
             <p className="text-sm md:text-base leading-relaxed text-gray-200 mb-4">
               {t.storyTeaser || "Die inspirierende Geschichte von Chris, einem kleinen Jungen mit einem Stottern, der zu einer Box-Legende wurde. Von den Schikanen in der Schule bis zum Champion der Welt - eine Geschichte über Mut, Durchhaltevermögen und den Kampfgeist, der niemals aufgibt."}
@@ -186,7 +186,7 @@ export default function ProjectKingChrisPage({ t, setCurrentPage }) {
           </div>
 
           {/* Track List */}
-          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 md:p-6 mb-6">
+          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-2 md:p-4 mb-6">
             <h2 className="text-lg md:text-xl font-bold mb-4 text-blue-300">🎵 Tracks</h2>
             <div className="space-y-2">
               {albumInfo.tracks.map((track) => (
@@ -196,14 +196,14 @@ export default function ProjectKingChrisPage({ t, setCurrentPage }) {
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-gray-400 text-xs font-mono">{String(track.id).padStart(2, '0')}</span>
-                    <span className="text-sm text-gray-200 font-medium">{track.name}</span>
+                    <span className="text-gray-200 font-semibold">{track.name}</span>
                   </div>
                   
-                  <div className="flex gap-1.5">
+                  <div className="flex gap-2">
                     {/* Preview Button */}
                     <button
                       onClick={() => handlePreview(track.id)}
-                      className={`px-2 md:px-3 py-1 md:py-1.5 rounded text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
+                      className={`px-3 py-1.5 rounded text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
                         playingTrackId === track.id
                           ? 'bg-green-900/50 border border-green-600 text-green-300'
                           : 'bg-gray-700/30 hover:bg-gray-600/40 border border-gray-600 text-gray-300 hover:text-gray-200'
@@ -250,20 +250,20 @@ export default function ProjectKingChrisPage({ t, setCurrentPage }) {
           </div>
 
           {/* Album Info PDF */}
-          <div className="mb-6 flex justify-center">
+          <div className="mb-8 flex justify-center">
             <a 
               href={`${process.env.PUBLIC_URL}/musik/King_Chris/Album_Info.pdf`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 border border-purple-500 text-white text-sm font-bold shadow-lg hover:shadow-xl transition-all duration-200"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 border border-purple-500 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-200"
             >
               📄 Album Info & Credits (PDF)
             </a>
           </div>
 
           {/* Footer Info */}
-          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 mb-6">
-            <p className="text-sm text-gray-300 text-center">
+          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-6 mb-8">
+            <p className="text-gray-300 text-center">
               <span className="text-blue-300 font-semibold">👑</span> King Chris Album
             </p>
           </div>

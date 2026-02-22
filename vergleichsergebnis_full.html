@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Vergleichsergebnis Full</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { border-collapse: collapse; width: 100%; font-size: 13px; }
+        th, td { border: 1px solid #ccc; padding: 4px 8px; text-align: left; }
+        th { background: #f0f0f0; position: sticky; top: 0; z-index: 2; }
+        tr:nth-child(even) { background: #fafafa; }
+        .status-Fehlt { background: #ffe0e0; }
+        .status-OK { background: #e0ffe0; }
+    </style>
+</head>
+<body>
+    <h2>Vergleichsergebnis (Full Matrix)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Kategorie</th>
+                <th>Level</th>
+                <th>Truhen CSV</th>
+                <th>Truhen JSON</th>
+                <th>Punkte CSV</th>
+                <th>Punkte JSON</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+        </tbody>
+    </table>
+    <script>
+    // CSV-Daten als String (nur die ersten 2000 Zeilen, für große Dateien ggf. anpassen)
+    const csv = `Name;Kategorie;Level;Truhen_CSV;Truhen_JSON;Punkte_CSV;Punkte_JSON;Status
+Upasara Wulung;Rare Dragon Chest;20;0;9;0;1152;Fehlt in CSV
+Upasara Wulung;Elven Citadel Chest;10;0;3;0;60;Fehlt in CSV
+Upasara Wulung;Elegant Chest;20;0;43;0;2752;Fehlt in CSV
+Upasara Wulung;Bone Chest;20;0;26;0;1664;Fehlt in CSV
+Upasara Wulung;Bone Chest;25;0;1;0;256;Fehlt in CSV
+Upasara Wulung;Golden Guardian Epic Chest;0;0;510;0;0;Fehlt in CSV
+Upasara Wulung;Runic Chest;20;0;1;0;0;Fehlt in CSV
+Upasara Wulung;Runic Chest;25;0;1;0;0;Fehlt in CSV
+Upasara Wulung;Sapphire Chest;25;0;3;0;0;Fehlt in CSV
+Upasara Wulung;Sapphire Chest;20;0;2;0;0;Fehlt in CSV
+Upasara Wulung;Sapphire Chest;35;0;8;0;0;Fehlt in CSV
+Upasara Wulung;Pumpkin Chest;0;0;1;0;0;Fehlt in CSV
+Upasara Wulung;Jörmungandr's Chest;0;0;10;0;0;Fehlt in CSV
+Upasara Wulung;Quick March Chest;0;0;9;0;0;Fehlt in CSV
+Upasara Wulung;Harpy Chest;15;0;11;0;660;Fehlt in CSV
+Upasara Wulung;Harpy Chest;20;0;15;0;2880;Fehlt in CSV
+Upasara Wulung;Merchant's Chest;0;0;1;0;0;Fehlt in CSV
+Upasara Wulung;Ancients' Chest;0;0;100;0;0;Fehlt in CSV
+Upasara Wulung;Ancient Warrior's Chest;15;0;14;0;840;Fehlt in CSV
+Upasara Wulung;Ancient Warrior's Chest;20;0;11;0;2112;Fehlt in CSV
+Upasara Wulung;Fire Chest;20;0;102;0;6528;Fehlt in CSV
+Upasara Wulung;Scorpion Chest;15;0;14;0;840;Fehlt in CSV
+Upasara Wulung;Scorpion Chest;20;0;29;0;5568;Fehlt in CSV
+Upasara Wulung;Gladiator's Chest;0;0;2;0;0;Fehlt in CSV
+Upasara Wulung;Barbarian Chest;15;0;17;0;340;Fehlt in CSV
+Upasara Wulung;Barbarian Chest;20;0;28;0;5376;Fehlt in CSV
+Upasara Wulung;Barbarian Chest;25;0;4;0;1024;Fehlt in CSV
+Upasara Wulung;Orc Chest;20;0;6;0;384;Fehlt in CSV
+Magic Ela;Elven Citadel Chest;10;0;2;0;40;Fehlt in CSV
+REY THOR;Sand Chest;15;0;1;0;20;Fehlt in CSV
+REY THOR;Sand Chest;10;0;2;0;20;Fehlt in CSV
+REY THOR;Turtle Chest;15;0;1;0;60;Fehlt in CSV
+REY THOR;Stone Chest;15;0;4;0;80;Fehlt in CSV
+REY THOR;Stone Chest;10;0;1;0;10;Fehlt in CSV
+REY THOR;Infernal Chest;15;0;4;0;80;Fehlt in CSV
+REY THOR;Infernal Chest;20;0;1;0;64;Fehlt in CSV
+REY THOR;Rare Dragon Chest;15;0;9;0;360;Fehlt in CSV
+REY THOR;Rare Dragon Chest;10;0;1;0;16;Fehlt in CSV
+REY THOR;Dark Omens chest;0;0;4;0;0;Fehlt in CSV
+REY THOR;Elven Citadel Chest;15;0;4;0;160;Fehlt in CSV
+REY THOR;Elven Citadel Chest;10;0;1;0;20;Fehlt in CSV
+REY THOR;Elegant Chest;15;0;1;0;20;Fehlt in CSV
+REY THOR;Elegant Chest;10;0;1;0;10;Fehlt in CSV
+REY THOR;Bone Chest;15;0;3;0;60;Fehlt in CSV
+REY THOR;Bone Chest;20;0;1;0;64;Fehlt in CSV
+REY THOR;Chest of the Cursed;15;0;4;0;240;Fehlt in CSV
+REY THOR;Pumpkin Chest;0;0;1;0;0;Fehlt in CSV
+REY THOR;Cursed Citadel Chest;20;0;1;0;80;Fehlt in CSV
+REY THOR;Quick March Chest;0;0;10;0;0;Fehlt in CSV
+REY THOR;Harpy Chest;15;0;3;0;180;Fehlt in CSV
+REY THOR;Chest of Authority;0;0;3;0;0;Fehlt in CSV
+REY THOR;Forgotten Chest;15;0;3;0;60;Fehlt in CSV
+REY THOR;Forgotten Chest;5;0;1;0;2;Fehlt in CSV
+REY THOR;Forgotten Chest;20;0;1;0;64;Fehlt in CSV
+REY THOR;Braided Chest;15;0;1;0;60;Fehlt in CSV
+REY THOR;Braided Chest;20;0;1;0;192;Fehlt in CSV
+REY THOR;Hermes Chest;0;0;3;0;0;Fehlt in CSV
+REY THOR;Titansteel Chest;15;0;3;0;180;Fehlt in CSV
+REY THOR;Scarab Chest;15;0;2;0;120;Fehlt in CSV
+REY THOR;Cobra Chest;15;0;2;0;40;Fehlt in CSV
+REY THOR;Cobra Chest;10;0;1;0;10;Fehlt in CSV
+REY THOR;Merchant's Chest;0;0;2;0;0;Fehlt in CSV
+REY THOR;Ancients' Chest;0;0;120;0;0;Fehlt in CSV
+REY THOR;Ancient Warrior's Chest;15;0;1;0;60;Fehlt in CSV
+REY THOR;Fire Chest;15;0;3;0;60;Fehlt in CSV
+REY THOR;Fire Chest;20;0;1;0;64;Fehlt in CSV
+REY THOR;Scorpion Chest;15;0;1;0;60;Fehlt in CSV
+REY THOR;Ancient Bastion Chest;15;0;2;0;120;Fehlt in CSV
+REY THOR;Mayan Chest;15;0;3;0;60;Fehlt in CSV
+REY THOR;Mayan Chest;10;0;1;0;10;Fehlt in CSV
+REY THOR;House of Horrors Chest;15;0;5;0;300;Fehlt in CSV
+REY THOR;Gnome Workshop Chest;15;0;6;0;120;Fehlt in CSV
+REY THOR;Gladiator's Chest;0;0;2;0;0;Fehlt in CSV
+REY THOR;Tartaros Chest;15;0;9;0;540;Fehlt in CSV
+REY THOR;Barbarian Chest;15;0;9;0;180;Fehlt in CSV
+REY THOR;Barbarian Chest;10;0;1;0;10;Fehlt in CSV
+REY THOR;Wooden Chest;0;0;4;0;200;Fehlt in CSV
+REY THOR;Minotaur Chest;15;0;1;0;60;Fehlt in CSV
+REY THOR;Orc Chest;15;0;3;0;60;Fehlt in CSV
+Kelerosir;Sand Chest;5;0;1;0;2;Fehlt in CSV
+Kelerosir;Sand Chest;15;0;50;0;1000;Fehlt in CSV
+Kelerosir;Sand Chest;10;0;19;0;190;Fehlt in CSV
+Kelerosir;Sand Chest;20;0;1;0;64;Fehlt in CSV
+Kelerosir;Stone Chest;5;0;3;0;6;Fehlt in CSV
+Kelerosir;Stone Chest;15;0;57;0;1140;Fehlt in CSV
+Kelerosir;Stone Chest;10;0;11;0;110;Fehlt in CSV
+Kelerosir;Infernal Chest;5;0;1;0;2;Fehlt in CSV
+Kelerosir;Infernal Chest;15;0;45;0;900;Fehlt in CSV
+Kelerosir;Infernal Chest;10;0;11;0;110;Fehlt in CSV
+Kelerosir;Rare Dragon Chest;15;0;21;0;840;Fehlt in CSV
+Kelerosir;Rare Dragon Chest;10;0;16;0;256;Fehlt in CSV
+Kelerosir;Ancientsâ€˜ Chest;0;0;2;0;0;Fehlt in CSV
+Kelerosir;Elven Citadel Chest;15;0;26;0;1040;Fehlt in CSV
+Kelerosir;Elven Citadel Chest;10;0;7;0;140;Fehlt in CSV
+Kelerosir;Dark Omens chest;0;0;2;0;0;Fehlt in CSV
+Kelerosir;Elegant Chest;5;0;1;0;2;Fehlt in CSV
+Kelerosir;Elegant Chest;15;0;57;0;1140;Fehlt in CSV
+Kelerosir;Elegant Chest;10;0;15;0;150;Fehlt in CSV
+Kelerosir;Bone Chest;5;0;2;0;4;Fehlt in CSV
+Kelerosir;Bone Chest;15;0;51;0;1020;Fehlt in CSV
+Kelerosir;Bone Chest;10;0;19;0;190;Fehlt in CSV
+Kelerosir;Chest of the Cursed;15;0;3;0;180;Fehlt in CSV
+Kelerosir;Pumpkin Chest;0;0;1;0;0;Fehlt in CSV
+Kelerosir;Jörmungandr's Chest;0;0;4;0;0;Fehlt in CSV
+Kelerosir;Quick March Chest;0;0;7;0;0;Fehlt in CSV
+Kelerosir;Forgotten Chest;5;0;2;0;4;Fehlt in CSV
+Kelerosir;Forgotten Chest;15;0;38;0;760;Fehlt in CSV
+Kelerosir;Forgotten Chest;10;0;14;0;140;Fehlt in CSV
+Kelerosir;Hermes Chest;0;0;1;0;0;Fehlt in CSV
+Kelerosir;Braided Chest;15;0;1;0;60;Fehlt in CSV
+Kelerosir;Scarab Chest;15;0;2;0;120;Fehlt in CSV
+Kelerosir;Cobra Chest;5;0;3;0;6;Fehlt in CSV
+Kelerosir;Cobra Chest;15;0;45;0;900;Fehlt in CSV
+Kelerosir;Cobra Chest;10;0;12;0;120;Fehlt in CSV
+Kelerosir;Merchant's Chest;0;0;1;0;0;Fehlt in CSV
+Kelerosir;Ancients' Chest;0;0;66;0;0;Fehlt in CSV
+Kelerosir;Fire Chest;5;0;2;0;4;Fehlt in CSV
+Kelerosir;Fire Chest;15;0;54;0;1080;Fehlt in CSV
+Kelerosir;Fire Chest;10;0;21;0;210;Fehlt in CSV
+Kelerosir;BarbariarÄ± Chest;10;0;1;0;0;Fehlt in CSV
+Kelerosir;Mayan Chest;5;0;1;0;2;Fehlt in CSV
+Kelerosir;Mayan Chest;15;0;43;0;860;Fehlt in CSV
+Kelerosir;Mayan Chest;10;0;16;0;160;Fehlt in CSV
+Kelerosir;House of Horrors Chest;15;0;1;0;60;Fehlt in CSV
+Kelerosir;Gnome Workshop Chest;5;0;3;0;6;Fehlt in CSV
+Kelerosir;Gnome Workshop Chest;15;0;63;0;1260;Fehlt in CSV
+Kelerosir;Gnome Workshop Chest;10;0;12;0;120;Fehlt in CSV
+Kelerosir;Gnome Workshop Chest;20;0;1;0;64;Fehlt in CSV
+Kelerosir;Gladiator's Chest;0;0;1;0;0;Fehlt in CSV
+Kelerosir;Tartaros Chest;15;0;23;0;1380;Fehlt in CSV
+Kelerosir;Tartaros Chest;10;0;62;0;1240;Fehlt in CSV
+Kelerosir;Tartaros Chest;20;0;6;0;1152;Fehlt in CSV
+Kelerosir;Barbarian Chest;5;0;3;0;6;Fehlt in CSV
+Kelerosir;Barbarian Chest;15;0;57;0;1140;Fehlt in CSV
+Kelerosir;Barbarian Chest;10;0;21;0;210;Fehlt in CSV
+Kelerosir;Wooden Chest;0;0;1;0;50;Fehlt in CSV
+Kelerosir;Orc Chest;5;0;1;0;2;Fehlt in CSV
+Kelerosir;Orc Chest;15;0;50;0;1000;Fehlt in CSV
+Kelerosir;Orc Chest;10;0;13;0;130;Fehlt in CSV`;
+    const tbody = document.getElementById('tbody');
+    const lines = csv.split('\n').slice(1); // skip header
+    for (const line of lines) {
+        if (!line.trim()) continue;
+        const cols = line.split(';');
+        const statusClass = cols[7] && cols[7].includes('Fehlt') ? 'status-Fehlt' : (cols[7] && cols[7].includes('OK') ? 'status-OK' : '');
+        const tr = document.createElement('tr');
+        for (let i = 0; i < cols.length; i++) {
+            const td = document.createElement('td');
+            td.textContent = cols[i];
+            if (i === 7 && statusClass) td.className = statusClass;
+            tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+    }
+    </script>
+    <p style="margin-top:2em;color:#888;font-size:12px;">Hinweis: Es werden nur die ersten 2000 Zeilen angezeigt. Für vollständige Daten bitte die CSV-Datei direkt öffnen.</p>
+</body>
+</html>

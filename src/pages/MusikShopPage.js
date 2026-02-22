@@ -78,6 +78,18 @@ function MusikShopPage(props) {
             <h2 className="text-xl font-bold mb-2 text-blue-300">King Chris</h2>
             <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded shadow" onClick={() => props.setCurrentPage && props.setCurrentPage("musikShopKingChris")}>Zum Shop</button>
           </div>
+          {/* Platzhalter 5: Prince o' Elyria */}
+          <div className="bg-gray-800 rounded p-6 flex flex-col items-center shadow-lg">
+            <img src={`${base}/musik/Prince_o_Elyria/Front-Cover.jpg`} alt="Prince o' Elyria" className="w-32 h-32 object-cover mb-4 rounded" />
+            <h2 className="text-xl font-bold mb-2 text-blue-300">Prince o' Elyria</h2>
+            <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded shadow" onClick={() => props.setCurrentPage && props.setCurrentPage("musikShopPrinceOElyria")}>Zum Shop</button>
+          </div>
+          {/* Platzhalter 6: The Astronaut */}
+          <div className="bg-gray-800 rounded p-6 flex flex-col items-center shadow-lg">
+            <img src={`${base}/musik/The_Astronaut/Front-Cover.PNG`} alt="The Astronaut" className="w-32 h-32 object-cover mb-4 rounded" />
+            <h2 className="text-xl font-bold mb-2 text-blue-300">The Astronaut</h2>
+            <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded shadow" onClick={() => props.setCurrentPage && props.setCurrentPage("musikShopTheAstronaut")}>Zum Shop</button>
+          </div>
         </div>
         <footer className="mt-auto text-gray-500 text-sm">© PizzaOnkel Musik-Shop</footer>
       </div>

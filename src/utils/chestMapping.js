@@ -121,16 +121,17 @@ export function mapChestToCategoryAndLevel(chest, chestMappings = []) {
       }
       // Debug-Log für jede Mapping-Prüfung
       if (categoryA === 'citadel' || categoryB === 'citadel' || nameA.includes('citadel') || nameB.includes('citadel')) {
-        console.log('[DEBUG][MappingCheck] Chest:', chest, 'Mapping:', m, {
-          idx,
-          nameA, nameB,
-          categoryA, categoryB,
-          typeA, typeB,
-          sourceA, sourceB,
-          levelA, levelB,
-          numA, numB,
-          matches, score
-        });
+        // Debug auskommentiert für Performance
+        // console.log('[DEBUG][MappingCheck] Chest:', chest, 'Mapping:', m, {
+        //   idx,
+        //   nameA, nameB,
+        //   categoryA, categoryB,
+        //   typeA, typeB,
+        //   sourceA, sourceB,
+        //   levelA, levelB,
+        //   numA, numB,
+        //   matches, score
+        // });
       }
       if (matches && score > bestScore) {
         bestScore = score;

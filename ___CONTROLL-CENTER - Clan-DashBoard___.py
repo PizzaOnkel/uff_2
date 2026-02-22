@@ -127,39 +127,49 @@ BACKUP_DIR = r"K:\B A C K U P - TOTAL BATTLE"
 
 # --- Backup & Entwicklung ---
 def backup_project():
+    import zipfile
     now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    backup_name = f"B A C K U P - Clan-Dashboard_uff_2_{now}"
+    backup_name = f"B A C K U P - Clan-Dashboard_uff_2_{now}.zip"
     dest = os.path.join(BACKUP_DIR, backup_name)
     try:
         # Zähle alle Dateien für den Fortschritt
         total_files = 0
         for rootdir, dirs, files in os.walk(UFF2_PATH):
+            # Überspringe node_modules und build Ordner
+            dirs[:] = [d for d in dirs if d not in ['node_modules', 'build', '.git', '__pycache__', 'firestore-export']]
             total_files += len(files)
         if total_files == 0:
             tkinter.messagebox.showwarning("Backup", "Keine Dateien zum Sichern gefunden!")
             return
+        
+        # Erstelle Backup-Verzeichnis falls nicht vorhanden
+        os.makedirs(BACKUP_DIR, exist_ok=True)
+        
         progress_var.set(0)
         progress_bar['maximum'] = total_files
         progress_bar.update()
+        
+        # Erstelle ZIP-Archiv
         copied = 0
-        def copy_with_progress(src, dst):
-            nonlocal copied
-            if not os.path.exists(dst):
-                os.makedirs(dst)
-            for item in os.listdir(src):
-                s = os.path.join(src, item)
-                d = os.path.join(dst, item)
-                if os.path.isdir(s):
-                    copy_with_progress(s, d)
-                else:
-                    shutil.copy2(s, d)
+        with zipfile.ZipFile(dest, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for rootdir, dirs, files in os.walk(UFF2_PATH):
+                # Überspringe große/unwichtige Ordner
+                dirs[:] = [d for d in dirs if d not in ['node_modules', 'build', '.git', '__pycache__', 'firestore-export']]
+                for file in files:
+                    file_path = os.path.join(rootdir, file)
+                    arcname = os.path.relpath(file_path, UFF2_PATH)
+                    zipf.write(file_path, arcname)
                     copied += 1
                     progress_var.set(copied)
                     progress_bar.update()
-        copy_with_progress(UFF2_PATH, dest)
+        
         progress_var.set(total_files)
         progress_bar.update()
-        tkinter.messagebox.showinfo("Backup erfolgreich", f"Backup wurde erstellt: {dest}")
+        
+        # Zeige Dateigröße
+        size_mb = os.path.getsize(dest) / (1024 * 1024)
+        tkinter.messagebox.showinfo("Backup erfolgreich", 
+            f"Komprimiertes Backup wurde erstellt:\n{dest}\n\nGröße: {size_mb:.1f} MB")
     except Exception as e:
         tkinter.messagebox.showerror("Backup fehlgeschlagen", f"Fehler: {e}")
     finally:
