@@ -1,0 +1,7 @@
+Medien-Ressource http://localhost:3000/uff_2/info-audio.mp3 konnte nicht dekodiert werden. uff_2
+Medien-Ressource http://localhost:3000/uff_2/info-audio.mp3 konnte nicht dekodiert werden, Fehler: Error Code: NS_ERROR_DOM_MEDIA_MEDIASINK_ERR (0x806e000b)
+Details: OnMediaSinkAudioError uff_2
+Fehler beim Verarbeiten des Wertes für '-webkit-text-size-adjust'.  Deklaration ignoriert. uff_2:33:29
+window._chestDebug
+Array(5090) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
+
